@@ -31,6 +31,8 @@
           - golang
           - dnf-plugins-core
           - alacritty
+          - python3
+          - python3-pip
         state: present
 
 - name: install rust
@@ -184,3 +186,17 @@
       shell: ~/.bun/bin/bun --version
       register: bun_version
       changed_when: false
+
+- name: virtual fish
+  hosts: localhost
+  tasks:
+    - name: install virtual fish
+      pip:
+        name: virtualfish
+        extra_args: --user
+        state: present
+    - name: setup virtualfish in fish shell
+      shell: fish -c "vf install"
+      args:
+        creates: ~/.config/fish/conf.d/virtualfish-loader.fish
+      
