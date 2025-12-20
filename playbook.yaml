@@ -28,6 +28,7 @@
           - neovim
           - htop
           - tmux
+          - golang
         state: present
 
 - name: install rust
