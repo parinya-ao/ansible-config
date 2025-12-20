@@ -62,7 +62,7 @@
   hosts: localhost
   become: yes
   tasks:
-    - name: remove old docker 
+    - name: remove old docker
       dnf:
         name:
           - docker
@@ -77,7 +77,7 @@
           - docker-engine
         state: absent
     - name: add docker repo
-      shell: dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+      shell: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
       args:
         creates: /etc/yum.repos.d/docker-ce.repo
 
@@ -129,7 +129,7 @@
   become: yes
   tasks:
     - name: import microsoft gpg key
-      rpm_key: 
+      rpm_key:
         key: https://packages.microsoft.com/keys/microsoft.asc
         state: present
     - name: add vscode repo
@@ -145,12 +145,12 @@
         name: code
         state: present
 
-- name: install and setup fish shell 
-  hosts: localhost 
+- name: install and setup fish shell
+  hosts: localhost
   become: yes
   tasks:
     - name: install fish shell
-      dnf: 
+      dnf:
         name: fish
         state: present
     - name: ensure fish in /etc/shells
@@ -177,17 +177,17 @@
         fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
       args:
         creates: ~/.config/fish/functions/fisher.fish
-        
+
     - name: install nvm.fish
       shell: |
         fish -c "fisher install jorgebucaran/nvm.fish"
       args:
         creates: ~/.config/fish/conf.d/nvm.fish
-        
+
     - name: wait for nvm to be ready
       pause:
         seconds: 2
-        
+
     - name: install node.js lts
       shell: |
         fish -c "nvm install lts"
@@ -216,4 +216,3 @@
       shell: fish -c "vf install"
       args:
         creates: ~/.config/fish/conf.d/virtualfish-loader.fish
-      
