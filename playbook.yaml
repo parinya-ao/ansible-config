@@ -1,0 +1,9 @@
+---
+- name: update
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: update
+      dnf:
+        name: "*"
+        state: latest
