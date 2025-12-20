@@ -1,4 +1,17 @@
 ---
+- name: config dnf
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: configure dnf for faster downloads
+    blockinfile:
+        path: /etc/dnf/dnf.conf
+        block: |
+          max_parallel_downloads=20
+          fastestmirror=True
+          deltarpm=True
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+
 - name: update
   hosts: localhost
   become: yes
