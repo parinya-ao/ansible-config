@@ -7,3 +7,86 @@
       dnf:
         name: "*"
         state: latest
+
+- name: install dev tool
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: install system package
+      dnf:
+        name:
+          - curl
+          - wget
+          - ufw
+          - zram
+          - tlp
+          - clang
+          - gcc
+          - cmake
+          - gdb
+          - git
+          - neovim
+          - htop
+          - tmux
+        state: present
+
+- name: install rust
+  hosts: localhost
+  tasks:
+    - name: install rust
+      shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      args:
+        creates: ~/.cargo/bin/rustc
+
+- name: install docker and docker compose
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: remove old docker 
+      dnf:
+        name:
+          - docker
+          - docker-client
+          - docker-client-latest
+          - docker-common
+          - docker-latest
+          - docker-latest-logrotate
+          - docker-logrotate
+          - docker-selinux
+          - docker-engine-selinux
+          - docker-engine
+        state: absent
+    - name: add docker repo
+      shell: dnf config-manager addrepo --from-repofile https://download.docker.com/linux/fedora/docker-ce.repo
+      args:
+        creates: /etc/yum.repos.d/docker-ce.repo
+
+    - name: install docker package
+      dnf:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+    - name: start docker and enable service
+      systemd:
+        name: docker
+        state: started
+        enable: yes
+    - name: add userto docker group
+      user:
+        name: "{{ ansible_user_id }}"
+        groups: docker
+        append: yes
+
+- name: install program using flatpak
+  hosts: localhost
+  tasks:
+    - name: install flatpak application
+      flatpak:
+        name:
+          - com.discordapp.Discord
+          - com.getpostman.Postman
+          - org.signal.Signal
