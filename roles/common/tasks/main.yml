@@ -21,28 +21,17 @@
         name: "*"
         state: latest
 
-- name: install dev tool
-  hosts: localhost
-  become: yes
-  tasks:
-    - name: install system package
-      dnf:
-        name:
-          - curl
-          - wget
-          - ufw
-          - zram
-          - tlp
-          - clang
-          - gcc
-          - cmake
-          - gdb
-          - git
-          - neovim
-          - htop
-          - tmux
-          - golang
-          - dnf-plugins-core
-          - python3
-          - python3-pip
-        state: present
+- name: install base system packages
+  dnf:
+    name:
+      - curl
+      - wget
+      - ufw
+      - zram-generator
+      - tlp
+      - git
+      - htop
+      - dnf-plugins-core
+      - python3
+      - python3-pip
+    state: present

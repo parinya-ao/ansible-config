@@ -1,79 +1,12 @@
 ---
-- name: install rust
+- name: setup localhost
   hosts: localhost
-  tasks:
-    - name: install rust
-      shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-      args:
-        creates: ~/.cargo/bin/rustc
-
-- name: install and setup fish shell
-  hosts: localhost
+  connection: local
   become: yes
-  tasks:
-    - name: install fish shell
-      dnf:
-        name: fish
-        state: present
-    - name: ensure fish in /etc/shells
-      lineinfile:
-        path: /etc/shells
-        line: /usr/bin/fish
-        state: present
-    - name: change all user to fish shell
-      shell: "getent passwd | awk -F: '$3 >= 1000 && $3 < 65534 {print $1}'"
-      register: all_users
-      changed_when: false
-    - name: set fish as default shell for all users
-      user:
-        name: "{{ item }}"
-        shell: /usr/bin/fish
-      loop: "{{ all_users.stdout_lines }}"
 
-- name: install fisher and plugins
-  hosts: localhost
-  tasks:
-    - name: install fisher
-      shell: |
-        fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
-      args:
-        creates: ~/.config/fish/functions/fisher.fish
-
-    - name: install nvm.fish
-      shell: |
-        fish -c "fisher install jorgebucaran/nvm.fish"
-      args:
-        creates: ~/.config/fish/conf.d/nvm.fish
-
-    - name: wait for nvm to be ready
-      pause:
-        seconds: 2
-
-    - name: install node.js lts
-      shell: |
-        fish -c "nvm install lts"
-
-- name: install bun
-  hosts: localhost
-  tasks:
-    - name: install bun
-      shell: "curl -fsSL https://bun.com/install | bash"
-      args:
-        creates: ~/.bun/bin/bun
-    - name: verify bun installation
-      shell: ~/.bun/bin/bun --version
-      register: bun_version
-      changed_when: false
-
-- name: virtual fish
-  hosts: localhost
-  tasks:
-    - name: install virtual fish
-      pip:
-        name: virtualfish
-        extra_args: --user
-        state: present
-    - name: setup virtualfish in fish shell
-      shell: fish -c "vf install"
-      args:
-        creates: ~/.config/fish/conf.d/virtualfish-loader.fish
+  roles:
+    - role: common
+    - role: docker
+    - role: destop
+    - role: developer
+      become: yes

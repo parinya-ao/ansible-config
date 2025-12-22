@@ -1,3 +1,74 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# tasks file for roles/developer
+# Compilers & CLI Tools
+- name: install development tools (compilers/editors)
+  dnf:
+    name:
+      - clang
+      - gcc
+      - cmake
+      - gdb
+      - neovim
+      - tmux
+      - golang
+    state: present
+
+# Rust
+- name: install rust
+  shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  args:
+    creates: ~/.cargo/bin/rustc
+
+# Fish Shell & Configuration
+- name: install fish shell
+  dnf:
+    name: fish
+    state: present
+
+- name: ensure fish in /etc/shells
+  lineinfile:
+    path: /etc/shells
+    line: /usr/bin/fish
+    state: present
+
+- name: change user shell to fish
+  user:
+    name: "{{ ansible_user_id }}"
+    shell: /usr/bin/fish
+
+# Fisher & Plugins (Run as User, not Root - ระวังเรื่อง become)
+- name: install fisher
+  shell: |
+    fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
+  args:
+    creates: ~/.config/fish/functions/fisher.fish
+  become: no # สำคัญ: ต้องรันใน user ปกติ
+
+- name: install nvm.fish
+  shell: fish -c "fisher install jorgebucaran/nvm.fish"
+  args:
+    creates: ~/.config/fish/conf.d/nvm.fish
+  become: no
+
+- name: install node.js lts via nvm
+  shell: fish -c "nvm install lts"
+  become: no
+
+# Bun
+- name: install bun
+  shell: "curl -fsSL https://bun.com/install | bash"
+  args:
+    creates: ~/.bun/bin/bun
+  become: no
+
+# VirtualFish
+- name: install virtualfish python package
+  pip:
+    name: virtualfish
+    extra_args: --user
+  become: no
+
+- name: setup virtualfish loader
+  shell: fish -c "vf install"
+  args:
+    creates: ~/.config/fish/conf.d/virtualfish-loader.fish
+  become: no
