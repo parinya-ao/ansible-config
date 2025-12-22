@@ -1,3 +1,48 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# tasks file for roles/common
+- name: config dnf
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: configure dnf for faster downloads
+      blockinfile:
+        path: /etc/dnf/dnf.conf
+        block: |
+          max_parallel_downloads=20
+          fastestmirror=True
+          deltarpm=True
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+
+- name: update
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: update
+      dnf:
+        name: "*"
+        state: latest
+
+- name: install dev tool
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: install system package
+      dnf:
+        name:
+          - curl
+          - wget
+          - ufw
+          - zram
+          - tlp
+          - clang
+          - gcc
+          - cmake
+          - gdb
+          - git
+          - neovim
+          - htop
+          - tmux
+          - golang
+          - dnf-plugins-core
+          - python3
+          - python3-pip
+        state: present
