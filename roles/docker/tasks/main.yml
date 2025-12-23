@@ -1,0 +1,43 @@
+---
+- name: install docker and docker compose
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: remove old docker
+      dnf:
+        name:
+          - docker
+          - docker-client
+          - docker-client-latest
+          - docker-common
+          - docker-latest
+          - docker-latest-logrotate
+          - docker-logrotate
+          - docker-selinux
+          - docker-engine-selinux
+          - docker-engine
+        state: absent
+    - name: add docker repo
+      shell: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+      args:
+        creates: /etc/yum.repos.d/docker-ce.repo
+
+    - name: install docker package
+      dnf:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+    - name: start docker and enable service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+    - name: add userto docker group
+      user:
+        name: "{{ ansible_user_id }}"
+        groups: docker
+        append: yes
