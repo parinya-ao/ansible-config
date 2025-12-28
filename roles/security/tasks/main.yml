@@ -1,0 +1,8 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/security
+- name: allow SSH
+  community.general.ufw:
+    rule: allow
+    name: OpenSSH
+    state: disabled

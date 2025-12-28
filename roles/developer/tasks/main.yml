@@ -1,0 +1,66 @@
+---
+# Compilers & CLI Tools
+- name: install development tools (compilers/editors)
+  ansible.builtin.dnf:
+    name:
+      - clang
+      - gcc
+      - cmake
+      - gdb
+      - neovim
+      - tmux
+      - golang
+      - python3-devel
+    state: present
+
+# Rust
+- name: install rust
+  ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  args:
+    creates: "{{ ansible_env.HOME }}/.cargo/bin/rustc"
+
+# install node js part
+# install nvm
+- name: install nvm
+  ansible.builtin.shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.nvm/nvm.sh"
+  become: no
+# load nvm
+- name: load nvm
+  become: no
+  ansible.builtin.shell: |
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+    nvm install {{ NODE_VERSION }}
+    nvm alias default {{ NODE_VERSION }}
+  vars:
+    NODE_VERSION: "24"
+  args:
+    executable: /bin/bash
+
+- name: verify node installation
+  become: false
+  ansible.builtin.shell: |
+    export NVM_DIR="$HOME/.nvm"
+    . "$NVM_DIR/nvm.sh"
+    node -v
+  args:
+    executable: /bin/bash
+
+
+# Bun
+- name: install bun
+  ansible.builtin.shell: "curl -fsSL https://bun.com/install | bash"
+  args:
+    creates: "{{ ansible_env.HOME }}/.bun/bin/bun"
+  become: no
+
+# install uv python3
+- name: install uv python3
+  ansible.builtin.shell:
+    cmd: curl -LsSf https://astral.sh/uv/install.sh | sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/uv"
+  become: no

@@ -1,0 +1,13 @@
+---
+- name: setup localhost
+  hosts: localhost
+  connection: local
+  become: yes
+
+  roles:
+    - role: common
+    - role: docker
+    - role: desktop
+    - role: developer
+    - role: font
+    # - role: security

@@ -1,0 +1,48 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/font
+
+# install fonts th sarbun new
+- name: create fonts th sarabun new dir
+  ansible.builtin.file:
+    path: /usr/share/fonts/th-sarabun-new
+    state: directory
+    mode: '0755'
+
+- name: download font th sarabun new
+  ansible.builtin.get_url:
+    url: https://www.f0nt.com/?dl_name=sipafonts/THSarabunNew.zip
+    dest: /tmp/THSarabunNew.zip
+    mode: '0644'
+
+- name: unzip font th sarabun new
+  ansible.builtin.unarchive:
+    src: /tmp/THSarabunNew.zip
+    dest: /usr/share/fonts/th-sarabun-new
+    remote_src: yes
+    mode: '0644'
+
+
+# install font inter
+- name: create fonts inter dir
+  ansible.builtin.file:
+    path: /usr/share/fonts/Inter
+    state: directory
+    mode: '0755'
+
+- name: download font inter
+  ansible.builtin.get_url:
+    url: https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip
+    dest: /tmp/Inter-4.1.zip
+    mode: '0644'
+
+- name: unzip font inter
+  ansible.builtin.unarchive:
+    src: /tmp/Inter-4.1.zip
+    dest: /usr/share/fonts/Inter
+    remote_src: yes
+    mode: '0644'
+
+- name: refresh font cache
+  ansible.builtin.command: fc-cache -f -v
+  changed_when: false
