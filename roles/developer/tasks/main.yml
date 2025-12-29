@@ -11,6 +11,7 @@
       - tmux
       - golang
       - python3-devel
+      - toolbox
     state: present
 
 # Rust

@@ -66,5 +66,6 @@
       - com.discordapp.Discord
       - com.getpostman.Postman
       - org.signal.Signal
+      - com.obsproject.Studio
+      - com.brave.Browser
     state: present
-
