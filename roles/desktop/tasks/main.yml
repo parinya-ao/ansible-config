@@ -15,6 +15,7 @@
     name:
       - okular
       - xclip
+      - gnome-extensions-app
       - gnome-tweaks
     state: present
 
@@ -67,5 +68,4 @@
       - com.getpostman.Postman
       - org.signal.Signal
       - com.obsproject.Studio
-      - com.brave.Browser
     state: present

@@ -12,6 +12,9 @@
       - golang
       - python3-devel
       - toolbox
+      - java-21-openjdk-devel
+      - java-21-openjdk
+      - cloc
     state: present
 
 # Rust
