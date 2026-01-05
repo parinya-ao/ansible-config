@@ -2,68 +2,26 @@
 ---
 # tasks file for roles/font
 
-# install fonts th sarbun new
-- name: create fonts th sarabun new dir
+- name: create font directories
   ansible.builtin.file:
-    path: /usr/share/fonts/th-sarabun-new
+    path: "{{ item.dir }}"
     state: directory
     mode: '0755'
+  loop: "{{ fonts }}"
 
-- name: download font th sarabun new
+- name: download fonts
   ansible.builtin.get_url:
-    url: https://www.f0nt.com/?dl_name=sipafonts/THSarabunNew.zip
-    dest: /tmp/THSarabunNew.zip
+    url: "{{ item.url }}"
+    dest: "{{ item.zip }}"
     mode: '0644'
+  loop: "{{ fonts }}"
+  notify: refresh font cache
 
-- name: unzip font th sarabun new
+- name: unzip fonts
   ansible.builtin.unarchive:
-    src: /tmp/THSarabunNew.zip
-    dest: /usr/share/fonts/th-sarabun-new
+    src: "{{ item.zip }}"
+    dest: "{{ item.dir }}"
     remote_src: yes
     mode: '0644'
-
-
-# install font inter
-- name: create fonts inter dir
-  ansible.builtin.file:
-    path: /usr/share/fonts/Inter
-    state: directory
-    mode: '0755'
-
-- name: download font inter
-  ansible.builtin.get_url:
-    url: https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip
-    dest: /tmp/Inter-4.1.zip
-    mode: '0644'
-
-- name: unzip font inter
-  ansible.builtin.unarchive:
-    src: /tmp/Inter-4.1.zip
-    dest: /usr/share/fonts/Inter
-    remote_src: yes
-    mode: '0644'
-
-
-# install font intel one mono
-- name: create fonts intel dir
-  ansible.builtin.file:
-    path: /usr/share/fonts/IntelOneMono
-    state: directory
-    mode: '0755'
-
-- name: create fonts intel one mono dir
-  ansible.builtin.get_url:
-    url: https://github.com/intel/intel-one-mono/releases/download/V1.4.0/ttf.zip
-    dest: /tmp/IntelOneMono-1.4.0.zip
-    mode: '0644'
-
-- name: unzip font intel one mono
-  ansible.builtin.unarchive:
-    src: /tmp/IntelOneMono-1.4.0.zip
-    dest: /usr/share/fonts/IntelOneMono
-    remote_src: yes
-    mode: '0644'
-
-- name: refresh font cache
-  ansible.builtin.command: fc-cache -f -v
-  changed_when: false
+  loop: "{{ fonts }}"
+  notify: refresh font cache
