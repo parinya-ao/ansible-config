@@ -43,6 +43,27 @@
     remote_src: yes
     mode: '0644'
 
+
+# install font intel one mono
+- name: create fonts intel dir
+  ansible.builtin.file:
+    path: /usr/share/fonts/IntelOneMono
+    state: directory
+    mode: '0755'
+
+- name: create fonts intel one mono dir
+  ansible.builtin.get_url:
+    url: https://github.com/intel/intel-one-mono/releases/download/V1.4.0/ttf.zip
+    dest: /tmp/IntelOneMono-1.4.0.zip
+    mode: '0644'
+
+- name: unzip font intel one mono
+  ansible.builtin.unarchive:
+    src: /tmp/IntelOneMono-1.4.0.zip
+    dest: /usr/share/fonts/IntelOneMono
+    remote_src: yes
+    mode: '0644'
+
 - name: refresh font cache
   ansible.builtin.command: fc-cache -f -v
   changed_when: false
