@@ -19,16 +19,6 @@
       - gnome-tweaks
     state: present
 
-- name: add brave repo
-  ansible.builtin.shell: dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
-  args:
-    creates: /etc/yum.repos.d/brave-browser.repo
-
-- name: install brave
-  ansible.builtin.dnf:
-    name: brave-browser
-    state: present
-
 - name: import microsoft gpg key
   ansible.builtin.rpm_key:
     key: https://packages.microsoft.com/keys/microsoft.asc
