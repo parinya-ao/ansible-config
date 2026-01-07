@@ -1,0 +1,35 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Docker CE packages installation
+
+- name: Install Docker CE packages
+  ansible.builtin.dnf:
+    name: "{{ docker_packages }}"
+    state: present
+    update_cache: true
+  become: true
+  register: docker_install_result
+  until: docker_install_result is succeeded
+  retries: "{{ docker_install_retries }}"
+  delay: "{{ docker_install_delay }}"
+  tags:
+    - docker
+    - packages
+
+- name: Display Docker version
+  ansible.builtin.shell:
+    cmd: docker --version
+  register: docker_version
+  changed_when: false
+  become: true
+  tags:
+    - docker
+    - packages
+
+- name: Show installed Docker version
+  ansible.builtin.debug:
+    msg: "{{ docker_version.stdout }}"
+  when: docker_version.stdout is defined
+  tags:
+    - docker
+    - packages

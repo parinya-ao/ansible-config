@@ -1,0 +1,36 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Docker service management
+
+- name: Start and enable Docker service
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: true
+    daemon_reload: true
+  become: true
+  tags:
+    - docker
+    - service
+
+- name: Verify Docker is running
+  ansible.builtin.command:
+    cmd: docker info
+  register: docker_info
+  changed_when: false
+  become: true
+  tags:
+    - docker
+    - service
+    - verify
+
+- name: Display Docker system info
+  ansible.builtin.debug:
+    msg: "Docker is running. Containers: {{ docker_info.stdout | regex_search('Containers: \\d+', '\\0') | first | regex_replace('Containers: ', '') }}, Images: {{ docker_info.stdout | regex_search('Images: \\d+', '\\0') | first | regex_replace('Images: ', '') }}"
+  when:
+    - docker_info.stdout is defined
+    - "'Server:' in docker_info.stdout"
+  tags:
+    - docker
+    - service
+    - verify
