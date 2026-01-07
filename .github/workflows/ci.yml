@@ -24,7 +24,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.12.12'
-          cache: 'pip'
 
       - name: Install Ansible and lint tools
         run: |
@@ -65,12 +64,12 @@ jobs:
           echo "=== Checking YAML Syntax ==="
           yamllint -d relaxed .
 
-  # Job 2: Test on Rocky Linux 10
-  test-rocky-linux-10:
-    name: Test on Rocky Linux 10
+  # Job 2: Test on Rocky Linux 9
+  test-rocky-linux-9:
+    name: Test on Rocky Linux 9
     runs-on: ubuntu-latest
     container:
-      image: rockylinux:10
+      image: rockylinux:9
       options: --privileged
     steps:
       - name: Checkout code
@@ -78,7 +77,7 @@ jobs:
 
       - name: Install basic dependencies
         run: |
-          echo "=== Installing base dependencies on Rocky Linux 10 ==="
+          echo "=== Installing base dependencies on Rocky Linux 9 ==="
           dnf install -y python3.12 python3-pip git sudo curl wget
 
       - name: Install Ansible
@@ -109,7 +108,7 @@ jobs:
 
       - name: Validate playbook syntax
         run: |
-          echo "=== Validating playbook syntax on Rocky Linux 10 ==="
+          echo "=== Validating playbook syntax on Rocky Linux 9 ==="
           ansible-playbook playbook.yaml -i /tmp/ansible/inventory.ini --syntax-check
 
       - name: List roles
@@ -186,12 +185,12 @@ jobs:
                   print(f"✗ {file_name} missing")
           EOF
 
-  # Job 3: Test on Rocky Linux 10 (Alternative verification)
-  test-rocky-linux-10-verify:
-    name: Test on Rocky Linux 10 (Verify)
+  # Job 3: Test on Rocky Linux 9 (Alternative verification)
+  test-rocky-linux-9-verify:
+    name: Test on Rocky Linux 9 (Verify)
     runs-on: ubuntu-latest
     container:
-      image: rockylinux:10
+      image: rockylinux:9
       options: --privileged
     steps:
       - name: Checkout code
@@ -199,12 +198,12 @@ jobs:
 
       - name: Install basic dependencies
         run: |
-          echo "=== Installing base dependencies on Rocky Linux 10 (Verify) ==="
+          echo "=== Installing base dependencies on Rocky Linux 9 (Verify) ==="
           dnf install -y python3.12 python3-pip git sudo curl wget
 
       - name: Install Ansible
         run: |
-          echo "=== Installing Ansible on Rocky Linux 10 ==="
+          echo "=== Installing Ansible on Rocky Linux 9 ==="
           pip3 install ansible-core
 
       - name: Display system and Ansible info
@@ -225,14 +224,14 @@ jobs:
 
       - name: Validate playbook syntax
         run: |
-          echo "=== Validating playbook syntax on Rocky Linux 10 ==="
+          echo "=== Validating playbook syntax on Rocky Linux 9 ==="
           ansible-playbook playbook.yaml -i /tmp/ansible/inventory.ini --syntax-check
 
   # Job 4: Generate report
   report:
     name: CI Report
     runs-on: ubuntu-latest
-    needs: [lint, test-rocky-linux-10, test-rocky-linux-10-verify]
+    needs: [lint, test-rocky-linux-9, test-rocky-linux-9-verify]
     if: always()
     steps:
       - name: Checkout code
@@ -243,11 +242,11 @@ jobs:
           echo "=== CI Pipeline Status ==="
           echo ""
           echo "Lint Status: ${{ needs.lint.result }}"
-          echo "Rocky Linux 10 Test: ${{ needs.test-rocky-linux-10.result }}"
-          echo "Rocky Linux 10 Verify Test: ${{ needs.test-rocky-linux-10-verify.result }}"
+          echo "Rocky Linux 9 Test: ${{ needs.test-rocky-linux-9.result }}"
+          echo "Rocky Linux 9 Verify Test: ${{ needs.test-rocky-linux-9-verify.result }}"
           echo ""
 
-          if [[ "${{ needs.lint.result }}" == "success" && "${{ needs.test-rocky-linux-10.result }}" == "success" && "${{ needs.test-rocky-linux-10-verify.result }}" == "success" ]]; then
+          if [[ "${{ needs.lint.result }}" == "success" && "${{ needs.test-rocky-linux-9.result }}" == "success" && "${{ needs.test-rocky-linux-9-verify.result }}" == "success" ]]; then
               echo "✗ Some checks failed"
               exit 1
           fi
