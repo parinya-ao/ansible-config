@@ -78,7 +78,7 @@ jobs:
       - name: Install basic dependencies
         run: |
           echo "=== Installing base dependencies on Rocky Linux 9 ==="
-          dnf install -y python3.12 python3-pip git sudo curl wget
+          dnf install -y --allowerasing python3.12 python3-pip git curl wget
 
       - name: Install Ansible
         run: |
@@ -199,7 +199,7 @@ jobs:
       - name: Install basic dependencies
         run: |
           echo "=== Installing base dependencies on Rocky Linux 9 (Verify) ==="
-          dnf install -y python3.12 python3-pip git sudo curl wget
+          dnf install -y --allowerasing python3.12 python3-pip git curl wget
 
       - name: Install Ansible
         run: |
