@@ -1,8 +1,25 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for roles/security
-- name: allow SSH
-  community.general.ufw:
-    rule: allow
-    name: OpenSSH
-    state: disabled
+
+- name: import firewalld setup tasks
+  ansible.builtin.import_tasks: firewalld.yml
+  tags:
+    - security
+    - firewall
+
+- name: import ssh port configuration tasks
+  ansible.builtin.import_tasks: ssh.yml
+  tags:
+    - security
+    - ssh
+    - firewall
+
+- name: import custom ports configuration tasks
+  ansible.builtin.import_tasks: custom-ports.yml
+  when: security_custom_ports | length > 0
+  tags:
+    - security
+    - firewall
+    - custom-ports
+

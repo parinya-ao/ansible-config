@@ -1,3 +1,38 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# defaults file for roles/developer
+# SPDX-License-Identifier: MIT-0
+# Default variables for developer role
+
+# Feature toggles - set to false to skip installation of specific components
+developer_install_rust: true
+developer_install_nodejs: true
+developer_install_bun: true
+developer_install_uv: true
+
+# Compilers and development tools package list
+developer_compilers_packages:
+  - clang
+  - gcc
+  - gcc-c++
+  - cmake
+  - gdb
+  - neovim
+  - tmux
+  - golang
+  - python3-devel
+  - toolbox
+  - java-21-openjdk-devel
+  - java-21-openjdk
+  - cloc
+  - make
+  - automake
+  - autoconf
+
+# Node.js version to install via nvm
+developer_node_version: "22"
+developer_nvm_version: "v0.40.3"
+
+# Rust configuration
+developer_rustup_default_host: "x86_64-unknown-linux-gnu"
+
+# UV (Python package manager) version (latest by default)
+developer_use_uv_latest: true

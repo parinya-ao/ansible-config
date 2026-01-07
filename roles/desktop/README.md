@@ -1,38 +1,86 @@
-Role Name
-=========
+# Desktop Role
 
-A brief description of the role goes here.
+This role configures a GNOME-based desktop environment on Fedora/RHEL systems with essential applications and tools for desktop productivity.
 
-Requirements
-------------
+## Role Purpose
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+The desktop role automates the setup of a fully-functional desktop environment including:
+- Desktop package management (Flatpak)
+- GNOME utilities and extensions
+- Visual Studio Code IDE with Microsoft repository
+- Starship prompt configuration
+- Essential flatpak applications (Discord, Postman, Signal, OBS, Anki)
 
-Role Variables
---------------
+## Requirements
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- RHEL/Fedora-based system
+- `common` role (as a dependency for base system configuration)
 
-Dependencies
-------------
+## Role Variables
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+### Default Variables (`defaults/main.yml`)
 
-Example Playbook
-----------------
+Currently uses the standard application list. Can be overridden for custom application selections.
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+### Included Tasks
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+The role is organized into the following task modules:
 
-License
--------
+- **packages.yml**: Installs base desktop packages, flatpak, and GNOME utilities
+  - flatpak
+  - okular (PDF viewer)
+  - xclip
+  - gnome-extensions-app
+  - gnome-tweaks
 
-BSD
+- **vscode.yml**: Installs Visual Studio Code
+  - Adds Microsoft GPG key
+  - Configures Microsoft yum repository
+  - Installs VS Code package
 
-Author Information
-------------------
+- **starship.yml**: Installs and configures Starship prompt
+  - Downloads and installs Starship
+  - Configures bash initialization for all users
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+- **flatpak-apps.yml**: Installs flatpak applications
+  - Discord
+  - Postman
+  - Signal
+  - OBS Studio
+  - Anki
+
+## Dependencies
+
+- **common**: Base system configuration role
+
+## Example Playbook
+
+```yaml
+---
+- hosts: desktop_hosts
+  roles:
+    - desktop
+```
+
+## Advanced Usage
+
+Override specific applications:
+
+```yaml
+---
+- hosts: desktop_hosts
+  roles:
+    - role: desktop
+      vars:
+        flatpak_apps:
+          - com.discordapp.Discord
+          - org.signal.Signal
+```
+
+## Author
+
+Ansible Desktop Configuration
+
+## License
+
+MIT-0

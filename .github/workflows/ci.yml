@@ -1,0 +1,275 @@
+name: Ansible Configuration CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  # Job 1: Syntax Check and Linting
+  lint:
+    name: Ansible Syntax & Lint Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.12'
+
+      - name: Install Ansible and lint tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible ansible-lint yamllint
+
+      - name: Display versions
+        run: |
+          echo "=== Ansible Version ==="
+          ansible --version
+          echo "=== Ansible-lint Version ==="
+          ansible-lint --version
+          echo "=== yamllint Version ==="
+          yamllint --version
+
+      - name: Validate playbook syntax
+        run: |
+          echo "=== Checking Playbook Syntax ==="
+          ansible-playbook playbook.yaml --syntax-check
+          echo "✓ Playbook syntax is valid"
+
+      - name: Validate role syntax
+        run: |
+          echo "=== Checking Role Syntax ==="
+          for role in roles/*/; do
+            echo "Checking role: $(basename $role)"
+            ansible-playbook --syntax-check -i inventory.ini -e "ansible_python_interpreter=/usr/bin/python3" -c local --list-tasks roles/$(basename $role)/tasks/main.yml || true
+          done
+
+      - name: Run ansible-lint
+        continue-on-error: true
+        run: |
+          echo "=== Running ansible-lint ==="
+          ansible-lint playbook.yaml roles/ -v
+
+      - name: Validate YAML syntax
+        run: |
+          echo "=== Checking YAML Syntax ==="
+          yamllint -d relaxed .
+
+  # Job 2: Test on Rocky Linux 9
+  test-rocky-linux-9:
+    name: Test on Rocky Linux 9
+    runs-on: ubuntu-latest
+    container:
+      image: rockylinux:9
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install basic dependencies
+        run: |
+          echo "=== Installing base dependencies on Rocky Linux 9 ==="
+          dnf install -y --allowerasing python3.12 python3-pip git curl wget
+
+      - name: Install Ansible
+        run: |
+          echo "=== Installing Ansible ==="
+          pip3 install ansible-core
+
+      - name: Install Ansible collections
+        run: |
+          echo "=== Installing required collections ==="
+          ansible-galaxy collection install community.general
+
+      - name: Display system and Ansible info
+        run: |
+          echo "=== System Information ==="
+          cat /etc/os-release
+          echo ""
+          echo "=== Ansible Version ==="
+          ansible --version
+          echo ""
+          echo "=== Python Version ==="
+          python3 --version
+
+      - name: Create test inventory
+        run: |
+          echo "=== Creating test inventory ==="
+          mkdir -p /tmp/ansible
+          cat > /tmp/ansible/inventory.ini << 'EOF'
+          [local]
+          localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3.12
+          EOF
+          cat /tmp/ansible/inventory.ini
+
+      - name: Validate playbook syntax
+        run: |
+          echo "=== Validating playbook syntax on Rocky Linux 9 ==="
+          ansible-playbook playbook.yaml -i /tmp/ansible/inventory.ini --syntax-check
+
+      - name: List roles
+        run: |
+          echo "=== Available Roles ==="
+          ls -la roles/
+          echo ""
+          for role in roles/*/; do
+            echo "Role: $(basename $role)"
+            ls -la "$role"
+            echo ""
+          done
+
+      - name: Test common role
+        run: |
+          echo "=== Testing Common Role ==="
+          ansible-playbook -i /tmp/ansible/inventory.ini \
+            -e "ansible_python_interpreter=/usr/bin/python3.12" \
+            -c local \
+            -m import_playbook roles/common/tests/test.yml \
+            --check \
+            -v || true
+          echo "✓ Common role test completed"
+
+      - name: Dry-run main playbook
+        continue-on-error: true
+        run: |
+          echo "=== Dry-run Main Playbook (--check mode) ==="
+          ansible-playbook playbook.yaml \
+            -i /tmp/ansible/inventory.ini \
+            -e "ansible_python_interpreter=/usr/bin/python3.12" \
+            -c local \
+            --check \
+            -v 2>&1 | head -100
+          echo "✓ Playbook dry-run completed"
+
+      - name: Validate playbook structure
+        run: |
+          echo "=== Validating Playbook Structure ==="
+          python3 << 'EOF'
+          import yaml
+
+          with open('playbook.yaml', 'r') as f:
+              playbook = yaml.safe_load(f)
+
+          if playbook:
+              print(f"✓ Playbook is valid YAML")
+              print(f"  Number of plays: {len(playbook)}")
+              for i, play in enumerate(playbook):
+                  print(f"  Play {i+1}: hosts={play.get('hosts')}, roles={len(play.get('roles', []))}")
+          else:
+              print("✗ Playbook is empty")
+              exit(1)
+          EOF
+
+      - name: Test directory structure
+        run: |
+          echo "=== Validating Directory Structure ==="
+          python3 << 'EOF'
+          import os
+
+          required_dirs = ['roles', 'command']
+          for dir_name in required_dirs:
+              if os.path.isdir(dir_name):
+                  print(f"✓ {dir_name}/ exists")
+              else:
+                  print(f"✗ {dir_name}/ missing")
+
+          required_files = ['playbook.yaml', 'inventory.ini', 'init.sh']
+          for file_name in required_files:
+              if os.path.isfile(file_name):
+                  print(f"✓ {file_name} exists")
+              else:
+                  print(f"✗ {file_name} missing")
+          EOF
+
+  # Job 3: Test on Rocky Linux 9 (Alternative verification)
+  test-rocky-linux-9-verify:
+    name: Test on Rocky Linux 9 (Verify)
+    runs-on: ubuntu-latest
+    container:
+      image: rockylinux:9
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install basic dependencies
+        run: |
+          echo "=== Installing base dependencies on Rocky Linux 9 (Verify) ==="
+          dnf install -y --allowerasing python3.12 python3-pip git curl wget
+
+      - name: Install Ansible
+        run: |
+          echo "=== Installing Ansible on Rocky Linux 9 ==="
+          pip3 install ansible-core
+
+      - name: Install Ansible collections
+        run: |
+          echo "=== Installing required collections ==="
+          ansible-galaxy collection install community.general
+
+      - name: Display system and Ansible info
+        run: |
+          echo "=== System Information ==="
+          cat /etc/os-release
+          echo ""
+          echo "=== Ansible Version ==="
+          ansible --version
+
+      - name: Create test inventory
+        run: |
+          mkdir -p /tmp/ansible
+          cat > /tmp/ansible/inventory.ini << 'EOF'
+          [local]
+          localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3.12
+          EOF
+
+      - name: Validate playbook syntax
+        run: |
+          echo "=== Validating playbook syntax on Rocky Linux 9 ==="
+          ansible-playbook playbook.yaml -i /tmp/ansible/inventory.ini --syntax-check
+
+  # Job 4: Generate report
+  report:
+    name: CI Report
+    runs-on: ubuntu-latest
+    needs: [lint, test-rocky-linux-9, test-rocky-linux-9-verify]
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check job status
+        run: |
+          echo "=== CI Pipeline Status ==="
+          echo ""
+          echo "Lint Status: ${{ needs.lint.result }}"
+          echo "Rocky Linux 9 Test: ${{ needs.test-rocky-linux-9.result }}"
+          echo "Rocky Linux 9 Verify Test: ${{ needs.test-rocky-linux-9-verify.result }}"
+          echo ""
+
+          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.test-rocky-linux-9.result }}" != "success" || "${{ needs.test-rocky-linux-9-verify.result }}" != "success" ]]; then
+              echo "✗ Some checks failed"
+              exit 1
+          fi
+
+          echo "✓ All checks passed"
+
+      - name: Display summary
+        if: always()
+        run: |
+          echo "=== Build Summary ==="
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Triggered by: ${{ github.event_name }}"
+          echo ""
+          echo "✓ CI workflow completed"

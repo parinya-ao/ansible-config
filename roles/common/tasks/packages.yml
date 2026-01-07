@@ -1,0 +1,21 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Base packages installation tasks
+
+- name: Install base system packages
+  ansible.builtin.dnf:
+    name: "{{ common_base_packages }}"
+    state: present
+  become: true
+  register: packages_install_result
+  tags:
+    - packages
+    - base-packages
+
+- name: Display installed packages summary
+  ansible.builtin.debug:
+    msg: "{{ packages_install_result.results | default([]) | length }} packages processed"
+  when: packages_install_result is changed
+  tags:
+    - packages
+    - base-packages

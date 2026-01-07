@@ -1,0 +1,49 @@
+#SPDX-License-Identifier: MIT-0
+---
+argument_specs:
+  main:
+    short_description: Configure GNOME desktop environment with essential applications
+    description:
+      - This role automates the setup of a fully-functional GNOME-based desktop environment
+      - Installs flatpak, VS Code, Starship prompt, and various desktop applications
+      - Requires the common role as a prerequisite for base system setup
+    version_added: '1.0.0'
+    author: Parinya Luangchaisuk
+    options:
+      install_desktop_packages:
+        type: bool
+        default: true
+        required: false
+        description: Install base desktop packages (okular, xclip, gnome-tweaks, etc.)
+
+      install_vscode:
+        type: bool
+        default: true
+        required: false
+        description: Install and configure Visual Studio Code from Microsoft repository
+
+      install_starship:
+        type: bool
+        default: true
+        required: false
+        description: Install and configure Starship command prompt
+
+      install_flatpak_apps:
+        type: bool
+        default: true
+        required: false
+        description: Install flatpak applications (Discord, Postman, Signal, OBS, Anki)
+
+      flatpak_apps_list:
+        type: list
+        elements: str
+        default:
+          - com.discordapp.Discord
+          - com.getpostman.Postman
+          - org.signal.Signal
+          - com.obsproject.Studio
+          - net.ankiweb.Anki
+        required: false
+        description:
+          - List of flatpak application IDs to install
+          - Can be overridden to customize the applications installed

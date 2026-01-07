@@ -1,3 +1,43 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# defaults file for roles/docker
+# SPDX-License-Identifier: MIT-0
+# Default variables for docker role
+
+# Feature toggles
+docker_remove_old_packages: true
+docker_add_user_to_group: true
+docker_enable_repo: true
+
+# Docker repository
+docker_repo_url: "https://download.docker.com/linux/centos/docker-ce.repo"
+
+# Old packages to remove (from official Docker docs)
+docker_old_packages:
+  - docker
+  - docker-client
+  - docker-client-latest
+  - docker-common
+  - docker-latest
+  - docker-latest-logrotate
+  - docker-logrotate
+  - docker-engine
+
+# Docker CE packages to install
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+# User configuration
+docker_user: "{{ ansible_user_id }}"
+
+# Installation retry settings (for network resilience)
+docker_install_retries: 3
+docker_install_delay: 10
+
+# Docker daemon configuration (optional)
+docker_daemon_config: {}
+  # Example: Enable BuildKit
+  # features:
+  #   buildkit: true

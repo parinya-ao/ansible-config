@@ -1,0 +1,38 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Docker user and group configuration
+
+- name: Ensure docker group exists
+  ansible.builtin.group:
+    name: docker
+    state: present
+    system: true
+  become: true
+  tags:
+    - docker
+    - users
+
+- name: Add user to docker group
+  ansible.builtin.user:
+    name: "{{ docker_user }}"
+    groups: docker
+    append: true
+  become: true
+  when: docker_add_user_to_group
+  notify:
+    - User added to docker group
+  tags:
+    - docker
+    - users
+
+- name: Display group addition notice
+  ansible.builtin.debug:
+    msg: |
+      User '{{ docker_user }}' has been added to the docker group.
+      Please log out and log back in for the changes to take effect,
+      or run: newgrp docker
+  when:
+    - docker_add_user_to_group
+  tags:
+    - docker
+    - users

@@ -1,13 +1,104 @@
 ---
-- name: setup localhost
+# =============================================================================
+# Ansible Configuration Playbook
+# This playbook configures a Fedora/RHEL workstation with development tools,
+# desktop environment, Docker, and fonts.
+# =============================================================================
+
+- name: Setup localhost workstation
   hosts: localhost
   connection: local
   become: yes
 
+  # Pre-tasks: Display system information before running roles
+  pre_tasks:
+    - name: Display system information
+      ansible.builtin.debug:
+        msg:
+          - "=========================================="
+          - "Ansible Configuration Playbook"
+          - "=========================================="
+          - "Target Host: {{ inventory_hostname }}"
+          - "OS Family: {{ ansible_facts['os_family'] }}"
+          - "Distribution: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+          - "Architecture: {{ ansible_facts['architecture'] }}"
+          - "Python Version: {{ ansible_facts['python_version'] }}"
+          - "=========================================="
+
+    - name: Display roles to be applied
+      ansible.builtin.debug:
+        msg:
+          - "Roles to be applied:"
+          - "  1. common      - Base system configuration"
+          - "  2. docker      - Docker CE installation"
+          - "  3. desktop     - Desktop environment and applications"
+          - "  4. developer   - Development tools and runtimes"
+          - "  5. font        - Font installation"
+          - "=========================================="
+
+    - name: Display Ansible version
+      ansible.builtin.shell: ansible --version
+      register: ansible_version_output
+      changed_when: false
+
+    - name: Show Ansible version
+      ansible.builtin.debug:
+        msg: "{{ ansible_version_output.stdout_lines }}"
+
   roles:
     - role: common
+      tags:
+        - common
+        - base
+
     - role: docker
+      tags:
+        - docker
+        - containers
+
     - role: desktop
+      tags:
+        - desktop
+        - gui
+
     - role: developer
+      tags:
+        - developer
+        - development
+
     - role: font
+      tags:
+        - font
+        - fonts
+
     # - role: security
+    #   tags:
+    #     - security
+
+  # Post-tasks: Display summary after running roles
+  post_tasks:
+    - name: Display completion summary
+      ansible.builtin.debug:
+        msg:
+          - "=========================================="
+          - "Playbook Execution Completed"
+          - "=========================================="
+          - "Target Host: {{ inventory_hostname }}"
+          - "Timestamp: {{ ansible_facts['date_time']['iso8601'] }}"
+          - "=========================================="
+
+    - name: Display next steps
+      ansible.builtin.debug:
+        msg:
+          - "=========================================="
+          - "Next Steps:"
+          - "=========================================="
+          - "1. Log out and log back in for group changes"
+          - "   (e.g., docker group)"
+          - "2. Verify installations:"
+          - "   - docker --version"
+          - "   - node --version"
+          - "   - cargo --version"
+          - "3. Run 'flatpak list' to see installed apps"
+          - "4. Run 'fc-list' to see installed fonts"
+          - "=========================================="

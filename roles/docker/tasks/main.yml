@@ -1,40 +1,39 @@
 ---
-- name: install docker
-  ansible.builtin.dnf:
-    name:
-      - docker
-      - docker-client
-      - docker-client-latest
-      - docker-common
-      - docker-latest
-      - docker-latest-logrotate
-      - docker-logrotate
-      - docker-engine
-    state: absent
+# SPDX-License-Identifier: MIT-0
+# Docker role - Main entry point
+# This role installs and configures Docker CE (Community Edition) on Fedora/RHEL systems including:
+# - Removal of old/obsolete Docker packages
+# - Docker CE repository configuration
+# - Docker CE packages installation
+# - Docker service management
+# - User group configuration for non-root Docker access
 
-- name: add docker repo
-  ansible.builtin.shell: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-  args:
-    creates: /etc/yum.repos.d/docker-ce.repo
+# Remove old Docker packages
+- name: Remove old Docker packages
+  ansible.builtin.import_tasks: remove-old.yml
+  tags:
+    - docker
 
-- name: install docker package
-  ansible.builtin.dnf:
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
-    state: present
+# Configure Docker repository
+- name: Configure Docker CE repository
+  ansible.builtin.import_tasks: repository.yml
+  tags:
+    - docker
 
-- name: start docker and enable service
-  ansible.builtin.systemd:
-    name: docker
-    state: started
-    enabled: yes
+# Install Docker packages
+- name: Install Docker CE packages
+  ansible.builtin.import_tasks: packages.yml
+  tags:
+    - docker
 
-- name: add userto docker group
-  ansible.builtin.user:
-    name: "{{ ansible_user_id }}"
-    groups: docker
-    append: yes
+# Start and enable Docker service
+- name: Configure Docker service
+  ansible.builtin.import_tasks: service.yml
+  tags:
+    - docker
+
+# Configure user access
+- name: Configure Docker user access
+  ansible.builtin.import_tasks: user-group.yml
+  tags:
+    - docker

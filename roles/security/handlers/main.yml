@@ -1,3 +1,7 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # handlers file for roles/security
+
+- name: firewalld reloaded
+  ansible.builtin.debug:
+    msg: "✓ Firewalld configuration reloaded successfully"

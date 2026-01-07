@@ -1,38 +1,178 @@
-Role Name
-=========
+# Developer Role
 
-A brief description of the role goes here.
+This role installs and configures a complete development environment on Fedora/RHEL systems, including compilers, language runtimes, and essential CLI tools for software development.
 
-Requirements
-------------
+## Role Purpose
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+The developer role automates the setup of a fully-functional development environment including:
+- System compilers and build tools (GCC, Clang, CMake, Make)
+- Development editors (Neovim, Tmux)
+- Language runtimes (Golang, Java 21 OpenJDK)
+- Rust toolchain via rustup
+- Node.js via nvm (Node Version Manager)
+- Bun JavaScript runtime
+- uv (modern Python package manager)
 
-Role Variables
---------------
+## Requirements
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- RHEL/Fedora-based system (Fedora 39+, RHEL 9+)
+- Ansible 2.15+
+- Internet connection for downloading language runtimes
 
-Dependencies
-------------
+## Role Variables
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+### Feature Toggles
 
-Example Playbook
-----------------
+Control which components are installed by setting these variables to `true` or `false`:
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+```yaml
+developer_install_rust: true        # Install Rust toolchain via rustup
+developer_install_nodejs: true      # Install Node.js via nvm
+developer_install_bun: true         # Install Bun runtime
+developer_install_uv: true          # Install uv (Python package manager)
+```
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+### Compiler Packages
 
-License
--------
+Default list of system packages to install:
 
-BSD
+```yaml
+developer_compilers_packages:
+  - clang          # C/C++ compiler
+  - gcc            # GNU Compiler Collection
+  - gcc-c++        # C++ compiler
+  - cmake          # Build system generator
+  - gdb            # GNU Debugger
+  - neovim         # Vim-fork text editor
+  - tmux           # Terminal multiplexer
+  - golang         # Go programming language
+  - python3-devel  # Python development headers
+  - toolbox        # Fedora container toolbox
+  - java-21-openjdk-devel  # Java 21 JDK
+  - java-21-openjdk         # Java 21 runtime
+  - cloc           # Count Lines of Code
+  - make           # Build automation tool
+  - automake       # Make file generator
+  - autoconf       # Configuration script generator
+```
 
-Author Information
-------------------
+### Node.js Configuration
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+```yaml
+developer_node_version: "22"        # Node.js version to install
+developer_nvm_version: "v0.40.3"    # nvm version
+```
+
+### Rust Configuration
+
+```yaml
+developer_rustup_default_host: "x86_64-unknown-linux-gnu"
+```
+
+### Python Tooling
+
+```yaml
+developer_use_uv_latest: true       # Always install latest uv version
+```
+
+## Dependencies
+
+None. This role is self-contained and can be used independently.
+
+## Example Playbook
+
+### Basic Usage
+
+```yaml
+---
+- hosts: developer_workstations
+  roles:
+    - developer
+```
+
+### Custom Configuration
+
+```yaml
+---
+- hosts: developer_workstations
+  roles:
+    - role: developer
+      vars:
+        # Install specific Node.js version
+        developer_node_version: "20"
+
+        # Skip Rust installation
+        developer_install_rust: false
+
+        # Add additional packages
+        developer_compilers_packages:
+          - gcc
+          - clang
+          - cmake
+          - neovim
+          - llvm
+          - lldb
+```
+
+### Selective Installation with Tags
+
+```bash
+# Install only compilers and system tools
+ansible-playbook playbook.yml --tags "compilers"
+
+# Install only Node.js
+ansible-playbook playbook.yml --tags "nodejs"
+
+# Install only Rust
+ansible-playbook playbook.yml --tags "rust"
+
+# Install JavaScript tools (Node.js + Bun)
+ansible-playbook playbook.yml --tags "javascript"
+```
+
+## Installed Tools Overview
+
+| Category | Tool | Version Management |
+|----------|------|-------------------|
+| Compilers | GCC, Clang | System (dnf) |
+| Build Tools | CMake, Make, Automake | System (dnf) |
+| Editors | Neovim | System (dnf) |
+| Go | Golang | System (dnf) |
+| Java | OpenJDK 21 | System (dnf) |
+| Rust | rustup + cargo | rustup |
+| Node.js | nvm | nvm (per-user) |
+| Bun | Bun | Installer (per-user) |
+| Python | uv | Installer (per-user) |
+
+## Directory Structure
+
+```
+roles/developer/
+├── defaults/
+│   └── main.yml          # Default variables
+├── handlers/
+│   └── main.yml          # Handlers (none currently)
+├── meta/
+│   └── main.yml          # Role metadata
+├── tasks/
+│   ├── main.yml          # Main entry point
+│   ├── compilers.yml     # System compilers and tools
+│   ├── rust.yml          # Rust toolchain
+│   ├── nodejs.yml        # Node.js via nvm
+│   ├── bun.yml           # Bun runtime
+│   └── python.yml        # uv Python tooling
+├── tests/
+│   ├── inventory
+│   └── test.yml
+├── vars/
+│   └── main.yml          # Role variables (empty, using defaults)
+└── README.md             # This file
+```
+
+## License
+
+MIT-0
+
+## Author
+
+Ansible Developer Configuration

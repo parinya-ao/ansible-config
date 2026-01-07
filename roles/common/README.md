@@ -1,38 +1,175 @@
-Role Name
-=========
+# Common Role
 
-A brief description of the role goes here.
+This role provides base system configuration for Fedora/RHEL systems, including DNF package manager optimization, system updates, and essential package installation.
 
-Requirements
-------------
+## Role Purpose
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+The common role serves as the foundation for system configuration by:
+- Optimizing DNF package manager performance (parallel downloads, fastest mirror, delta RPMs)
+- Performing full system updates
+- Installing essential base packages for all system types
+- Configuring firewalld service
 
-Role Variables
---------------
+This role should be run first on all systems as a prerequisite for other roles.
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+## Requirements
 
-Dependencies
-------------
+- RHEL/Fedora-based system (Fedora 39+, RHEL 9+)
+- Ansible 2.15+
+- Root or sudo access
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+## Role Variables
 
-Example Playbook
-----------------
+### Feature Toggles
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+```yaml
+# Enable/disable full system update
+common_system_update_enabled: true
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+# Enable/disable firewalld service
+common_firewalld_enabled: true
+```
 
-License
--------
+### DNF Configuration
 
-BSD
+```yaml
+# Maximum parallel downloads (default: 20)
+common_dnf_max_parallel_downloads: 20
 
-Author Information
-------------------
+# Enable fastest mirror selection (default: true)
+common_dnf_fastestmirror: "True"
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+# Enable delta RPMs for faster updates (default: true)
+common_dnf_deltarpm: "True"
+
+# Retry settings for network resilience
+common_dnf_retries: 3
+common_dnf_delay: 10
+```
+
+### Base Packages
+
+Default list of packages installed by this role:
+
+```yaml
+common_base_packages:
+  - curl              # Command line tool for transferring data
+  - wget              # Network utility to retrieve files
+  - zram-generator    # Compressed swap device generator
+  - git               # Version control system
+  - htop              # Interactive process viewer
+  - dnf-plugins-core  # Core DNF plugins
+  - python3           # Python 3 interpreter
+  - python3-pip       # Python package manager
+  - firewalld         # Firewall daemon
+```
+
+### Additional Packages
+
+Extend the base package list:
+
+```yaml
+common_extra_packages:
+  - vim
+  - tmux
+  - rsync
+```
+
+## Dependencies
+
+None. This is the base role and should not have dependencies.
+
+## Example Playbook
+
+### Basic Usage
+
+```yaml
+---
+- hosts: all
+  roles:
+    - common
+```
+
+### Custom Configuration
+
+```yaml
+---
+- hosts: servers
+  roles:
+    - role: common
+      vars:
+        # Skip system update (faster execution)
+        common_system_update_enabled: false
+
+        # Increase parallel downloads
+        common_dnf_max_parallel_downloads: 30
+
+        # Add extra packages
+        common_extra_packages:
+          - vim
+          - tmux
+          - ripgrep
+          - fd-find
+```
+
+### Selective Installation with Tags
+
+```bash
+# Configure DNF only
+ansible-playbook playbook.yml --tags "dnf"
+
+# Run system update only
+ansible-playbook playbook.yml --tags "system-update"
+
+# Install packages only
+ansible-playbook playbook.yml --tags "packages"
+
+# Skip system update
+ansible-playbook playbook.yml --skip-tags "system-update"
+```
+
+## Directory Structure
+
+```
+roles/common/
+├── defaults/
+│   └── main.yml          # Default variables
+├── handlers/
+│   └── main.yml          # Handlers for service changes
+├── meta/
+│   └── main.yml          # Role metadata
+├── tasks/
+│   ├── main.yml          # Main entry point
+│   ├── dnf.yml           # DNF configuration
+│   ├── system-update.yml # System package update
+│   └── packages.yml      # Base packages installation
+├── tests/
+│   ├── inventory
+│   └── test.yml
+├── vars/
+│   └── main.yml          # Role variables (empty, using defaults)
+└── README.md             # This file
+```
+
+## DNF Configuration Details
+
+This role configures the following DNF settings in `/etc/dnf/dnf.conf`:
+
+```ini
+max_parallel_downloads=20
+fastestmirror=True
+deltarpm=True
+```
+
+These settings:
+- **max_parallel_downloads**: Speeds up package installation by downloading multiple packages simultaneously
+- **fastestmirror**: Automatically selects the fastest mirror based on connection speed
+- **deltarpm**: Reduces download size by only downloading changed portions of RPM packages
+
+## License
+
+MIT-0
+
+## Author
+
+Ansible Common Configuration

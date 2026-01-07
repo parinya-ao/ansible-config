@@ -1,0 +1,12 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Compilers & CLI Tools installation tasks
+
+- name: Install development compilers and tools
+  ansible.builtin.dnf:
+    name: "{{ developer_compilers_packages }}"
+    state: present
+  become: true
+  tags:
+    - compilers
+    - development-tools

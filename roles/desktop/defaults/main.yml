@@ -1,3 +1,31 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for roles/desktop
+# These are low-priority variables that can be overridden by playbooks or host variables
+
+# Feature flags for conditional role execution
+install_desktop_packages: true
+install_vscode: true
+install_starship: true
+install_flatpak_apps: true
+
+# Flatpak applications to install
+flatpak_apps_list:
+  - com.discordapp.Discord
+  - com.getpostman.Postman
+  - org.signal.Signal
+  - com.obsproject.Studio
+  - net.ankiweb.Anki
+  - com.rustdesk.RustDesk
+
+# Desktop packages to install
+desktop_packages:
+  - okular
+  - xclip
+  - gnome-extensions-app
+  - gnome-tweaks
+
+# Starship configuration
+starship_install: true
+starship_config_path: /etc/bashrc
+

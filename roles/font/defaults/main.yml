@@ -2,7 +2,7 @@
 ---
 # defaults file for roles/font
 
-font_base_path: /usr/share/fonts
+font_base_dir: /usr/share/fonts
 
 fonts:
   - name: th-sarabun-new
