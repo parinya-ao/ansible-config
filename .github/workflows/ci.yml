@@ -256,10 +256,12 @@ jobs:
           echo "Rocky Linux 9 Verify Test: ${{ needs.test-rocky-linux-9-verify.result }}"
           echo ""
 
-          if [[ "${{ needs.lint.result }}" == "success" && "${{ needs.test-rocky-linux-9.result }}" == "success" && "${{ needs.test-rocky-linux-9-verify.result }}" == "success" ]]; then
+          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.test-rocky-linux-9.result }}" != "success" || "${{ needs.test-rocky-linux-9-verify.result }}" != "success" ]]; then
               echo "✗ Some checks failed"
               exit 1
           fi
+
+          echo "✓ All checks passed"
 
       - name: Display summary
         if: always()
