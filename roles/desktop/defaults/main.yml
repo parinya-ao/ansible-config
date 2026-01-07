@@ -16,6 +16,7 @@ flatpak_apps_list:
   - org.signal.Signal
   - com.obsproject.Studio
   - net.ankiweb.Anki
+  - com.rustdesk.RustDesk
 
 # Desktop packages to install
 desktop_packages:
