@@ -1,3 +1,15 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # vars file for roles/desktop
+# These are high-priority variables used internally by the role
+
+# Visual Studio Code repository configuration
+vscode_repo_name: code
+vscode_repo_description: Visual Studio Code
+vscode_repo_baseurl: https://packages.microsoft.com/yumrepos/vscode
+vscode_gpg_key: https://packages.microsoft.com/keys/microsoft.asc
+
+# Starship installation script details
+starship_install_script: https://starship.rs/install.sh
+starship_bin_path: /usr/local/bin/starship
+

@@ -1,3 +1,10 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# handlers file for roles/developer
+# SPDX-License-Identifier: MIT-0
+# Handlers file for developer role
+# This role does not manage any long-running services,
+# so no handlers are currently defined.
+
+# Example handler (not currently used):
+# - name: Reload development environment
+#   ansible.builtin.shell:
+#     cmd: source {{ ansible_env.HOME }}/.bashrc

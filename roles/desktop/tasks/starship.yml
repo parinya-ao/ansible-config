@@ -1,0 +1,15 @@
+#SPDX-License-Identifier: MIT-0
+---
+# Install and configure Starship prompt
+
+- name: install starship
+  ansible.builtin.shell: curl -sS https://starship.rs/install.sh | sh -s -- --yes
+  args:
+    creates: /usr/local/bin/starship
+
+- name: configure starship for all users
+  ansible.builtin.lineinfile:
+    path: /etc/bashrc
+    line: 'eval "$(starship init bash)"'
+    state: present
+    create: yes

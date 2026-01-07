@@ -1,0 +1,31 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Bun JavaScript runtime installation
+
+- name: Install Bun JavaScript runtime
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://bun.sh/install | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.bun/bin/bun"
+  become: false
+  tags:
+    - bun
+    - javascript
+
+- name: Verify Bun installation
+  ansible.builtin.shell:
+    cmd: "{{ ansible_env.HOME }}/.bun/bin/bun --version"
+  register: bun_version
+  changed_when: false
+  become: false
+  tags:
+    - bun
+    - javascript
+
+- name: Display Bun version
+  ansible.builtin.debug:
+    msg: "Bun {{ bun_version.stdout }} installed"
+  when: bun_version.stdout is defined
+  tags:
+    - bun
+    - javascript

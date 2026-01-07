@@ -1,62 +1,15 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for roles/desktop
-- name: install flatpak
-  ansible.builtin.dnf:
-    name: flatpak
-    state: present
 
-- name: add flathub remote
-  ansible.builtin.command:
-    cmd: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+- name: import packages tasks
+  ansible.builtin.import_tasks: packages.yml
 
-- name: install desktop package
-  ansible.builtin.dnf:
-    name:
-      - okular
-      - xclip
-      - gnome-extensions-app
-      - gnome-tweaks
-    state: present
+- name: import vscode tasks
+  ansible.builtin.import_tasks: vscode.yml
 
-- name: import microsoft gpg key
-  ansible.builtin.rpm_key:
-    key: https://packages.microsoft.com/keys/microsoft.asc
-    state: present
+- name: import starship tasks
+  ansible.builtin.import_tasks: starship.yml
 
-- name: add vscode repo
-  ansible.builtin.yum_repository:
-    name: code
-    description: Visual Studio Code
-    baseurl: https://packages.microsoft.com/yumrepos/vscode
-    gpgcheck: yes
-    gpgkey: https://packages.microsoft.com/keys/microsoft.asc
-    enabled: yes
-
-- name: install vscode
-  ansible.builtin.dnf:
-    name: code
-    state: present
-
-# install starship
-- name: install starship
-  ansible.builtin.shell: curl -sS https://starship.rs/install.sh | sh -s -- --yes
-  args:
-    creates: /usr/local/bin/starship
-
-- name: configure starship for all users
-  ansible.builtin.lineinfile:
-    path: /etc/bashrc
-    line: 'eval "$(starship init bash)"'
-    state: present
-    create: yes
-
-- name: install flatpak applications
-  community.general.flatpak:
-    name:
-      - com.discordapp.Discord
-      - com.getpostman.Postman
-      - org.signal.Signal
-      - com.obsproject.Studio
-      - net.ankiweb.Anki
-    state: present
+- name: import flatpak applications tasks
+  ansible.builtin.import_tasks: flatpak-apps.yml

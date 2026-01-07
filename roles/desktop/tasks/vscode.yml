@@ -1,0 +1,22 @@
+#SPDX-License-Identifier: MIT-0
+---
+# Install and configure Visual Studio Code
+
+- name: import microsoft gpg key
+  ansible.builtin.rpm_key:
+    key: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+
+- name: add vscode repo
+  ansible.builtin.yum_repository:
+    name: code
+    description: Visual Studio Code
+    baseurl: https://packages.microsoft.com/yumrepos/vscode
+    gpgcheck: yes
+    gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+    enabled: yes
+
+- name: install vscode
+  ansible.builtin.dnf:
+    name: code
+    state: present

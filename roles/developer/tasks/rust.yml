@@ -1,0 +1,23 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Rust toolchain installation via rustup
+
+- name: Install Rust toolchain via rustup
+  ansible.builtin.shell:
+    cmd: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  args:
+    creates: "{{ ansible_env.HOME }}/.cargo/bin/rustc"
+  become: false
+  tags:
+    - rust
+    - compilers
+
+- name: Verify Rust installation
+  ansible.builtin.shell:
+    cmd: "{{ ansible_env.HOME }}/.cargo/bin/rustc --version"
+  register: rust_version
+  changed_when: false
+  become: false
+  tags:
+    - rust
+    - compilers
