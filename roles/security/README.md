@@ -1,38 +1,144 @@
-Role Name
-=========
+# Security Role
 
-A brief description of the role goes here.
+This role configures system security settings, primarily firewall management using firewalld on RHEL/Fedora systems.
 
-Requirements
-------------
+## Role Purpose
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+The security role automates the configuration of:
+- Firewalld service installation and startup
+- SSH port opening (default port 22)
+- Custom port opening with flexible protocol support
+- Permanent and immediate firewall rule application
 
-Role Variables
---------------
+## Requirements
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- RHEL/Fedora-based system with firewalld support
+- `ansible.posix` collection (for firewalld module)
+- `common` role as dependency
 
-Dependencies
-------------
+## Role Variables
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+### Default Variables (`defaults/main.yml`)
 
-Example Playbook
-----------------
+- `security_enable_firewalld` (bool): Enable firewalld service (default: `true`)
+- `security_ssh_port` (int): SSH port to open (default: `22`)
+- `security_custom_ports` (list): List of custom ports to open (default: `[]`)
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+### Custom Ports Format
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+security_custom_ports:
+  - port: 8080
+    protocol: tcp
+    state: enabled
 
-License
--------
+  - port: 53
+    protocol: udp
+    state: enabled
 
-BSD
+  - port: 3000
+    protocol: tcp
+    state: disabled
+```
 
-Author Information
-------------------
+## Included Tasks
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+- **firewalld.yml**: Install and configure firewalld service
+- **ssh.yml**: Open SSH port using firewalld
+- **custom-ports.yml**: Open custom ports (when `security_custom_ports` is defined)
+
+## Dependencies
+
+- **common**: Base system configuration role
+
+## Example Playbook
+
+### Basic Usage (SSH only)
+
+```yaml
+---
+- hosts: localhost
+  roles:
+    - security
+```
+
+### With Custom Ports
+
+```yaml
+---
+- hosts: localhost
+  roles:
+    - role: security
+      vars:
+        security_ssh_port: 2222
+        security_custom_ports:
+          - port: 80
+            protocol: tcp
+            state: enabled
+          - port: 443
+            protocol: tcp
+            state: enabled
+          - port: 8080
+            protocol: tcp
+            state: enabled
+          - port: 53
+            protocol: udp
+            state: enabled
+```
+
+## Advanced Examples
+
+### Disable Specific Ports
+
+```yaml
+security_custom_ports:
+  - port: 8080
+    protocol: tcp
+    state: disabled
+```
+
+### Multiple Protocols
+
+```yaml
+security_custom_ports:
+  - port: 53
+    protocol: tcp
+    state: enabled
+  - port: 53
+    protocol: udp
+    state: enabled
+```
+
+## Verification
+
+After the role runs, verify firewall rules:
+
+```bash
+# List all open ports
+sudo firewall-cmd --list-ports
+
+# List all services
+sudo firewall-cmd --list-services
+
+# Check specific port
+sudo firewall-cmd --query-port=22/tcp
+```
+
+## Handlers
+
+- `firewalld reloaded`: Reloads firewalld configuration after changes
+
+## Tags
+
+- `security`: All security role tasks
+- `firewall`: Firewall-related tasks
+- `ssh`: SSH port configuration
+- `custom-ports`: Custom port configuration
+
+## Author
+
+Parinya Luangchaisuk
+
+## License
+
+MIT-0

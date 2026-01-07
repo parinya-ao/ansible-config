@@ -1,0 +1,29 @@
+#SPDX-License-Identifier: MIT-0
+---
+# SSH port configuration using firewalld
+
+- name: Open SSH port {{ security_ssh_port }} with firewalld
+  ansible.builtin.shell:
+    cmd: firewall-cmd --permanent --add-port={{ security_ssh_port }}/tcp
+  become: true
+  register: ssh_port_result
+  changed_when: "'success' in ssh_port_result.stdout"
+  tags:
+    - firewalld
+    - ssh
+
+- name: Reload firewalld for SSH port
+  ansible.builtin.shell:
+    cmd: firewall-cmd --reload
+  become: true
+  when: ssh_port_result.changed
+  tags:
+    - firewalld
+    - ssh
+
+- name: Display SSH firewall rule
+  ansible.builtin.debug:
+    msg: "✓ SSH port {{ security_ssh_port }}/tcp is now open in firewalld"
+  tags:
+    - firewalld
+    - ssh

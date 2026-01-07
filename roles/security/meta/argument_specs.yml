@@ -1,0 +1,54 @@
+#SPDX-License-Identifier: MIT-0
+---
+argument_specs:
+  main:
+    short_description: Configure firewall security and open ports using firewalld
+    description:
+      - This role manages firewall configuration using firewalld
+      - Automatically opens SSH port (default 22)
+      - Supports opening custom ports with TCP/UDP protocols
+      - All changes are permanent and immediate
+    version_added: '1.0.0'
+    author: Parinya Luangchaisuk
+    options:
+      security_enable_firewalld:
+        type: bool
+        default: true
+        required: false
+        description: Enable and start firewalld service
+
+      security_ssh_port:
+        type: int
+        default: 22
+        required: false
+        description: SSH port to open in firewall (default is 22)
+
+      security_custom_ports:
+        type: list
+        elements: dict
+        default: []
+        required: false
+        description: List of custom ports to open in firewall
+        options:
+          port:
+            type: int
+            required: true
+            description: Port number to open
+
+          protocol:
+            type: str
+            default: tcp
+            required: false
+            choices:
+              - tcp
+              - udp
+            description: Protocol type (tcp or udp)
+
+          state:
+            type: str
+            default: enabled
+            required: false
+            choices:
+              - enabled
+              - disabled
+            description: Whether the port should be enabled or disabled

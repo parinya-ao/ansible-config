@@ -22,6 +22,6 @@
     src: "{{ item.zip }}"
     dest: "{{ item.dir }}"
     remote_src: yes
-    mode: '0644'
+    mode: 'a+rX'
   loop: "{{ fonts }}"
   notify: refresh font cache

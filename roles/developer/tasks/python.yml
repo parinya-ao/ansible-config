@@ -6,7 +6,7 @@
   ansible.builtin.shell:
     cmd: curl -LsSf https://astral.sh/uv/install.sh | sh
   args:
-    creates: "{{ ansible_env.HOME }}/.local/bin/uv"
+    creates: "{{ lookup('env', 'HOME') }}/.local/bin/uv"
   become: false
   tags:
     - python
@@ -14,7 +14,7 @@
 
 - name: Verify uv installation
   ansible.builtin.shell:
-    cmd: "{{ ansible_env.HOME }}/.local/bin/uv --version"
+    cmd: "{{ lookup('env', 'HOME') }}/.local/bin/uv --version"
   register: uv_version
   changed_when: false
   become: false
