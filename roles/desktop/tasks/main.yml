@@ -58,4 +58,5 @@
       - com.getpostman.Postman
       - org.signal.Signal
       - com.obsproject.Studio
+      - net.ankiweb.Anki
     state: present
