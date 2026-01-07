@@ -85,6 +85,11 @@ jobs:
           echo "=== Installing Ansible ==="
           pip3 install ansible-core
 
+      - name: Install Ansible collections
+        run: |
+          echo "=== Installing required collections ==="
+          ansible-galaxy collection install community.general
+
       - name: Display system and Ansible info
         run: |
           echo "=== System Information ==="
