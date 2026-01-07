@@ -1,0 +1,28 @@
+---
+# SPDX-License-Identifier: MIT-0
+# System update tasks
+
+- name: Update all packages to latest version
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+    update_cache: true
+  become: true
+  when: common_system_update_enabled
+  register: dnf_update_result
+  retries: "{{ common_dnf_retries }}"
+  delay: "{{ common_dnf_delay }}"
+  until: dnf_update_result is succeeded
+  tags:
+    - system-update
+    - update
+
+- name: Display update summary
+  ansible.builtin.debug:
+    msg: "System updated successfully"
+  when:
+    - common_system_update_enabled
+    - dnf_update_result is changed
+  tags:
+    - system-update
+    - update

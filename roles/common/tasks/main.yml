@@ -1,29 +1,28 @@
 ---
-- name: config dnf
-  ansible.builtin.blockinfile:
-    path: /etc/dnf/dnf.conf
-    block: |
-      max_parallel_downloads=20
-      fastestmirror=True
-      deltarpm=True
-    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+# SPDX-License-Identifier: MIT-0
+# Common role - Main entry point
+# This role configures the base system with:
+# - DNF package manager optimization
+# - System package updates
+# - Essential base packages
 
+# DNF Configuration
+- name: Configure DNF package manager
+  ansible.builtin.import_tasks: dnf.yml
+  tags:
+    - common
+    - dnf
 
-- name: update all package
-  ansible.builtin.dnf:
-    name: "*"
-    state: latest
+# System Update
+- name: Perform system update
+  ansible.builtin.import_tasks: system-update.yml
+  tags:
+    - common
+    - system-update
 
-- name: install base system packages
-  ansible.builtin.dnf:
-    name:
-      - curl
-      - wget
-      - zram-generator
-      - git
-      - htop
-      - dnf-plugins-core
-      - python3
-      - python3-pip
-      - firewalld
-    state: present
+# Base Packages Installation
+- name: Install base packages
+  ansible.builtin.import_tasks: packages.yml
+  tags:
+    - common
+    - packages
