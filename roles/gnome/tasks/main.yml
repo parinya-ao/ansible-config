@@ -1,15 +1,10 @@
 ---
 # tasks file for gnome
 
-- name: Install dconf utils
-  ansible.builtin.dnf:
-    name: dconf
-    state: present
-  become: true
+- name: Setup GNOME Dependencies
+  import_tasks: install.yml
+  tags: [gnome, install]
 
-- name: Apply GNOME dconf settings
-  include_tasks: apply_dconf.yml
-  loop: "{{ gnome_dconf_settings }}"
-  loop_control:
-    loop_var: section
-    label: "{{ section.path }}"
+- name: Configure GNOME Settings
+  import_tasks: configure.yml
+  tags: [gnome, configure]

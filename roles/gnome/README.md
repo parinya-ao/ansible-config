@@ -1,38 +1,56 @@
-Role Name
-=========
+GNOME Configuration Role
+========================
 
-A brief description of the role goes here.
+This role configures the GNOME desktop environment using `dconf`. It allows for granular control over GNOME settings through a structured variable list.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- `community.general` collection (for `dconf` module)
+- Fedora or RHEL-based distribution (uses `dnf`)
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+The main variable to configure is `gnome_dconf_settings`. It is a list of objects, where each object defines a path and a set of key-value pairs.
+
+### Variable Structure
+
+```yaml
+gnome_dconf_settings:
+  - path: /org/gnome/desktop/interface/
+    values:
+      color-scheme: "'prefer-dark'"
+      font-name: "'Inter 11'"
+```
+
+**Note:** Strings must be enclosed in single quotes inside the value (e.g. `"'value'"`) as per dconf requirements.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+None.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+- hosts: localhost
+  roles:
+    - role: gnome
+      vars:
+        gnome_dconf_settings:
+          - path: /org/gnome/desktop/interface/
+            values:
+              accent-color: "'teal'"
+```
 
 License
 -------
 
-BSD
+MIT
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Parinya

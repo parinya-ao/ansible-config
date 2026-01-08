@@ -1,0 +1,6 @@
+---
+- name: Install dconf utils
+  ansible.builtin.dnf:
+    name: dconf
+    state: present
+  become: true
