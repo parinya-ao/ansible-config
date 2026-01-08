@@ -80,16 +80,12 @@ gnome_dconf_settings:
 
   - path: /org/gnome/desktop/notifications/
     values:
-      application-children: "['org-gnome-software', 'org-gnome-ptyxis', 'firefox', 'code', 'org-signal-signal', 'org-gnome-settings', 'com-discordapp-discord', 'org-vinegarhq-sober', 'io-github-mlm-games-pomodorot', 'gnome-power-panel', 'org-gnome-characters', 'org-mozilla-thunderbird', 'org-gnome-nautilus']"
+      application-children: "['org-gnome-software', 'org-gnome-ptyxis', 'firefox', 'code', 'org-signal-signal', 'org-gnome-settings', 'org-vinegarhq-sober', 'io-github-mlm-games-pomodorot', 'gnome-power-panel', 'org-gnome-characters', 'org-mozilla-thunderbird', 'org-gnome-nautilus']"
       show-banners: "false"
 
   - path: /org/gnome/desktop/notifications/application/code/
     values:
       application-id: "'code.desktop'"
-
-  - path: /org/gnome/desktop/notifications/application/com-discordapp-discord/
-    values:
-      application-id: "'com.discordapp.Discord.desktop'"
 
   - path: /org/gnome/desktop/notifications/application/firefox/
     values:
@@ -239,7 +235,7 @@ gnome_dconf_settings:
 
   - path: /org/gnome/shell/
     values:
-      app-picker-layout: "[{'org.gnome.Snapshot.desktop': <{'position': <0>}>, 'org.gnome.Nautilus.desktop': <{'position': <1>}>, 'org.gnome.clocks.desktop': <{'position': <2>}>, 'org.gnome.Papers.desktop': <{'position': <3>}>, 'org.gnome.Tour.desktop': <{'position': <4>}>, 'htop.desktop': <{'position': <5>}>, 'org.gnome.Settings.desktop': <{'position': <6>}>, 'org.gnome.SystemMonitor.desktop': <{'position': <7>}>, 'Utilities': <{'position': <8>}>, 'com.discordapp.Discord.desktop': <{'position': <9>}>, 'nvim.desktop': <{'position': <10>}>, 'md.obsidian.Obsidian.desktop': <{'position': <11>}>, 'org.kde.okular.desktop': <{'position': <12>}>, 'com.getpostman.Postman.desktop': <{'position': <13>}>, 'org.signal.Signal.desktop': <{'position': <14>}>, 'org.gnome.tweaks.desktop': <{'position': <15>}>, 'java-21-openjdk-jconsole.desktop': <{'position': <16>}>, 'org.jousse.vincent.Pomodorolm.desktop': <{'position': <17>}>}]"
+      app-picker-layout: "[{'org.gnome.Snapshot.desktop': <{'position': <0>}>, 'org.gnome.Nautilus.desktop': <{'position': <1>}>, 'org.gnome.clocks.desktop': <{'position': <2>}>, 'org.gnome.Papers.desktop': <{'position': <3>}>, 'org.gnome.Tour.desktop': <{'position': <4>}>, 'htop.desktop': <{'position': <5>}>, 'org.gnome.Settings.desktop': <{'position': <6>}>, 'org.gnome.SystemMonitor.desktop': <{'position': <7>}>, 'Utilities': <{'position': <8>}>, 'nvim.desktop': <{'position': <10>}>, 'md.obsidian.Obsidian.desktop': <{'position': <11>}>, 'org.kde.okular.desktop': <{'position': <12>}>, 'com.getpostman.Postman.desktop': <{'position': <13>}>, 'org.signal.Signal.desktop': <{'position': <14>}>, 'org.gnome.tweaks.desktop': <{'position': <15>}>, 'java-21-openjdk-jconsole.desktop': <{'position': <16>}>, 'org.jousse.vincent.Pomodorolm.desktop': <{'position': <17>}>}]"
       command-history: "['terminal']"
       disabled-extensions: "['pomodoro@arun.codito.in']"
       enabled-extensions: "['smarttiling@samuelnovaes', 'background-logo@fedorahosted.org']"

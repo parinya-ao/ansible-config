@@ -12,7 +12,6 @@
 - name: install flatpak applications
   community.general.flatpak:
     name:
-      - com.discordapp.Discord
       - com.getpostman.Postman
       - org.signal.Signal
       - com.obsproject.Studio
