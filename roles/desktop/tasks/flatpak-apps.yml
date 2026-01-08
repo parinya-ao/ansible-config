@@ -2,6 +2,13 @@
 ---
 # Install Flatpak applications
 
+- name: Add Flathub remote
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+  become: true
+
 - name: install flatpak applications
   community.general.flatpak:
     name:

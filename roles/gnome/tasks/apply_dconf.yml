@@ -7,3 +7,6 @@
   loop: "{{ section.values | dict2items }}"
   loop_control:
     label: "{{ section.path }}{{ item.key }}"
+  become: true
+  become_user: "{{ ansible_user_id }}"
+  ignore_errors: true
