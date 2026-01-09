@@ -26,3 +26,11 @@
   tags:
     - common
     - packages
+
+# System Maintenance
+- name: Configure system maintenance tasks
+  ansible.builtin.import_tasks: maintenance.yml
+  tags:
+    - common
+    - maintenance
+

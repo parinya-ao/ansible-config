@@ -1,0 +1,295 @@
+---
+# defaults file for roles/gnome
+
+gnome_dconf_settings:
+  - path: /org/gnome/Ptyxis/
+    values:
+      default-profile-uuid: "'46d51b4375d0bbb77af61ac369507fa8'"
+      profile-uuids: "['46d51b4375d0bbb77af61ac369507fa8']"
+      window-size: "(uint32 144, uint32 27)"
+
+  - path: /org/gnome/Snapshot/
+    values:
+      is-maximized: "false"
+      window-height: "640"
+      window-width: "800"
+
+  - path: /org/gnome/clocks/state/window/
+    values:
+      maximized: "false"
+      panel-id: "'world'"
+      size: "(870, 690)"
+
+  - path: /org/gnome/control-center/
+    values:
+      last-panel: "'wifi'"
+      window-state: "(980, 586, true)"
+
+  - path: /org/gnome/desktop/app-folders/
+    values:
+      folder-children: "['Utilities', 'YaST', 'Pardus']"
+
+  - path: /org/gnome/desktop/app-folders/folders/Pardus/
+    values:
+      categories: "['X-Pardus-Apps']"
+      name: "'X-Pardus-Apps.directory'"
+      translate: "true"
+
+  - path: /org/gnome/desktop/app-folders/folders/Utilities/
+    values:
+      apps: "['org.gnome.DiskUtility.desktop', 'org.gnome.font-viewer.desktop', 'org.gnome.Loupe.desktop']"
+      categories: "['X-GNOME-Utilities']"
+      name: "'X-GNOME-Utilities.directory'"
+      translate: "true"
+
+  - path: /org/gnome/desktop/app-folders/folders/YaST/
+    values:
+      categories: "['X-SuSE-YaST']"
+      name: "'suse-yast.directory'"
+      translate: "true"
+
+  - path: /org/gnome/desktop/background/
+    values:
+      color-shading-type: "'solid'"
+      picture-options: "'zoom'"
+      # picture-uri excluded
+      # picture-uri-dark excluded
+      primary-color: "'#000000000000'"
+      secondary-color: "'#000000000000'"
+
+  - path: /org/gnome/desktop/datetime/
+    values:
+      automatic-timezone: "true"
+
+  - path: /org/gnome/desktop/input-sources/
+    values:
+      mru-sources: "[('xkb', 'us'), ('xkb', 'th')]"
+      sources: "[('xkb', 'us'), ('xkb', 'th')]"
+      xkb-options: "['grp:caps_toggle']"
+
+  - path: /org/gnome/desktop/interface/
+    values:
+      accent-color: "'teal'"
+      clock-format: "'24h'"
+      color-scheme: "'prefer-dark'"
+      document-font-name: "'Inter 11'"
+      enable-animations: "true"
+      font-name: "'Inter 11'"
+      show-battery-percentage: "true"
+      toolkit-accessibility: "false"
+
+  - path: /org/gnome/desktop/notifications/
+    values:
+      application-children: "['org-gnome-software', 'org-gnome-ptyxis', 'firefox', 'code', 'org-signal-signal', 'org-gnome-settings', 'org-vinegarhq-sober', 'io-github-mlm-games-pomodorot', 'gnome-power-panel', 'org-gnome-characters', 'org-mozilla-thunderbird', 'org-gnome-nautilus']"
+      show-banners: "false"
+
+  - path: /org/gnome/desktop/notifications/application/code/
+    values:
+      application-id: "'code.desktop'"
+
+  - path: /org/gnome/desktop/notifications/application/firefox/
+    values:
+      application-id: "'firefox.desktop'"
+
+  - path: /org/gnome/desktop/notifications/application/gnome-power-panel/
+    values:
+      application-id: "'gnome-power-panel.desktop'"
+
+  - path: /org/gnome/desktop/notifications/application/io-github-mlm-games-pomodorot/
+    values:
+      application-id: "'io.github.mlm_games.pomodorot.desktop'"
+
+  - path: /org/gnome/desktop/notifications/application/org-gnome-characters/
+    values:
+      application-id: "'org.gnome.Characters.desktop'"
+
+  - path: /org/gnome/desktop/notifications/application/org-gnome-nautilus/
+    values:
+      application-id: "'org.gnome.Nautilus.desktop'"
+
+  - path: /org/gnome/desktop/notifications/application/org-gnome-ptyxis/
+    values:
+      application-id: "'org.gnome.Ptyxis.desktop'"
+
+  - path: /org/gnome/desktop/notifications/application/org-gnome-settings/
+    values:
+      application-id: "'org.gnome.Settings.desktop'"
+
+  - path: /org/gnome/desktop/notifications/application/org-gnome-software/
+    values:
+      application-id: "'org.gnome.Software.desktop'"
+
+  - path: /org/gnome/desktop/notifications/application/org-mozilla-thunderbird/
+    values:
+      application-id: "'org.mozilla.Thunderbird.desktop'"
+
+  - path: /org/gnome/desktop/notifications/application/org-signal-signal/
+    values:
+      application-id: "'org.signal.Signal.desktop'"
+
+  - path: /org/gnome/desktop/notifications/application/org-vinegarhq-sober/
+    values:
+      application-id: "'org.vinegarhq.Sober.desktop'"
+
+  - path: /org/gnome/desktop/peripherals/pointingstick/
+    values:
+      scroll-method: "'on-button-down'"
+
+  - path: /org/gnome/desktop/peripherals/touchpad/
+    values:
+      click-method: "'areas'"
+      disable-while-typing: "false"
+      speed: "0.19850187265917607"
+      two-finger-scrolling-enabled: "true"
+
+  - path: /org/gnome/desktop/privacy/
+    values:
+      recent-files-max-age: "7"
+      remove-old-trash-files: "true"
+
+  - path: /org/gnome/desktop/screensaver/
+    values:
+      color-shading-type: "'solid'"
+      picture-options: "'zoom'"
+      # picture-uri excluded
+      primary-color: "'#000000000000'"
+      secondary-color: "'#000000000000'"
+
+  - path: /org/gnome/desktop/search-providers/
+    values:
+      sort-order: "['org.gnome.Settings.desktop', 'org.gnome.Contacts.desktop', 'org.gnome.Nautilus.desktop']"
+
+  - path: /org/gnome/desktop/session/
+    values:
+      idle-delay: "uint32 0"
+
+  - path: /org/gnome/desktop/wm/preferences/
+    values:
+      button-layout: "'appmnenu:minimize,maximize,close'"
+
+  - path: /org/gnome/evolution-data-server/
+    values:
+      migrated: "true"
+
+  - path: /org/gnome/login-screen/
+    values:
+      enable-fingerprint-authentication: "true"
+      enable-smartcard-authentication: "false"
+
+  - path: /org/gnome/mutter/
+    values:
+      experimental-features: "['scale-monitor-framebuffer']"
+
+  - path: /org/gnome/nautilus/preferences/
+    values:
+      default-folder-viewer: "'icon-view'"
+      migrated-gtk-settings: "true"
+      search-filter-time-type: "'last_modified'"
+
+  - path: /org/gnome/nautilus/window-state/
+    values:
+      initial-size: "(890, 550)"
+      initial-size-file-chooser: "(890, 550)"
+
+  - path: /org/gnome/nm-applet/eap/7373b71f-687d-4b06-8c4b-355cc20ddcb1/
+    values:
+      ignore-ca-cert: "true"
+      ignore-phase2-ca-cert: "false"
+
+  - path: /org/gnome/portal/filechooser/com.getpostman.Postman/
+    values:
+      last-folder-path: "'{{ ansible_user_dir }}/Documents/e_tax_data/Archive_data2'"
+
+  - path: /org/gnome/portal/filechooser/md.obsidian.Obsidian/
+    values:
+      last-folder-path: "'{{ ansible_user_dir }}/Documents'"
+
+  - path: /org/gnome/portal/filechooser/org.gnome.Settings/
+    values:
+      last-folder-path: "'{{ ansible_user_dir }}/Pictures/wallpaper'"
+
+  - path: /org/gnome/portal/filechooser/org.signal.Signal/
+    values:
+      last-folder-path: "'{{ ansible_user_dir }}/Documents/e_tax_data'"
+
+  - path: /org/gnome/settings-daemon/plugins/color/
+    values:
+      night-light-enabled: "true"
+      night-light-schedule-automatic: "false"
+
+  - path: /org/gnome/settings-daemon/plugins/media-keys/
+    values:
+      custom-keybindings: "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
+
+  - path: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/
+    values:
+      binding: "'<Control><Alt>t'"
+      command: "'{{ ansible_user_dir }}/.cargo/bin/alacritty'"
+      name: "'alacritty'"
+
+  - path: /org/gnome/settings-daemon/plugins/power/
+    values:
+      power-button-action: "'nothing'"
+      sleep-inactive-ac-timeout: "3600"
+      sleep-inactive-ac-type: "'nothing'"
+
+  - path: /org/gnome/shell/
+    values:
+      app-picker-layout: "[{'org.gnome.Snapshot.desktop': <{'position': <0>}>, 'org.gnome.Nautilus.desktop': <{'position': <1>}>, 'org.gnome.clocks.desktop': <{'position': <2>}>, 'org.gnome.Papers.desktop': <{'position': <3>}>, 'org.gnome.Tour.desktop': <{'position': <4>}>, 'htop.desktop': <{'position': <5>}>, 'org.gnome.Settings.desktop': <{'position': <6>}>, 'org.gnome.SystemMonitor.desktop': <{'position': <7>}>, 'Utilities': <{'position': <8>}>, 'nvim.desktop': <{'position': <10>}>, 'md.obsidian.Obsidian.desktop': <{'position': <11>}>, 'org.kde.okular.desktop': <{'position': <12>}>, 'com.getpostman.Postman.desktop': <{'position': <13>}>, 'org.signal.Signal.desktop': <{'position': <14>}>, 'org.gnome.tweaks.desktop': <{'position': <15>}>, 'java-21-openjdk-jconsole.desktop': <{'position': <16>}>, 'org.jousse.vincent.Pomodorolm.desktop': <{'position': <17>}>}]"
+      command-history: "['terminal']"
+      disabled-extensions: "['pomodoro@arun.codito.in']"
+      enabled-extensions: "['smarttiling@samuelnovaes', 'background-logo@fedorahosted.org']"
+      favorite-apps: "['code.desktop', 'org.mozilla.Thunderbird.desktop', 'org.gnome.Software.desktop', 'firefox.desktop', 'org.gnome.Ptyxis.desktop', 'org.gnome.TextEditor.desktop', 'org.gnome.Calculator.desktop']"
+      last-selected-power-profile: "'performance'"
+      welcome-dialog-last-shown-version: "'47.8'"
+
+  - path: /org/gnome/shell/world-clocks/
+    values:
+      locations: "@av []"
+
+  - path: /org/gnome/software/
+    values:
+      check-timestamp: "int64 1767844964"
+      first-run: "false"
+      flatpak-purge-timestamp: "int64 1767859545"
+      update-notification-timestamp: "int64 1767413362"
+
+  - path: /org/gnome/tweaks/
+    values:
+      show-extensions-notice: "false"
+
+  - path: /org/gtk/gtk4/settings/file-chooser/
+    values:
+      show-hidden: "false"
+      sort-directories-first: "false"
+
+  - path: /org/gtk/settings/file-chooser/
+    values:
+      clock-format: "'24h'"
+      date-format: "'regular'"
+      location-mode: "'path-bar'"
+      show-hidden: "false"
+      show-size-column: "true"
+      show-type-column: "true"
+      sidebar-width: "167"
+      sort-column: "'name'"
+      sort-directories-first: "false"
+      sort-order: "'ascending'"
+      type-format: "'category'"
+      window-position: "(26, 23)"
+      window-size: "(1231, 902)"
+
+  - path: /org/virt-manager/virt-manager/
+    values:
+      manager-window-height: "550"
+      manager-window-width: "550"
+
+  - path: /org/virt-manager/virt-manager/connections/
+    values:
+      autoconnect: "['qemu:///system']"
+      uris: "['qemu:///system']"
+
+  - path: /org/virt-manager/virt-manager/vmlist-fields/
+    values:
+      disk-usage: "false"
+      network-traffic: "false"

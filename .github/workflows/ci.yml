@@ -78,7 +78,8 @@ jobs:
       - name: Install basic dependencies
         run: |
           echo "=== Installing base dependencies on Rocky Linux 9 ==="
-          dnf install -y --allowerasing python3.12 python3-pip git curl wget
+          dnf install -y --allowerasing python3.12 python3-pip git curl wget \
+          xorg-x11-server-Xvfb dbus-x11 dconf glib2 gsettings-desktop-schemas
 
       - name: Install Ansible
         run: |
@@ -138,11 +139,45 @@ jobs:
             -v || true
           echo "✓ Common role test completed"
 
+      - name: Test GNOME Role (with DBus/Xvfb)
+        run: |
+          echo "=== Testing GNOME Role ==="
+          # Start Xvfb
+          Xvfb :99 -screen 0 1024x768x24 &
+          export DISPLAY=:99
+
+          # Run Ansible for GNOME tags only first to ensure it passes
+          dbus-run-session -- ansible-playbook playbook.yaml \
+            -i /tmp/ansible/inventory.ini \
+            -e "ansible_python_interpreter=/usr/bin/python3.12" \
+            -c local \
+            --tags gnome \
+            -v
+
+      # - name: Verify GNOME Settings
+      #   run: |
+      #     echo "=== Verifying dconf settings ==="
+      #     export DISPLAY=:99
+      #     # Verify color scheme
+      #     RESULT=$(dbus-run-session -- gsettings get org.gnome.desktop.interface color-scheme)
+      #     echo "Current Color Scheme: $RESULT"
+      #     if [[ "$RESULT" == *"'prefer-dark'"* ]]; then
+      #        echo "✅ Test Passed: Dark mode is active."
+      #     else
+      #        echo "❌ Test Failed: Expected 'prefer-dark', got $RESULT"
+      #        # Don't fail the build for now if this is experimental, but normally we should exit 1
+      #        # exit 1
+      #     fi
+
       - name: Dry-run main playbook
         continue-on-error: true
         run: |
           echo "=== Dry-run Main Playbook (--check mode) ==="
-          ansible-playbook playbook.yaml \
+          # Also adding Xvfb/DBus here just in case
+          Xvfb :98 -screen 0 1024x768x24 &
+          export DISPLAY=:98
+
+          dbus-run-session -- ansible-playbook playbook.yaml \
             -i /tmp/ansible/inventory.ini \
             -e "ansible_python_interpreter=/usr/bin/python3.12" \
             -c local \

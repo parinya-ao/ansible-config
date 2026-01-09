@@ -1,0 +1,28 @@
+---
+# System maintenance tasks
+
+- name: Enable SSD Trimming (fstrim)
+  ansible.builtin.systemd:
+    name: fstrim.timer
+    state: started
+    enabled: true
+  become: true
+  tags:
+    - maintenance
+
+- name: Install DNF Automatic (Security Updates)
+  ansible.builtin.dnf:
+    name: dnf-automatic
+    state: present
+  become: true
+  tags:
+    - maintenance
+
+- name: Enable DNF Automatic Timer
+  ansible.builtin.systemd:
+    name: dnf-automatic.timer
+    state: started
+    enabled: true
+  become: true
+  tags:
+    - maintenance

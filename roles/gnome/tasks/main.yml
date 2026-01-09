@@ -1,0 +1,10 @@
+---
+# tasks file for gnome
+
+- name: Setup GNOME Dependencies
+  import_tasks: install.yml
+  tags: [gnome, install]
+
+- name: Configure GNOME Settings
+  import_tasks: configure.yml
+  tags: [gnome, configure]

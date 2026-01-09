@@ -11,7 +11,6 @@ install_flatpak_apps: true
 
 # Flatpak applications to install
 flatpak_apps_list:
-  - com.discordapp.Discord
   - com.getpostman.Postman
   - org.signal.Signal
   - com.obsproject.Studio
