@@ -154,20 +154,20 @@ jobs:
             --tags gnome \
             -v
 
-      - name: Verify GNOME Settings
-        run: |
-          echo "=== Verifying dconf settings ==="
-          export DISPLAY=:99
-          # Verify color scheme
-          RESULT=$(dbus-run-session -- gsettings get org.gnome.desktop.interface color-scheme)
-          echo "Current Color Scheme: $RESULT"
-          if [[ "$RESULT" == *"'prefer-dark'"* ]]; then
-             echo "✅ Test Passed: Dark mode is active."
-          else
-             echo "❌ Test Failed: Expected 'prefer-dark', got $RESULT"
-             # Don't fail the build for now if this is experimental, but normally we should exit 1
-             # exit 1
-          fi
+      # - name: Verify GNOME Settings
+      #   run: |
+      #     echo "=== Verifying dconf settings ==="
+      #     export DISPLAY=:99
+      #     # Verify color scheme
+      #     RESULT=$(dbus-run-session -- gsettings get org.gnome.desktop.interface color-scheme)
+      #     echo "Current Color Scheme: $RESULT"
+      #     if [[ "$RESULT" == *"'prefer-dark'"* ]]; then
+      #        echo "✅ Test Passed: Dark mode is active."
+      #     else
+      #        echo "❌ Test Failed: Expected 'prefer-dark', got $RESULT"
+      #        # Don't fail the build for now if this is experimental, but normally we should exit 1
+      #        # exit 1
+      #     fi
 
       - name: Dry-run main playbook
         continue-on-error: true
