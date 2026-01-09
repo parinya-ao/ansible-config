@@ -79,7 +79,7 @@ jobs:
         run: |
           echo "=== Installing base dependencies on Rocky Linux 9 ==="
           dnf install -y --allowerasing python3.12 python3-pip git curl wget \
-          xorg-x11-server-Xvfb dbus-x11 dconf glib2
+          xorg-x11-server-Xvfb dbus-x11 dconf glib2 gsettings-desktop-schemas
 
       - name: Install Ansible
         run: |

@@ -1,6 +1,8 @@
 ---
-- name: Install dconf utils
+- name: Install GNOME dependencies
   ansible.builtin.dnf:
-    name: dconf
+    name:
+      - dconf
+      - gsettings-desktop-schemas
     state: present
   become: true
