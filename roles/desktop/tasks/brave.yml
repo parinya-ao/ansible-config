@@ -1,0 +1,61 @@
+---
+# ---------------------------------------------------------
+# Phase 1: Preparation & Supply Chain
+# ---------------------------------------------------------
+- name: 📦 1.1 Install DNF Core Plugins
+  ansible.builtin.dnf:
+    name: dnf-plugins-core
+    state: present
+  become: true
+
+- name: 🔗 1.2 Secure Supply Line (Add Brave Repository)
+  ansible.builtin.get_url:
+    url: https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+    dest: /etc/yum.repos.d/brave-browser.repo
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: 🗝️ 1.3 Import GPG Key (Automated Trust)
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+  become: true
+
+# ---------------------------------------------------------
+# Phase 2: Deployment
+# ---------------------------------------------------------
+- name: ⬇️ 2.1 Deploy Brave Browser
+  ansible.builtin.dnf:
+    name: brave-browser
+    state: latest
+  become: true
+
+# ---------------------------------------------------------
+# Phase 3: The Surgical Fix (Fixing Missing Icon)
+# ---------------------------------------------------------
+- name: 💉 3.1 Manual Icon Injection (Fixing RHEL/Rocky 10 Installer Bug)
+  ansible.builtin.copy:
+    src: /opt/brave.com/brave/product_logo_128.png
+    dest: /usr/share/icons/hicolor/128x128/apps/brave-browser.png
+    remote_src: true
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  register: icon_injected
+
+- name: 🔄 3.2 Force Icon Cache Refresh
+  ansible.builtin.command: gtk-update-icon-cache /usr/share/icons/hicolor
+  become: true
+  when: icon_injected.changed
+
+- name: 🗂️ 3.3 Re-index Desktop Database
+  ansible.builtin.command: update-desktop-database /usr/share/applications
+  become: true
+  when: icon_injected.changed
+
+- name: ✅ Mission Complete
+  ansible.builtin.debug:
+    msg: "Brave deployed and Icon fixed successfully. System is secured."

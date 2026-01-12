@@ -13,3 +13,7 @@
 
 - name: import flatpak applications tasks
   ansible.builtin.import_tasks: flatpak-apps.yml
+
+- name: import brave browser tasks
+  ansible.builtin.import_tasks: brave.yml
+
