@@ -4,7 +4,7 @@
 
 - name: Configure NodeSource repository for Node.js {{ developer_node_version }}
   ansible.builtin.shell:
-    cmd: "curl -fsSL https://rpm.nodesource.com/setup_{{ developer_node_version }}.x | bash -"
+    cmd: "curl -fsSL {{ developer_nodesource_setup_url }}/setup_{{ developer_node_version }}.x | bash -"
     executable: /bin/bash
     creates: "/etc/yum.repos.d/nodesource-nodejs-{{ developer_node_version }}.repo"
   tags:

@@ -4,7 +4,7 @@
 
 - name: Install Bun JavaScript runtime
   ansible.builtin.shell:
-    cmd: curl -fsSL https://bun.sh/install | bash
+    cmd: curl -fsSL {{ developer_bun_install_url }} | bash
   args:
     creates: "{{ lookup('env', 'HOME') }}/.bun/bin/bun"
   become: false
