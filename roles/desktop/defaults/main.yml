@@ -8,6 +8,10 @@ install_desktop_packages: true
 install_vscode: true
 install_starship: true
 install_flatpak_apps: true
+install_zed: true
+
+# Zed editor download URL
+zed_download_url: "https://github.com/zed-industries/zed/releases/latest/download/zed-linux-x86_64.tar.gz"
 
 # Flatpak applications to install
 flatpak_apps_list:

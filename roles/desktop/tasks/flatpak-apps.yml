@@ -11,9 +11,5 @@
 
 - name: Install Flatpak applications
   community.general.flatpak:
-    name:
-      - com.getpostman.Postman
-      - org.signal.Signal
-      - com.obsproject.Studio
-      - net.ankiweb.Anki
+    name: "{{ flatpak_apps_list }}"
     state: present
