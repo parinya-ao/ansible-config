@@ -2,12 +2,12 @@
 ---
 # Install and configure Starship prompt
 
-- name: install starship
+- name: Install Starship prompt
   ansible.builtin.shell: curl -sS https://starship.rs/install.sh | sh -s -- --yes
   args:
     creates: /usr/local/bin/starship
 
-- name: configure starship for all users
+- name: Configure Starship for all users
   ansible.builtin.lineinfile:
     path: /etc/bashrc
     line: 'eval "$(starship init bash)"'

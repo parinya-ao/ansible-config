@@ -9,7 +9,7 @@
     flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
   become: true
 
-- name: install flatpak applications
+- name: Install Flatpak applications
   community.general.flatpak:
     name:
       - com.getpostman.Postman

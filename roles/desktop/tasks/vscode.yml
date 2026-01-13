@@ -2,12 +2,12 @@
 ---
 # Install and configure Visual Studio Code
 
-- name: import microsoft gpg key
+- name: Import Microsoft GPG key
   ansible.builtin.rpm_key:
     key: https://packages.microsoft.com/keys/microsoft.asc
     state: present
 
-- name: add vscode repo
+- name: Add VSCode repository
   ansible.builtin.yum_repository:
     name: code
     description: Visual Studio Code
@@ -16,7 +16,7 @@
     gpgkey: https://packages.microsoft.com/keys/microsoft.asc
     enabled: yes
 
-- name: install vscode
+- name: Install Visual Studio Code
   ansible.builtin.dnf:
     name: code
     state: present
