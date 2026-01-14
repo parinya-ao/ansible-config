@@ -7,6 +7,7 @@ developer_install_rust: true
 developer_install_nodejs: true
 developer_install_bun: true
 developer_install_uv: true
+developer_install_flutter: true
 
 # Compilers and development tools package list
 developer_compilers_packages:
@@ -36,8 +37,13 @@ developer_rustup_default_host: "x86_64-unknown-linux-gnu"
 # UV (Python package manager) version (latest by default)
 developer_use_uv_latest: true
 
+# Flutter configuration
+developer_flutter_version: "3.24.3"
+developer_flutter_install_dir: "{{ ansible_user_dir }}/develop"
+
 # Installation script URLs
 developer_nodesource_setup_url: "https://rpm.nodesource.com"
 developer_rustup_install_url: "https://sh.rustup.rs"
 developer_bun_install_url: "https://bun.sh/install"
 developer_uv_install_url: "https://astral.sh/uv/install.sh"
+developer_flutter_download_url: "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_{{ developer_flutter_version }}-stable.tar.xz"

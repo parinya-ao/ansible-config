@@ -46,3 +46,11 @@
   tags:
     - developers
     - python
+
+# Flutter SDK
+- name: Install Flutter SDK
+  ansible.builtin.import_tasks: flutter.yml
+  when: developer_install_flutter
+  tags:
+    - developers
+    - flutter
