@@ -42,7 +42,7 @@
       register: ansible_version_output
       changed_when: false
 
-    - name: Show Ansible version
+    - name: Display Ansible version output
       ansible.builtin.debug:
         msg: "{{ ansible_version_output.stdout_lines }}"
 

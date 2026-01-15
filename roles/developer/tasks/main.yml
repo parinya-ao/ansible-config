@@ -4,7 +4,7 @@
 # This role installs a complete development environment including:
 # - System compilers and development tools
 # - Rust toolchain via rustup
-# - Node.js via nvm
+# - Node.js via NodeSource rpm stream
 # - Bun JavaScript runtime
 # - uv Python package manager
 
@@ -46,3 +46,11 @@
   tags:
     - developers
     - python
+
+# Flutter SDK
+- name: Install Flutter SDK
+  ansible.builtin.import_tasks: flutter.yml
+  when: developer_install_flutter
+  tags:
+    - developers
+    - flutter

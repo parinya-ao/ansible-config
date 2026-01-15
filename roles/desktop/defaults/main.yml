@@ -8,6 +8,18 @@ install_desktop_packages: true
 install_vscode: true
 install_starship: true
 install_flatpak_apps: true
+install_zed: true
+
+# Zed editor download URL
+zed_download_url: "https://github.com/zed-industries/zed/releases/latest/download/zed-linux-x86_64.tar.gz"
+
+# Brave browser URLs
+brave_repo_url: "https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo"
+brave_gpg_key_url: "https://brave-browser-rpm-release.s3.brave.com/brave-core.asc"
+
+# VSCode URLs
+vscode_gpg_key_url: "https://packages.microsoft.com/keys/microsoft.asc"
+vscode_repo_baseurl: "https://packages.microsoft.com/yumrepos/vscode"
 
 # Flatpak applications to install
 flatpak_apps_list:

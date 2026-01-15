@@ -2,21 +2,34 @@
 ---
 # Install and configure Visual Studio Code
 
-- name: import microsoft gpg key
+- name: Import Microsoft GPG key
   ansible.builtin.rpm_key:
-    key: https://packages.microsoft.com/keys/microsoft.asc
+    key: "{{ vscode_gpg_key_url }}"
     state: present
 
-- name: add vscode repo
+- name: Add VSCode repository
   ansible.builtin.yum_repository:
     name: code
     description: Visual Studio Code
-    baseurl: https://packages.microsoft.com/yumrepos/vscode
+    baseurl: "{{ vscode_repo_baseurl }}"
     gpgcheck: yes
-    gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+    gpgkey: "{{ vscode_gpg_key_url }}"
     enabled: yes
 
-- name: install vscode
+- name: Install Visual Studio Code
   ansible.builtin.dnf:
     name: code
     state: present
+
+- name: Ensure VS Code User Directory Exists
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/Code/User"
+    state: directory
+    mode: '0755'
+
+- name: Copy VS Code Settings
+  ansible.builtin.copy:
+    src: vscode/settings.json
+    dest: "{{ ansible_user_dir }}/.config/Code/User/settings.json"
+    mode: '0644'
+    backup: yes

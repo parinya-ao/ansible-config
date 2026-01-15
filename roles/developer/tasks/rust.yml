@@ -4,7 +4,7 @@
 
 - name: Install Rust toolchain via rustup
   ansible.builtin.shell:
-    cmd: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    cmd: curl --proto '=https' --tlsv1.2 -sSf {{ developer_rustup_install_url }} | sh -s -- -y
   args:
     creates: "{{ lookup('env', 'HOME') }}/.cargo/bin/rustc"
   become: false

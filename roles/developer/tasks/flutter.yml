@@ -1,0 +1,81 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Flutter SDK installation
+# Manual installation steps:
+# 1. Install prerequisites
+# 2. Download and extract SDK
+# 3. Add to PATH
+
+- name: Install Flutter dependencies
+  ansible.builtin.dnf:
+    name:
+      - curl
+      - git
+      - unzip
+      - xz
+      - zip
+      - mesa-libGLU
+    state: present
+  become: true
+  tags:
+    - flutter
+    - mobile
+
+- name: Create development directory
+  ansible.builtin.file:
+    path: "{{ developer_flutter_install_dir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+  tags:
+    - flutter
+    - mobile
+
+- name: Check if Flutter SDK is already installed
+  ansible.builtin.stat:
+    path: "{{ developer_flutter_install_dir }}/flutter"
+  register: flutter_dir
+  tags:
+    - flutter
+    - mobile
+
+- name: Download Flutter SDK
+  ansible.builtin.get_url:
+    url: "{{ developer_flutter_download_url }}"
+    dest: "/tmp/flutter_linux_{{ developer_flutter_version }}-stable.tar.xz"
+    mode: '0644'
+  when: not flutter_dir.stat.exists
+  tags:
+    - flutter
+    - mobile
+
+- name: Extract Flutter SDK
+  ansible.builtin.unarchive:
+    src: "/tmp/flutter_linux_{{ developer_flutter_version }}-stable.tar.xz"
+    dest: "{{ developer_flutter_install_dir }}"
+    remote_src: yes
+    creates: "{{ developer_flutter_install_dir }}/flutter"
+  when: not flutter_dir.stat.exists
+  tags:
+    - flutter
+    - mobile
+
+- name: Add Flutter to PATH in .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_user_dir }}/.bashrc"
+    line: 'export PATH="{{ developer_flutter_install_dir }}/flutter/bin:$PATH"'
+    regexp: 'export PATH=".*flutter/bin:\$PATH"'
+    state: present
+    create: yes
+  tags:
+    - flutter
+    - mobile
+
+- name: Initial flutter precache
+  ansible.builtin.command: "{{ developer_flutter_install_dir }}/flutter/bin/flutter precache"
+  changed_when: true
+  when: not flutter_dir.stat.exists
+  tags:
+    - flutter
+    - mobile

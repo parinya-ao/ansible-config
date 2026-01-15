@@ -1,0 +1,315 @@
+{
+
+  "workbench.colorTheme": "Visual Studio Dark",
+  "workbench.iconTheme": "material-icon-theme",
+
+  "editor.fontFamily": "'IntelOne Mono', 'Intel One Mono'",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 16,
+  "editor.lineHeight": 1.6,
+
+  "editor.stickyScroll.enabled": true,
+  "editor.stickyScroll.maxLineCount": 5,
+  "editor.minimap.enabled": true,
+  "editor.minimap.renderCharacters": false,
+  "editor.tabSize": 4,
+
+  "editor.rulers": [80, 100],
+  "editor.renderWhitespace": "trailing",
+
+  "errorLens.fontFamily": "'IntelOne Mono', monospace",
+  "errorLens.fontSize": "16",
+  "errorLens.margin": "1ch",
+  "errorLens.scrollbarHackEnabled": true,
+  "errorLens.messageBackgroundMode": "none",
+
+  "errorLens.messageColor": "#ff6b6b",
+
+  "errorLens.warningColor": "#ffd93d",
+
+  "errorLens.infoColor": "#74b9ff",
+
+  "errorLens.hintColor": "#a29bfe",
+
+  "errorLens.enabledDiagnosticLevels": ["error", "warning"],
+
+  "gitlens.currentLine.enabled": true,
+  "gitlens.currentLine.style": "detached",
+
+  "gitlens.currentLine.format": "${author}, ${ago} • ${message}",
+
+  "gitlens.codeLens.enabled": false,
+
+  "gitlens.hovers.currentLine.over": "line",
+  "gitlens.hovers.enabled": false,
+
+  "todo-tree.tree.showScanModeButton": false,
+  "todo-tree.highlights.defaultHighlight": {
+    "icon": "alert",
+    "type": "text",
+    "foreground": "#000000",
+    "background": "#ffd93d",
+
+    "opacity": 50,
+    "iconColour": "#ffd93d",
+    "gutterIcon": true
+  },
+  "todo-tree.highlights.customHighlight": {
+    "FIXME": {
+      "icon": "flame",
+      "background": "#ff6b6b",
+
+      "foreground": "#ffffff",
+      "iconColour": "#ff6b6b"
+    },
+    "HACK": {
+      "icon": "tools",
+      "background": "#a29bfe",
+
+      "foreground": "#000000"
+    }
+  },
+      "editor.inlineSuggest.enabled": false,
+
+  // =========================================================
+  // ⚡ LEVEL 1: ZERO FRICTION (ลบล้างแรงเสียดทาน)
+  // =========================================================
+  "files.autoSave": "off", // Auto-save on focus change
+  "editor.formatOnType": true, // Format on typing
+  "editor.formatOnPaste": true, // Format on paste
+  "explorer.confirmDelete": false, // Disable delete confirmation
+  "explorer.confirmDragAndDrop": false, // Disable drag-and-drop confirmation
+  "git.confirmSync": false, // Disable Git sync confirmation
+  "git.autofetch": true, // Auto-fetch Git changes
+
+  // =========================================================
+  // 🏎️ LEVEL 2: INSTANT INTELLIGENCE (สมองไวเท่าความคิด)
+  // =========================================================
+  "editor.quickSuggestionsDelay": 0, // Instant suggestions
+  "editor.suggestSelection": "recentlyUsed", // Prioritize recent suggestions
+  "typescript.preferences.useAliasesForRenames": false, // Disable alias renames
+  "typescript.suggest.completeFunctionCalls": true, // Auto-complete function calls
+
+  // =========================================================
+  // 👁️ LEVEL 3: SPEED READING UI (อ่านโค้ดไวขึ้น 2 เท่า)
+  // =========================================================
+  "workbench.editor.enablePreview": false, // Disable preview mode
+  "editor.foldingImportsByDefault": true, // Fold imports by default
+
+  // =========================================================
+  // 🤖 LEVEL 4: AI & TERMINAL AUTO-PILOT
+  // =========================================================
+  "terminal.integrated.shellIntegration.suggestEnabled": true, // Auto-fix terminal commands
+  "editor.inlineSuggest.showToolbar": "onHover", // Show toolbar on hover
+
+  // =========================================================
+  // 🛠️ LEVEL 5: AUTO CLEANUP (บ้านสะอาดเอง)
+  // =========================================================
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit", // Auto-organize imports
+    "source.fixAll": "explicit", // Fix all issues
+    "source.fixAll.eslint": "explicit" // Fix ESLint issues
+  },
+
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.indexing": true,
+  "python.analysis.inlayHints.functionReturnTypes": true,
+  "python.analysis.inlayHints.variableTypes": true,
+  "ruff.configuration": "${workspaceFolder}/pyproject.toml",
+  "mypy-type-checker.args": ["--config-file=${workspaceFolder}/pyproject.toml"],
+
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+      "source.organizeImports": "explicit",
+      "source.removeUnusedImports": "explicit"
+    }
+  },
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.suggest.autoImports": true,
+  "javascript.suggest.autoImports": true,
+  "typescript.inlayHints.parameterNames.enabled": "all",
+  "typescript.inlayHints.variableTypes.enabled": true,
+
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "go.useLanguageServer": true,
+  "go.lintOnSave": "package",
+  "go.vetOnSave": "package",
+  "go.inlayHints.assignVariableTypes": true,
+  "go.inlayHints.compositeLiteralFields": true,
+  "go.inlayHints.parameterNames": true,
+
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    "editor.formatOnSave": true
+  },
+  "rust-analyzer.checkOnSave.command": "clippy",
+  "rust-analyzer.inlayHints.typeHints.enable": true,
+  "rust-analyzer.inlayHints.chainingHints.enable": true,
+
+  "[c]": { "editor.defaultFormatter": "ms-vscode.cpptools" },
+  "[cpp]": { "editor.defaultFormatter": "ms-vscode.cpptools" },
+  "C_Cpp.clang_format_fallbackStyle": "Google",
+  "C_Cpp.formatting": "clangFormat",
+
+  "[ansible]": { "editor.defaultFormatter": "redhat.ansible" },
+  "ansible.validation.enabled": true,
+  "ansible.validation.lint.enabled": true,
+
+  "[yaml]": { "editor.defaultFormatter": "redhat.vscode-yaml" },
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.{yml,yaml}",
+    "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.22.4-standalone-strict/all.json": "/*.k8s.{yml,yaml}",
+    "https://json.schemastore.org/docker-compose.json": "docker-compose.{yml,yaml}"
+  },
+
+  "[toml]": { "editor.defaultFormatter": "tamasfe.even-better-toml" },
+
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/.ruff_cache": true,
+    "**/.mypy_cache": true,
+    "**/node_modules": true
+  },
+  "redhat.telemetry.enabled": true,
+  "claudeCode.selectedModel": "opus",
+
+  "editor.bracketPairColorization.enabled": true,
+
+  "editor.guides.bracketPairs": "active",
+
+  "editor.guides.indentation": true,
+  "editor.linkedEditing": true,
+
+  "editor.matchBrackets": "near",
+
+  "window.titleBarStyle": "custom",
+
+  "window.dialogStyle": "custom",
+  "editor.smoothScrolling": true,
+  "workbench.list.smoothScrolling": true,
+  "terminal.integrated.smoothScrolling": true,
+  "editor.cursorBlinking": "smooth",
+
+  "editor.cursorSmoothCaretAnimation": "on",
+
+  "terminal.integrated.fontFamily": "'IntelOne Mono', 'Fira Code', monospace",
+
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.gpuAcceleration": "on",
+
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.next": true,
+
+    "**/.nuxt": true,
+
+    "**/coverage": true,
+    "**/.venv": true,
+    "**/yarn.lock": true,
+    "**/package-lock.json": true
+  },
+
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/.hg/store/**": true
+  },
+
+  "html.format.wrapLineLength": 100,
+  "html.format.wrapAttributes": "auto",
+  "javascript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": true,
+  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": true,
+
+  "telemetry.telemetryLevel": "off",
+
+  "github.copilot.editor.enableAutoCompletions": true,
+
+  "breadcrumbs.enabled": true,
+
+  "breadcrumbs.filePath": "on",
+  "breadcrumbs.symbolPath": "on",
+  "editor.guides.highlightActiveBracketPair": true,
+  "workbench.editor.highlightModifiedTabs": true,
+
+  "window.commandCenter": true,
+
+  "workbench.editor.limit.enabled": true,
+  "workbench.editor.limit.value": 7,
+
+  "workbench.editor.limit.perEditorGroup": true,
+  "workbench.editor.showTabs": "multiple",
+  "workbench.editor.tabSizing": "shrink",
+  "explorer.autoReveal": true,
+
+  "explorer.compactFolders": true,
+
+  "testing.automaticallyOpenPeekView": "failureInVisibleDocument",
+
+  "testing.alwaysRevealTestOnFailure": true,
+  "testing.followRunningTest": true,
+  "coverage.toolbarLocations": "testProfile",
+
+  "terminal.integrated.shellIntegration.enabled": true,
+
+  "terminal.integrated.shellIntegration.showCommandGuide": true,
+
+  "terminal.integrated.copyOnSelection": true,
+
+  "terminal.integrated.tabs.enabled": true,
+  "terminal.integrated.defaultProfile.linux": "bash",
+
+  "terminal.integrated.defaultProfile.osx": "bash",
+
+  "window.restoreWindows": "all",
+
+  "files.enableTrash": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "diffEditor.renderSideBySide": true,
+  "editor.find.addExtraSpaceOnTop": true,
+  "editor.accessibilitySupport": "off",
+  "claudeCode.initialPermissionMode": "bypassPermissions",
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+  "security.workspace.trust.untrustedFiles": "open",
+  "chat.tools.terminal.autoApprove": {
+    "/^docker exec backend_app ps aux && docker exec backend_app ls -ld /app$/": {
+      "approve": true,
+      "matchCommandLine": true
+    },
+    "/^bun --version$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
+  },
+  "git.enableSmartCommit": true,
+  "chat.agent.maxRequests": 250,
+  "claudeCode.allowDangerouslySkipPermissions": true,
+  "claudeCode.useCtrlEnterToSend": true,
+  "editor.wordWrap": "on",
+  "workbench.sideBar.location": "right",
+  "claudeCode.preferredLocation": "panel",
+}
+

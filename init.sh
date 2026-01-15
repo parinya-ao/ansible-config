@@ -1,96 +1,186 @@
 #!/bin/bash
 
-# =============================================================================
-# Ansible Config Initialization Script
-# This script sets up the system and runs the Ansible playbook
-# =============================================================================
+################################################################################
+#                     ANSIBLE CONFIG - INITIALIZATION SCRIPT                  #
+#         This script sets up your system and runs the Ansible playbook       #
+################################################################################
 
 set -e
 
-# =============================================================================
-# Source Utility Functions
-# =============================================================================
+################################################################################
+#                              LIBRARY LOADING                                #
+################################################################################
 
+# Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/command/lib/colors.sh"
-source "${SCRIPT_DIR}/command/lib/log_info.sh"
-source "${SCRIPT_DIR}/command/lib/log_success.sh"
-source "${SCRIPT_DIR}/command/lib/log_step.sh"
-source "${SCRIPT_DIR}/command/lib/log_warn.sh"
+LIB_DIR="${SCRIPT_DIR}/command/lib"
 
-# =============================================================================
-# Main Installation Process
-# =============================================================================
-
-log_info "=========================================="
-log_info "Ansible Config - Initialization Script"
-log_info "=========================================="
-
-# Step 1: Enable CRB repository
-log_step "1/6: Enabling CRB repository..."
-log_info "Running: dnf config-manager --set-enabled crb"
-if dnf config-manager --set-enabled crb 2>&1; then
-    log_success "CRB repository enabled successfully"
-else
-    log_warn "CRB repository might already be enabled or unavailable"
+# Check if library directory exists
+if [ ! -d "$LIB_DIR" ]; then
+    echo "Error: Library directory not found at $LIB_DIR"
+    exit 1
 fi
 
-# Step 2: Install EPEL repository
-log_step "2/6: Installing EPEL repository..."
-log_info "Running: dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm"
-if sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm -y 2>&1; then
-    log_success "EPEL repository installed successfully"
+# Load helper functions
+source "${LIB_DIR}/colors.sh"
+source "${LIB_DIR}/print_hr.sh"
+source "${LIB_DIR}/print_header.sh"
+source "${LIB_DIR}/print_step.sh"
+source "${LIB_DIR}/print_info.sh"
+source "${LIB_DIR}/print_success.sh"
+source "${LIB_DIR}/print_warn.sh"
+source "${LIB_DIR}/print_error.sh"
+source "${LIB_DIR}/print_list.sh"
+
+################################################################################
+#                           UTILITY FUNCTIONS                                 #
+################################################################################
+
+# Check if command exists
+command_exists() {
+    command -v "$1" &>/dev/null
+}
+
+# Run command silently
+run_silent() {
+    eval "$1" &>/dev/null
+}
+
+################################################################################
+#                            MAIN EXECUTION                                   #
+################################################################################
+
+clear
+print_header "ANSIBLE CONFIGURATION - INITIALIZATION SETUP"
+
+################################################################################
+#                     STEP 1: ENABLE CRB REPOSITORY                           #
+################################################################################
+
+print_step "1/7" "Enabling CRB Repository"
+print_info "Checking and enabling CRB repository..."
+
+if run_silent "sudo dnf config-manager --set-enabled crb"; then
+    print_success "CRB repository is now enabled"
 else
-    log_warn "EPEL repository might already be installed"
+    print_warn "CRB repository already enabled or unavailable on this system"
 fi
 
-# Step 3: Install required packages (git, ansible-core)
-log_step "3/6: Installing git and ansible-core..."
-log_info "Running: sudo dnf install git ansible-core -y"
-if sudo dnf install git ansible-core -y 2>&1; then
-    log_success "Required packages installed successfully"
-    log_info "Git version: $(git --version 2>/dev/null || echo 'Not found')"
-    log_info "Ansible Core version: $(ansible --version 2>/dev/null | head -n1 || echo 'Not found')"
+################################################################################
+#                     STEP 2: INSTALL EPEL REPOSITORY                         #
+################################################################################
+
+print_step "2/7" "Installing EPEL Repository"
+print_info "Checking and installing EPEL repository..."
+
+if run_silent "sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm"; then
+    print_success "EPEL repository installed successfully"
 else
-    log_warn "Required packages might already be installed"
+    print_warn "EPEL repository already installed on this system"
 fi
 
-# Step 4: Install Ansible Galaxy collections
-log_step "4/6: Installing Ansible Galaxy collections..."
-log_info "Running: ./command/main.sh"
-chmod +x ./command/main.sh
-if ./command/main.sh 2>&1; then
-    log_success "Ansible Galaxy collections installed successfully"
+
+################################################################################
+#                   STEP 3: INSTALL REQUIRED PACKAGES                         #
+################################################################################
+
+print_step "3/7" "Installing Required Packages"
+
+if command_exists git && command_exists ansible; then
+    print_success "Git and Ansible are already installed"
 else
-    log_warn "Ansible Galaxy collections installation might have issues"
+    print_info "Installing Git and Ansible..."
+    if sudo dnf install -y git ansible-core 2>&1 | tail -1 >/dev/null; then
+        print_success "Required packages installed successfully"
+    else
+        print_error "Failed to install required packages"
+        exit 1
+    fi
 fi
 
-# Step 5: Display playbook information
-log_step "5/6: Displaying playbook information..."
-log_info "Playbook: playbook.yaml"
-log_info "Target: localhost"
-log_info "Roles to be applied:"
-grep -E "^\s+- role:" playbook.yaml | sed 's/^[[:space:]]*/  - /' || echo "  (Unable to read roles)"
-
-# Step 6: Run Ansible playbook
-log_step "6/6: Running Ansible playbook..."
-log_info "Running: ansible-playbook playbook.yaml -K -v"
-log_warn "You will be prompted for sudo password..."
+# Display version information
 echo ""
-log_info "=========================================="
-log_info "Ansible Playbook Execution"
-log_info "=========================================="
+if command_exists git; then
+    print_info "Git version: $(git --version | cut -d' ' -f3)"
+fi
+if command_exists ansible; then
+    print_info "Ansible version: $(ansible --version | head -n1 | sed 's/ansible \[core //;s/\]//')"
+fi
+
+
+################################################################################
+#              STEP 4: INSTALL ANSIBLE GALAXY COLLECTIONS                     #
+################################################################################
+
+print_step "4/7" "Installing Ansible Galaxy Collections"
+print_info "Installing community.general collection..."
+
+if run_silent "ansible-galaxy collection install community.general"; then
+    print_success "community.general collection installed successfully"
+else
+    print_success "community.general collection already installed"
+fi
+
+
+################################################################################
+#                      STEP 5: DISPLAY AVAILABLE ROLES                        #
+################################################################################
+
+print_step "5/7" "Available Roles"
+print_info "The following roles will be applied:"
 echo ""
 
-if ansible-playbook playbook.yaml -K -v 2>&1; then
+if [ -f "playbook.yaml" ]; then
+    while IFS= read -r role; do
+        role_name=$(echo "$role" | sed 's/.*role: *//' | sed 's/ *#.*//')
+        [ -n "$role_name" ] && print_list "$role_name"
+    done < <(grep -E "^\s+- role:" playbook.yaml 2>/dev/null)
+else
+    print_warn "playbook.yaml not found in current directory"
+fi
+
+
+################################################################################
+#                      STEP 6: CONFIRMATION PROMPT                            #
+################################################################################
+
+print_step "6/7" "Ready to Begin"
+echo ""
+print_warn "You will be prompted to enter your sudo password"
+echo ""
+print_hr
+echo ""
+read -p "  ${COLOR_BOLD}Continue with installation?${COLOR_RESET} [${COLOR_GREEN}Y${COLOR_RESET}/${COLOR_RED}n${COLOR_RESET}] " -n 1 -r
+echo ""
+echo ""
+
+if [[ $REPLY =~ ^[Nn]$ ]]; then
+    print_warn "Installation aborted by user"
+    exit 0
+fi
+
+
+################################################################################
+#                  STEP 7: RUN ANSIBLE PLAYBOOK                               #
+################################################################################
+
+print_step "7/7" "Executing Ansible Playbook"
+echo ""
+
+if ansible-playbook playbook.yaml -K -v; then
     echo ""
-    log_info "=========================================="
-    log_success "Ansible playbook completed successfully!"
-    log_info "=========================================="
+    print_header "INSTALLATION COMPLETED SUCCESSFULLY"
+    echo ""
+    print_info "Next steps:"
+    print_list "Log out and back in for group changes to take effect (docker group)"
+    print_list "Run: ${COLOR_BOLD}docker --version${COLOR_RESET} to verify Docker installation"
+    print_list "Run: ${COLOR_BOLD}node --version${COLOR_RESET} to verify Node.js installation"
+    print_list "Run: ${COLOR_BOLD}cargo --version${COLOR_RESET} to verify Rust installation"
+    print_list "Run: ${COLOR_BOLD}flatpak list${COLOR_RESET} to see installed Flatpak applications"
+    echo ""
 else
     echo ""
-    log_info "=========================================="
-    log_warn "Ansible playbook completed with errors"
-    log_info "=========================================="
+    print_header "INSTALLATION FAILED"
+    print_error "Please review the error messages above and try again"
     exit 1
 fi
