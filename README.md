@@ -57,6 +57,5 @@ Add `-e ansible_user=...` or limit the run via `--tags common` to scope what exe
 2. Run local checks (lint, syntax, and optionally targeted role dry-runs).
 3. Push your changes with a descriptive PR that summarizes scope and tests performed.
 4. Preserve code style in Ansible/YAML and describe configuration expectations in role README files.
-
 ## License
 MIT-0. See LICENSE for details.
