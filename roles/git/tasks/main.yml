@@ -1,0 +1,58 @@
+---
+# SPDX-License-Identifier: MIT-0
+# tasks file for roles/git
+# Configures git globally with optional SSH signing if key exists
+
+- name: Check if SSH public key exists
+  stat:
+    path: "{{ git_ssh_pubkey_path }}"
+  register: ssh_pubkey_stat
+  become: true
+  become_user: "{{ git_config_user }}"
+
+- name: Set git user.name
+  community.general.git_config:
+    name: user.name
+    value: "{{ git_config_name }}"
+    scope: "{{ git_config_scope }}"
+  become: true
+  become_user: "{{ git_config_user }}"
+
+- name: Set git user.email
+  community.general.git_config:
+    name: user.email
+    value: "{{ git_config_email }}"
+    scope: "{{ git_config_scope }}"
+  become: true
+  become_user: "{{ git_config_user }}"
+
+- name: Enable auto-setup remote on push
+  community.general.git_config:
+    name: push.autosetupremote
+    value: "{{ git_push_autosetupremote }}"
+    scope: "{{ git_config_scope }}"
+  become: true
+  become_user: "{{ git_config_user }}"
+
+- name: Configure git SSH signing (if SSH key exists)
+  when: ssh_pubkey_stat.stat.exists
+  become: true
+  become_user: "{{ git_config_user }}"
+  block:
+    - name: Set git signing key to SSH public key
+      community.general.git_config:
+        name: user.signingkey
+        value: "{{ git_ssh_pubkey_path }}"
+        scope: "{{ git_config_scope }}"
+
+    - name: Use SSH format for git signing
+      community.general.git_config:
+        name: gpg.format
+        value: ssh
+        scope: "{{ git_config_scope }}"
+
+    - name: Enable commit signing
+      community.general.git_config:
+        name: commit.gpgsign
+        value: "true"
+        scope: "{{ git_config_scope }}"

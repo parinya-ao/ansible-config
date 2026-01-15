@@ -30,11 +30,12 @@
         msg:
           - "Roles to be applied:"
           - "  1. common      - Base system configuration"
-          - "  2. docker      - Docker CE installation"
-          - "  3. desktop     - Desktop environment and applications"
-          - "  4. developer   - Development tools and runtimes"
-          - "  5. font        - Font installation"
-          - "  6. gnome       - GNOME desktop configuration"
+          - "  2. git        - Git configuration with SSH signing"
+          - "  3. docker      - Docker CE installation"
+          - "  4. desktop     - Desktop environment and applications"
+          - "  5. developer   - Development tools and runtimes"
+          - "  6. font        - Font installation"
+          - "  7. gnome       - GNOME desktop configuration"
           - "=========================================="
 
     - name: Display Ansible version
@@ -51,6 +52,11 @@
       tags:
         - common
         - base
+
+    - role: git
+      tags:
+        - git
+        - dotfiles
 
     - role: docker
       tags:

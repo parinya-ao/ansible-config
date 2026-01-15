@@ -3,7 +3,7 @@
 # Install and configure Starship prompt
 
 - name: Install Starship prompt
-  ansible.builtin.shell: curl -sS https://starship.rs/install.sh | sh -s -- --yes
+  ansible.builtin.shell: curl -sS {{ starship_install_url }} | sh -s -- --yes
   args:
     creates: /usr/local/bin/starship
 

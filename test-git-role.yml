@@ -1,0 +1,10 @@
+---
+# Test playbook for git role
+- name: Test git role
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+
+  roles:
+    - role: git
