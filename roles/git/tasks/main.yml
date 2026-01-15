@@ -10,6 +10,10 @@
   become: true
   become_user: "{{ git_config_user }}"
 
+# ============================================================================
+# Git Identity Configuration
+# ============================================================================
+
 - name: Set git user.name
   community.general.git_config:
     name: user.name
@@ -26,6 +30,22 @@
   become: true
   become_user: "{{ git_config_user }}"
 
+# ============================================================================
+# Commit Configuration
+# ============================================================================
+
+- name: Set commit.verbose
+  community.general.git_config:
+    name: commit.verbose
+    value: "{{ git_commit_verbose }}"
+    scope: "{{ git_config_scope }}"
+  become: true
+  become_user: "{{ git_config_user }}"
+
+# ============================================================================
+# Push and Pull Configuration
+# ============================================================================
+
 - name: Enable auto-setup remote on push
   community.general.git_config:
     name: push.autosetupremote
@@ -33,6 +53,94 @@
     scope: "{{ git_config_scope }}"
   become: true
   become_user: "{{ git_config_user }}"
+
+- name: Set pull.rebase
+  community.general.git_config:
+    name: pull.rebase
+    value: "{{ git_pull_rebase }}"
+    scope: "{{ git_config_scope }}"
+  become: true
+  become_user: "{{ git_config_user }}"
+
+# ============================================================================
+# Rebase Configuration
+# ============================================================================
+
+- name: Set rebase.autostash
+  community.general.git_config:
+    name: rebase.autostash
+    value: "{{ git_rebase_autostash }}"
+    scope: "{{ git_config_scope }}"
+  become: true
+  become_user: "{{ git_config_user }}"
+
+# ============================================================================
+# Fetch Configuration
+# ============================================================================
+
+- name: Set fetch.prune
+  community.general.git_config:
+    name: fetch.prune
+    value: "{{ git_fetch_prune }}"
+    scope: "{{ git_config_scope }}"
+  become: true
+  become_user: "{{ git_config_user }}"
+
+# ============================================================================
+# Rerere Configuration
+# ============================================================================
+
+- name: Enable rerere
+  community.general.git_config:
+    name: rerere.enabled
+    value: "{{ git_rerere_enabled }}"
+    scope: "{{ git_config_scope }}"
+  become: true
+  become_user: "{{ git_config_user }}"
+
+- name: Enable rerere autoupdate
+  community.general.git_config:
+    name: rerere.autoupdate
+    value: "{{ git_rerere_autoupdate }}"
+    scope: "{{ git_config_scope }}"
+  become: true
+  become_user: "{{ git_config_user }}"
+
+# ============================================================================
+# Core Configuration
+# ============================================================================
+
+- name: Set core.autocrlf
+  community.general.git_config:
+    name: core.autocrlf
+    value: "{{ git_core_autocrlf }}"
+    scope: "{{ git_config_scope }}"
+  become: true
+  become_user: "{{ git_config_user }}"
+
+- name: Set core.editor
+  community.general.git_config:
+    name: core.editor
+    value: "{{ git_core_editor }}"
+    scope: "{{ git_config_scope }}"
+  become: true
+  become_user: "{{ git_config_user }}"
+
+# ============================================================================
+# Git Aliases
+# ============================================================================
+
+- name: Set alias.lg
+  community.general.git_config:
+    name: alias.lg
+    value: "{{ git_alias_lg }}"
+    scope: "{{ git_config_scope }}"
+  become: true
+  become_user: "{{ git_config_user }}"
+
+# ============================================================================
+# SSH Signing Configuration (Conditional)
+# ============================================================================
 
 - name: Configure git SSH signing (if SSH key exists)
   when: ssh_pubkey_stat.stat.exists
@@ -54,5 +162,5 @@
     - name: Enable commit signing
       community.general.git_config:
         name: commit.gpgsign
-        value: "true"
+        value: "{{ git_commit_gpgsign }}"
         scope: "{{ git_config_scope }}"
