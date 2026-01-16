@@ -13,7 +13,7 @@ The docker role automates the complete Docker CE installation:
 
 ## Requirements
 
-- Fedora-based system (Fedora 39+)
+- Fedora-based system
 - Ansible 2.15+
 - Root or sudo access
 - Internet connection for Docker repository

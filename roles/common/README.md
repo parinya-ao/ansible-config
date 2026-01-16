@@ -14,7 +14,7 @@ This role should be run first on all systems as a prerequisite for other roles.
 
 ## Requirements
 
-- Fedora-based system (Fedora 39+)
+- Fedora-based system
 - Ansible 2.15+
 - Root or sudo access
 

@@ -15,7 +15,7 @@ The developer role automates the setup of a fully-functional development environ
 
 ## Requirements
 
-- Fedora-based system (Fedora 39+)
+- Fedora-based system
 - Ansible 2.15+
 - Internet connection for downloading language runtimes
 

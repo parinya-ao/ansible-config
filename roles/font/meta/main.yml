@@ -11,13 +11,7 @@ galaxy_info:
   platforms:
     - name: Fedora
       versions:
-        - "39"
-        - "40"
-        - "41"
-    - name: EL
-      versions:
-        - "9"
-        - "10"
+        - all
 
   galaxy_tags:
     - fonts

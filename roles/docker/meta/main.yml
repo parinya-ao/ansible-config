@@ -15,9 +15,7 @@ galaxy_info:
   platforms:
     - name: Fedora
       versions:
-        - "39"
-        - "40"
-        - "41"
+        - all
 
   galaxy_tags:
     - docker
