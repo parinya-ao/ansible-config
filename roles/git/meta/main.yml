@@ -1,0 +1,20 @@
+galaxy_info:
+  author: parinya-ao
+  description: Configure git with optional SSH signing support
+  company: personal
+  license: MIT-0
+
+  min_ansible_version: 2.10
+
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+
+  galaxy_tags:
+    - git
+    - dotfiles
+    - ssh
+    - signing
+
+dependencies: []

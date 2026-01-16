@@ -64,12 +64,12 @@ jobs:
           echo "=== Checking YAML Syntax ==="
           yamllint -d relaxed .
 
-  # Job 2: Test on Rocky Linux 9
-  test-rocky-linux-9:
-    name: Test on Rocky Linux 9
+  # Job 2: Test on Fedora
+  test-fedora:
+    name: Test on Fedora
     runs-on: ubuntu-latest
     container:
-      image: rockylinux:9
+      image: fedora:latest
       options: --privileged
     steps:
       - name: Checkout code
@@ -77,8 +77,8 @@ jobs:
 
       - name: Install basic dependencies
         run: |
-          echo "=== Installing base dependencies on Rocky Linux 9 ==="
-          dnf install -y --allowerasing python3.12 python3-pip git curl wget \
+          echo "=== Installing base dependencies on Fedora ==="
+          dnf install -y --allowerasing python3 python3-pip git curl wget \
           xorg-x11-server-Xvfb dbus-x11 dconf glib2 gsettings-desktop-schemas
 
       - name: Install Ansible
@@ -108,13 +108,13 @@ jobs:
           mkdir -p /tmp/ansible
           cat > /tmp/ansible/inventory.ini << 'EOF'
           [local]
-          localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3.12
+          localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
           EOF
           cat /tmp/ansible/inventory.ini
 
       - name: Validate playbook syntax
         run: |
-          echo "=== Validating playbook syntax on Rocky Linux 9 ==="
+          echo "=== Validating playbook syntax on Fedora ==="
           ansible-playbook playbook.yaml -i /tmp/ansible/inventory.ini --syntax-check
 
       - name: List roles
@@ -132,7 +132,7 @@ jobs:
         run: |
           echo "=== Testing Common Role ==="
           ansible-playbook -i /tmp/ansible/inventory.ini \
-            -e "ansible_python_interpreter=/usr/bin/python3.12" \
+            -e "ansible_python_interpreter=/usr/bin/python3" \
             -c local \
             -m import_playbook roles/common/tests/test.yml \
             --check \
@@ -149,7 +149,7 @@ jobs:
           # Run Ansible for GNOME tags only first to ensure it passes
           dbus-run-session -- ansible-playbook playbook.yaml \
             -i /tmp/ansible/inventory.ini \
-            -e "ansible_python_interpreter=/usr/bin/python3.12" \
+            -e "ansible_python_interpreter=/usr/bin/python3" \
             -c local \
             --tags gnome \
             -v
@@ -179,7 +179,7 @@ jobs:
 
           dbus-run-session -- ansible-playbook playbook.yaml \
             -i /tmp/ansible/inventory.ini \
-            -e "ansible_python_interpreter=/usr/bin/python3.12" \
+            -e "ansible_python_interpreter=/usr/bin/python3" \
             -c local \
             --check \
             -v 2>&1 | head -100
@@ -225,12 +225,12 @@ jobs:
                   print(f"✗ {file_name} missing")
           EOF
 
-  # Job 3: Test on Rocky Linux 9 (Alternative verification)
-  test-rocky-linux-9-verify:
-    name: Test on Rocky Linux 9 (Verify)
+  # Job 3: Test on Fedora (Alternative verification)
+  test-fedora-verify:
+    name: Test on Fedora (Verify)
     runs-on: ubuntu-latest
     container:
-      image: rockylinux:9
+      image: fedora:latest
       options: --privileged
     steps:
       - name: Checkout code
@@ -238,12 +238,12 @@ jobs:
 
       - name: Install basic dependencies
         run: |
-          echo "=== Installing base dependencies on Rocky Linux 9 (Verify) ==="
-          dnf install -y --allowerasing python3.12 python3-pip git curl wget
+          echo "=== Installing base dependencies on Fedora (Verify) ==="
+          dnf install -y --allowerasing python3 python3-pip git curl wget
 
       - name: Install Ansible
         run: |
-          echo "=== Installing Ansible on Rocky Linux 9 ==="
+          echo "=== Installing Ansible on Fedora ==="
           pip3 install ansible-core
 
       - name: Install Ansible collections
@@ -264,19 +264,19 @@ jobs:
           mkdir -p /tmp/ansible
           cat > /tmp/ansible/inventory.ini << 'EOF'
           [local]
-          localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3.12
+          localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
           EOF
 
       - name: Validate playbook syntax
         run: |
-          echo "=== Validating playbook syntax on Rocky Linux 9 ==="
+          echo "=== Validating playbook syntax on Fedora ==="
           ansible-playbook playbook.yaml -i /tmp/ansible/inventory.ini --syntax-check
 
   # Job 4: Generate report
   report:
     name: CI Report
     runs-on: ubuntu-latest
-    needs: [lint, test-rocky-linux-9, test-rocky-linux-9-verify]
+    needs: [lint, test-fedora, test-fedora-verify]
     if: always()
     steps:
       - name: Checkout code
@@ -287,11 +287,11 @@ jobs:
           echo "=== CI Pipeline Status ==="
           echo ""
           echo "Lint Status: ${{ needs.lint.result }}"
-          echo "Rocky Linux 9 Test: ${{ needs.test-rocky-linux-9.result }}"
-          echo "Rocky Linux 9 Verify Test: ${{ needs.test-rocky-linux-9-verify.result }}"
+          echo "Fedora Test: ${{ needs.test-fedora.result }}"
+          echo "Fedora Verify Test: ${{ needs.test-fedora-verify.result }}"
           echo ""
 
-          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.test-rocky-linux-9.result }}" != "success" || "${{ needs.test-rocky-linux-9-verify.result }}" != "success" ]]; then
+          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.test-fedora.result }}" != "success" || "${{ needs.test-fedora-verify.result }}" != "success" ]]; then
               echo "✗ Some checks failed"
               exit 1
           fi

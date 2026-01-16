@@ -1,6 +1,6 @@
 # Security Role
 
-This role configures system security settings, primarily firewall management using firewalld on RHEL/Fedora systems.
+This role configures system security settings, primarily firewall management using firewalld on Fedora systems.
 
 ## Role Purpose
 
@@ -12,7 +12,7 @@ The security role automates the configuration of:
 
 ## Requirements
 
-- RHEL/Fedora-based system with firewalld support
+- Fedora-based system with firewalld support
 - `ansible.posix` collection (for firewalld module)
 - `common` role as dependency
 

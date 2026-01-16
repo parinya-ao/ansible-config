@@ -13,16 +13,11 @@ galaxy_info:
         - "39"
         - "40"
         - "41"
-    - name: EL
-      versions:
-        - "9"
-        - "10"
 
   galaxy_tags:
     - desktop
     - gnome
     - fedora
-    - rhel
     - vscode
     - flatpak
     - starship

@@ -1,6 +1,6 @@
 # Docker Role
 
-This role installs and configures Docker CE (Community Edition) on Fedora/RHEL systems, including containerd, BuildKit plugin, and Docker Compose plugin.
+This role installs and configures Docker CE (Community Edition) on Fedora systems, including containerd, BuildKit plugin, and Docker Compose plugin.
 
 ## Role Purpose
 
@@ -13,7 +13,7 @@ The docker role automates the complete Docker CE installation:
 
 ## Requirements
 
-- RHEL/Fedora-based system (Fedora 39+, RHEL 9+)
+- Fedora-based system (Fedora 39+)
 - Ansible 2.15+
 - Root or sudo access
 - Internet connection for Docker repository

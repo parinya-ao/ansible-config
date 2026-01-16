@@ -1,6 +1,6 @@
 # Common Role
 
-This role provides base system configuration for Fedora/RHEL systems, including DNF package manager optimization, system updates, and essential package installation.
+This role provides base system configuration for Fedora systems, including DNF package manager optimization, system updates, and essential package installation.
 
 ## Role Purpose
 
@@ -14,7 +14,7 @@ This role should be run first on all systems as a prerequisite for other roles.
 
 ## Requirements
 
-- RHEL/Fedora-based system (Fedora 39+, RHEL 9+)
+- Fedora-based system (Fedora 39+)
 - Ansible 2.15+
 - Root or sudo access
 

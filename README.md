@@ -1,6 +1,6 @@
 # Ansible Workstation Setup
 
-Automated workstation onboarding for Fedora/RHEL family hosts so developers can get from zero to a consistent desktop + tooling stack with one playbook run.
+Automated workstation onboarding for Fedora hosts so developers can get from zero to a consistent desktop + tooling stack with one playbook run.
 
 ## Table of Contents
 - [What It Covers](#what-it-covers)
@@ -21,9 +21,9 @@ Automated workstation onboarding for Fedora/RHEL family hosts so developers can 
 - **Security**: Harden SSH, firewalld, and custom port policies through dedicated security roles.
 
 ## Tech Stack
-- **Provisioning**: Ansible 2.13+ / ansible-core 2.14 (targeting Rocky Linux 9).
+- **Provisioning**: Ansible 2.13+ / ansible-core 2.14 (targeting Fedora).
 - **Collections**: `community.general` for Flatpak/dconf and `ansible.posix` through included roles.
-- **CI**: GitHub Actions workflow at `.github/workflows/ci.yml` performs ansible-lint, syntax checks, Rocky Linux container tests, and a report job.
+- **CI**: GitHub Actions workflow at `.github/workflows/ci.yml` performs ansible-lint, syntax checks, Fedora container tests, and a report job.
 
 ## Quick Start
 ```bash
@@ -38,7 +38,7 @@ Add `-e ansible_user=...` or limit the run via `--tags common` to scope what exe
 
 ## Testing & CI
 - Local linting: `ansible-lint playbook.yaml roles/`, `yamllint -d relaxed .`, `ansible-playbook --syntax-check playbook.yaml`.
-- GitHub workflow runs on `main`/`develop`, riffs through union of lint, Rocky Linux 9 tests (with Xvfb/DBus for GNOME), and a post-run report.
+- GitHub workflow runs on `main`/`develop`, riffs through union of lint, Fedora tests (with Xvfb/DBus for GNOME), and a post-run report.
 - Container validation replicates real installs by installing Python 3.12, Ansible core, required collections, and executing tagged dry-runs.
 
 ## How to Use
@@ -50,7 +50,7 @@ Add `-e ansible_user=...` or limit the run via `--tags common` to scope what exe
 
 ## Project Status
 - Active: Maintainers regularly update role defaults, packages, and desktop tweaks.
-- CI: `ci.yml` enforces syntax, lints, and Rocky Linux 9 validation; CI report job fails if any dependency job does not succeed.
+- CI: `ci.yml` enforces syntax, lints, and Fedora validation; CI report job fails if any dependency job does not succeed.
 
 ## Contribution
 1. Fork, branch from `develop`, and update relevant role/task files.

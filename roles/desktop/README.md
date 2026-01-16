@@ -1,6 +1,6 @@
 # Desktop Role
 
-This role configures a GNOME-based desktop environment on Fedora/RHEL systems with essential applications and tools for desktop productivity.
+This role configures a GNOME-based desktop environment on Fedora systems with essential applications and tools for desktop productivity.
 
 ## Role Purpose
 
@@ -13,7 +13,7 @@ The desktop role automates the setup of a fully-functional desktop environment i
 
 ## Requirements
 
-- RHEL/Fedora-based system
+- Fedora-based system
 - `common` role (as a dependency for base system configuration)
 
 ## Role Variables

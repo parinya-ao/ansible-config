@@ -40,3 +40,8 @@ desktop_packages:
 starship_install: true
 starship_config_path: /etc/bashrc
 
+# Installation URLs
+flathub_repo_url: "https://dl.flathub.org/repo/flathub.flatpakrepo"
+flathub_repo_url_alt: "https://flathub.org/repo/flathub.flatpakrepo"
+starship_install_url: "https://starship.rs/install.sh"
+

@@ -5,7 +5,7 @@
 galaxy_info:
   role_name: docker
   author: Ansible Docker Configuration
-  description: Install and configure Docker CE (Community Edition) with containerd, BuildKit, and Docker Compose plugin on Fedora/RHEL systems.
+  description: Install and configure Docker CE (Community Edition) with containerd, BuildKit, and Docker Compose plugin on Fedora systems.
   company: personal
 
   license: MIT-0
@@ -18,10 +18,6 @@ galaxy_info:
         - "39"
         - "40"
         - "41"
-    - name: EL
-      versions:
-        - "9"
-        - "10"
 
   galaxy_tags:
     - docker

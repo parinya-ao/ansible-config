@@ -7,7 +7,7 @@ Requirements
 ------------
 
 - `community.general` collection (for `dconf` module)
-- Fedora or RHEL-based distribution (uses `dnf`)
+- Fedora-based distribution (uses `dnf`)
 
 Role Variables
 --------------

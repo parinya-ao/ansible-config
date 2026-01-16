@@ -6,7 +6,7 @@
   community.general.flatpak_remote:
     name: flathub
     state: present
-    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+    flatpakrepo_url: "{{ flathub_repo_url }}"
   become: true
 
 - name: Install Flatpak applications
