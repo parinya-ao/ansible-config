@@ -1,7 +1,7 @@
 ---
 # SPDX-License-Identifier: MIT-0
 # Docker role - Main entry point
-# This role installs and configures Docker CE (Community Edition) on Fedora/RHEL systems including:
+# This role installs and configures Docker CE (Community Edition) on Fedora systems including:
 # - Removal of old/obsolete Docker packages
 # - Docker CE repository configuration
 # - Docker CE packages installation

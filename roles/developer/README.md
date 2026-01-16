@@ -1,6 +1,6 @@
 # Developer Role
 
-This role installs and configures a complete development environment on Fedora/RHEL systems, including compilers, language runtimes, and essential CLI tools for software development.
+This role installs and configures a complete development environment on Fedora systems, including compilers, language runtimes, and essential CLI tools for software development.
 
 ## Role Purpose
 
@@ -15,7 +15,7 @@ The developer role automates the setup of a fully-functional development environ
 
 ## Requirements
 
-- RHEL/Fedora-based system (Fedora 39+, RHEL 9+)
+- Fedora-based system (Fedora 39+)
 - Ansible 2.15+
 - Internet connection for downloading language runtimes
 

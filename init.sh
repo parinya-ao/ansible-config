@@ -54,37 +54,10 @@ clear
 print_header "ANSIBLE CONFIGURATION - INITIALIZATION SETUP"
 
 ################################################################################
-#                     STEP 1: ENABLE CRB REPOSITORY                           #
+#                     STEP 1: INSTALL REQUIRED PACKAGES                         #
 ################################################################################
 
-print_step "1/7" "Enabling CRB Repository"
-print_info "Checking and enabling CRB repository..."
-
-if run_silent "sudo dnf config-manager --set-enabled crb"; then
-    print_success "CRB repository is now enabled"
-else
-    print_warn "CRB repository already enabled or unavailable on this system"
-fi
-
-################################################################################
-#                     STEP 2: INSTALL EPEL REPOSITORY                         #
-################################################################################
-
-print_step "2/7" "Installing EPEL Repository"
-print_info "Checking and installing EPEL repository..."
-
-if run_silent "sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm"; then
-    print_success "EPEL repository installed successfully"
-else
-    print_warn "EPEL repository already installed on this system"
-fi
-
-
-################################################################################
-#                   STEP 3: INSTALL REQUIRED PACKAGES                         #
-################################################################################
-
-print_step "3/7" "Installing Required Packages"
+print_step "1/5" "Installing Required Packages"
 
 if command_exists git && command_exists ansible; then
     print_success "Git and Ansible are already installed"
@@ -109,10 +82,10 @@ fi
 
 
 ################################################################################
-#              STEP 4: INSTALL ANSIBLE GALAXY COLLECTIONS                     #
+#              STEP 2: INSTALL ANSIBLE GALAXY COLLECTIONS                     #
 ################################################################################
 
-print_step "4/7" "Installing Ansible Galaxy Collections"
+print_step "2/5" "Installing Ansible Galaxy Collections"
 print_info "Installing community.general collection..."
 
 if run_silent "ansible-galaxy collection install community.general"; then
@@ -123,10 +96,10 @@ fi
 
 
 ################################################################################
-#                      STEP 5: DISPLAY AVAILABLE ROLES                        #
+#                      STEP 3: DISPLAY AVAILABLE ROLES                        #
 ################################################################################
 
-print_step "5/7" "Available Roles"
+print_step "3/5" "Available Roles"
 print_info "The following roles will be applied:"
 echo ""
 
@@ -141,10 +114,10 @@ fi
 
 
 ################################################################################
-#                      STEP 6: CONFIRMATION PROMPT                            #
+#                      STEP 4: CONFIRMATION PROMPT                            #
 ################################################################################
 
-print_step "6/7" "Ready to Begin"
+print_step "4/5" "Ready to Begin"
 echo ""
 print_warn "You will be prompted to enter your sudo password"
 echo ""
@@ -161,10 +134,10 @@ fi
 
 
 ################################################################################
-#                  STEP 7: RUN ANSIBLE PLAYBOOK                               #
+#                  STEP 5: RUN ANSIBLE PLAYBOOK                               #
 ################################################################################
 
-print_step "7/7" "Executing Ansible Playbook"
+print_step "5/5" "Executing Ansible Playbook"
 echo ""
 
 if ansible-playbook playbook.yaml -K -vvv; then

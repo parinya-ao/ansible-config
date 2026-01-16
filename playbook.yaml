@@ -1,7 +1,7 @@
 ---
 # =============================================================================
 # Ansible Configuration Playbook
-# This playbook configures a Fedora/RHEL workstation with development tools,
+# This playbook configures a Fedora workstation with development tools,
 # desktop environment, Docker, and fonts.
 # =============================================================================
 
