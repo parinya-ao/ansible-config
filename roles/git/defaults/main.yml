@@ -3,6 +3,10 @@
 # defaults file for roles/git
 # Git configuration with optional SSH signing support
 
+# Actual user information (captured before privilege escalation)
+actual_user_home: "{{ lookup('env', 'HOME') }}"
+actual_user_name: "{{ lookup('env', 'USER') }}"
+
 # Git user account to configure (defaults to current user)
 git_config_user: "{{ ansible_user_id }}"
 

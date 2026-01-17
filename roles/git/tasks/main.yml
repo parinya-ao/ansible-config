@@ -13,7 +13,7 @@
     value: "{{ git_config_name }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
 
 - name: Set git user.email
   community.general.git_config:
@@ -21,7 +21,7 @@
     value: "{{ git_config_email }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
 
 # ============================================================================
 # Commit Configuration
@@ -33,7 +33,7 @@
     value: "{{ git_commit_verbose }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
 
 # ============================================================================
 # Push and Pull Configuration
@@ -45,7 +45,7 @@
     value: "{{ git_push_autosetupremote }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
 
 - name: Set pull.rebase
   community.general.git_config:
@@ -53,7 +53,7 @@
     value: "{{ git_pull_rebase }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
 
 # ============================================================================
 # Rebase Configuration
@@ -65,7 +65,7 @@
     value: "{{ git_rebase_autostash }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
 
 # ============================================================================
 # Fetch Configuration
@@ -77,7 +77,7 @@
     value: "{{ git_fetch_prune }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
 
 # ============================================================================
 # Rerere Configuration
@@ -89,7 +89,7 @@
     value: "{{ git_rerere_enabled }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
 
 - name: Enable rerere autoupdate
   community.general.git_config:
@@ -97,7 +97,7 @@
     value: "{{ git_rerere_autoupdate }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
 
 # ============================================================================
 # Core Configuration
@@ -109,7 +109,7 @@
     value: "{{ git_core_autocrlf }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
 
 - name: Set core.editor
   community.general.git_config:
@@ -117,7 +117,7 @@
     value: "{{ git_core_editor }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
 
 # ============================================================================
 # Git Aliases
@@ -129,7 +129,7 @@
     value: "{{ git_alias_lg }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
 
 # ============================================================================
 # SSH Signing Configuration
@@ -137,12 +137,12 @@
 
 - name: Configure git SSH signing
   become: true
-  become_user: "{{ git_config_user }}"
+  become_user: "{{ actual_user_name }}"
   block:
     - name: Set git signing key to SSH public key
       community.general.git_config:
         name: user.signingkey
-        value: "{{ ansible_user_dir }}/.ssh/id_ed25519.pub"
+        value: "{{ actual_user_home }}/.ssh/id_ed25519.pub"
         scope: "{{ git_config_scope }}"
 
     - name: Use SSH format for git signing
