@@ -1,4 +1,6 @@
+---
 galaxy_info:
+  role_name: gnome
   author: Parinya
   description: GNOME Desktop Settings configuration via dconf
   company: none
@@ -8,7 +10,7 @@ galaxy_info:
     - name: Fedora
       versions:
         - all
-  categories:
+  galaxy_tags:
     - desktop
 
 dependencies: []

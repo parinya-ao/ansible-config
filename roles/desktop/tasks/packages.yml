@@ -1,4 +1,4 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 # Install desktop package management and applications
 
@@ -9,7 +9,8 @@
 
 - name: Add Flathub remote
   ansible.builtin.command:
-    cmd: flatpak remote-add --if-not-exists flathub {{ flathub_repo_url_alt }}
+    cmd: flatpak remote-add --if-not-exists flathub {{ desktop_flathub_repo_url_alt }}
+  changed_when: false
 
 - name: Install desktop packages
   ansible.builtin.dnf:

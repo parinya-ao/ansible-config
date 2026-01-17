@@ -3,8 +3,17 @@
 # Python tooling installation (uv - modern Python package manager)
 
 - name: Install uv (modern Python package manager)
-  ansible.builtin.shell:
-    cmd: curl -LsSf {{ developer_uv_install_url }} | sh
+  ansible.builtin.get_url:
+    url: "{{ developer_uv_install_url }}"
+    dest: /tmp/install-uv.sh
+    mode: "0755"
+  tags:
+    - python
+    - uv
+
+- name: Execute uv installer
+  ansible.builtin.command:
+    cmd: /tmp/install-uv.sh
   args:
     creates: "{{ lookup('env', 'HOME') }}/.local/bin/uv"
   become: false
@@ -12,10 +21,18 @@
     - python
     - uv
 
+- name: Clean up uv installer script
+  ansible.builtin.file:
+    path: /tmp/install-uv.sh
+    state: absent
+  tags:
+    - python
+    - uv
+
 - name: Verify uv installation
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: "{{ lookup('env', 'HOME') }}/.local/bin/uv --version"
-  register: uv_version
+  register: developer_uv_version
   changed_when: false
   become: false
   tags:
@@ -24,8 +41,8 @@
 
 - name: Display uv version
   ansible.builtin.debug:
-    msg: "uv {{ uv_version.stdout }} installed"
-  when: uv_version.stdout is defined
+    msg: "uv {{ developer_uv_version.stdout }} installed"
+  when: developer_uv_version.stdout is defined
   tags:
     - python
     - uv

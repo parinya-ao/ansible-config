@@ -10,23 +10,24 @@
 
 - name: Add Brave repository
   ansible.builtin.get_url:
-    url: "{{ brave_repo_url }}"
+    url: "{{ desktop_brave_repo_url }}"
     dest: /etc/yum.repos.d/brave-browser.repo
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   become: true
 
 - name: Import Brave GPG key
   ansible.builtin.rpm_key:
     state: present
-    key: "{{ brave_gpg_key_url }}"
+    key: "{{ desktop_brave_gpg_key_url }}"
   become: true
 
 - name: Install Brave browser
   ansible.builtin.dnf:
     name: brave-browser
-    state: latest
+    state: present
+    update_cache: true
   become: true
 
 - name: Fix Brave icon (copy to standard location)
@@ -36,19 +37,10 @@
     remote_src: true
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   become: true
-  register: icon_injected
-
-- name: Refresh icon cache
-  ansible.builtin.command: gtk-update-icon-cache /usr/share/icons/hicolor
-  become: true
-  when: icon_injected.changed
-
-- name: Update desktop database
-  ansible.builtin.command: update-desktop-database /usr/share/applications
-  become: true
-  when: icon_injected.changed
+  register: desktop_icon_injected
+  notify: Refresh icon cache, Update desktop database
 
 - name: Display Brave installation complete
   ansible.builtin.debug:

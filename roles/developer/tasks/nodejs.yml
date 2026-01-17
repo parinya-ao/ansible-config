@@ -2,11 +2,28 @@
 # SPDX-License-Identifier: MIT-0
 # Node.js installation via the NodeSource rpm stream
 
-- name: Configure NodeSource repository for Node.js {{ developer_node_version }}
+- name: Download NodeSource setup script
+  ansible.builtin.get_url:
+    url: "{{ developer_nodesource_setup_url }}/setup_{{ developer_node_version }}.x"
+    dest: "/tmp/nodesource-setup.sh"
+    mode: "0755"
+  tags:
+    - nodejs
+    - javascript
+
+- name: Configure NodeSource repository for Node.js
   ansible.builtin.shell:
-    cmd: "curl -fsSL {{ developer_nodesource_setup_url }}/setup_{{ developer_node_version }}.x | bash -"
+    cmd: /tmp/nodesource-setup.sh
     executable: /bin/bash
     creates: "/etc/yum.repos.d/nodesource-nodejs-{{ developer_node_version }}.repo"
+  tags:
+    - nodejs
+    - javascript
+
+- name: Clean up NodeSource setup script
+  ansible.builtin.file:
+    path: /tmp/nodesource-setup.sh
+    state: absent
   tags:
     - nodejs
     - javascript
@@ -20,9 +37,9 @@
     - javascript
 
 - name: Verify Node.js installation
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: node -v
-  register: node_version
+  register: developer_node_version
   changed_when: false
   tags:
     - nodejs
@@ -30,8 +47,8 @@
 
 - name: Display Node.js version
   ansible.builtin.debug:
-    msg: "Node.js {{ node_version.stdout }} installed"
-  when: node_version.stdout is defined
+    msg: "Node.js {{ developer_node_version.stdout }} installed"
+  when: developer_node_version.stdout is defined
   tags:
     - nodejs
     - javascript

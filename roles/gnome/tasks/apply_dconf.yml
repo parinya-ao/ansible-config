@@ -1,5 +1,5 @@
 ---
-- name: "Apply Settings for {{ section.path }}"
+- name: Apply Settings for {{ section.path }}
   community.general.dconf:
     key: "{{ section.path }}{{ item.key }}"
     value: "{{ item.value }}"
@@ -9,4 +9,4 @@
     label: "{{ section.path }}{{ item.key }}"
   become: true
   become_user: "{{ ansible_user_id }}"
-  ignore_errors: true
+  failed_when: false

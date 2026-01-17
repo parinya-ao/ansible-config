@@ -1,20 +1,18 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 # defaults file for roles/font
 
 font_base_dir: /usr/share/fonts
 
-fonts:
+font_fonts:
   - name: th-sarabun-new
     dir: "{{ font_base_dir }}/th-sarabun-new"
     url: https://www.f0nt.com/?dl_name=sipafonts/THSarabunNew.zip
     zip: /tmp/THSarabunNew.zip
-
   - name: Inter
     dir: "{{ font_base_dir }}/Inter"
     url: https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip
     zip: /tmp/Inter-4.1.zip
-
   - name: IntelOneMono
     dir: "{{ font_base_dir }}/IntelOneMono"
     url: https://github.com/intel/intel-one-mono/releases/download/V1.4.0/ttf.zip

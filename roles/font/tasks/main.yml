@@ -6,22 +6,22 @@
   ansible.builtin.file:
     path: "{{ item.dir }}"
     state: directory
-    mode: '0755'
-  loop: "{{ fonts }}"
+    mode: "0755"
+  loop: "{{ font_fonts }}"
 
 - name: Download fonts
   ansible.builtin.get_url:
     url: "{{ item.url }}"
     dest: "{{ item.zip }}"
-    mode: '0644'
-  loop: "{{ fonts }}"
+    mode: "0644"
+  loop: "{{ font_fonts }}"
   notify: refresh font cache
 
 - name: Extract fonts
   ansible.builtin.unarchive:
     src: "{{ item.zip }}"
     dest: "{{ item.dir }}"
-    remote_src: yes
-    mode: 'a+rX'
-  loop: "{{ fonts }}"
+    remote_src: true
+    mode: "a+rX"
+  loop: "{{ font_fonts }}"
   notify: refresh font cache

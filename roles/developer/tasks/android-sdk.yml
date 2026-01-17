@@ -1,0 +1,233 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Android SDK command-line tools installation
+
+- name: Get actual user info
+  ansible.builtin.set_fact:
+    developer_actual_user_home: "{{ lookup('env', 'HOME') }}"
+    developer_actual_user_name: "{{ lookup('env', 'USER') }}"
+  tags:
+    - android
+    - mobile
+
+- name: Check if Android SDK is already installed
+  ansible.builtin.stat:
+    path: "{{ developer_actual_user_home }}/Android/Sdk/cmdline-tools/latest/bin/sdkmanager"
+  register: developer_android_sdk_check
+  tags:
+    - android
+    - mobile
+
+- name: Debug Android SDK variables
+  ansible.builtin.debug:
+    msg:
+      - "User Home: {{ developer_actual_user_home }}"
+      - "Android SDK Path: {{ developer_actual_user_home }}/Android/Sdk"
+      - "SDK Manager exists: {{ developer_android_sdk_check.stat.exists }}"
+  tags:
+    - android
+    - mobile
+
+- name: Install Adoptium Temurin Java Repository
+  ansible.builtin.dnf:
+    name: adoptium-temurin-java-repository
+    state: present
+  become: true
+  tags:
+    - android
+    - mobile
+
+- name: Enable Fedora third-party repositories
+  ansible.builtin.command:
+    cmd: fedora-third-party enable
+  become: true
+  changed_when: false
+  failed_when: false
+  tags:
+    - android
+    - mobile
+
+- name: Remove all OpenJDK packages
+  ansible.builtin.dnf:
+    name:
+      - java-21-openjdk
+      - java-21-openjdk-devel
+      - java-21-openjdk-headless
+      - java-25-openjdk
+      - java-25-openjdk-devel
+      - java-25-openjdk-headless
+      - java-25-openjdk-crypto-adapter
+      - java-latest-openjdk
+      - java-latest-openjdk-devel
+      - java-latest-openjdk-headless
+    state: absent
+  become: true
+  failed_when: false
+  tags:
+    - android
+    - mobile
+
+- name: Install Android SDK dependencies
+  ansible.builtin.dnf:
+    name:
+      - unzip
+      - rsync
+      - temurin-17-jdk
+    state: present
+  become: true
+  tags:
+    - android
+    - mobile
+
+- name: Set Java 17 (Temurin) as default alternative
+  community.general.alternatives:
+    name: java
+    path: /usr/lib/jvm/temurin-17-jdk/bin/java
+    link: /usr/bin/java
+  become: true
+  tags:
+    - android
+    - mobile
+
+- name: Set javac 17 (Temurin) as default alternative
+  community.general.alternatives:
+    name: javac
+    path: /usr/lib/jvm/temurin-17-jdk/bin/javac
+    link: /usr/bin/javac
+  become: true
+  tags:
+    - android
+    - mobile
+
+- name: Set Android SDK command-line tools URL
+  ansible.builtin.set_fact:
+    developer_android_sdk_download_url: "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+  when: not developer_android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Download Android SDK command-line tools
+  ansible.builtin.get_url:
+    url: "{{ developer_android_sdk_download_url }}"
+    dest: "/tmp/commandlinetools-linux-latest.zip"
+    mode: "0644"
+  when: not developer_android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Create Android SDK directory structure
+  ansible.builtin.file:
+    path: "{{ developer_actual_user_home }}/Android/Sdk/cmdline-tools/latest"
+    state: directory
+    mode: "0755"
+    owner: "{{ developer_actual_user_name }}"
+    group: "{{ developer_actual_user_name }}"
+  when: not developer_android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Extract Android SDK command-line tools to temp directory
+  ansible.builtin.unarchive:
+    src: "/tmp/commandlinetools-linux-latest.zip"
+    dest: "/tmp"
+    remote_src: true
+  when: not developer_android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Move command-line tools to final location
+  ansible.builtin.copy:
+    src: /tmp/cmdline-tools/
+    dest: "{{ developer_actual_user_home }}/Android/Sdk/cmdline-tools/latest/"
+    remote_src: true
+    mode: preserve
+  become: true
+  when: not developer_android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Set ownership of Android SDK directory
+  ansible.builtin.file:
+    path: "{{ developer_actual_user_home }}/Android/Sdk"
+    state: directory
+    recurse: true
+    owner: "{{ developer_actual_user_name }}"
+    group: "{{ developer_actual_user_name }}"
+  when: not developer_android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Clean up temporary files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/tmp/cmdline-tools"
+    - "/tmp/commandlinetools-linux-latest.zip"
+  when: not developer_android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Add ANDROID_HOME to .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ developer_actual_user_home }}/.bashrc"
+    line: "export ANDROID_HOME=$HOME/Android/Sdk"
+    regexp: "^export ANDROID_HOME="
+    state: present
+    create: true
+    owner: "{{ developer_actual_user_name }}"
+    group: "{{ developer_actual_user_name }}"
+    mode: "0644"
+  tags:
+    - android
+    - mobile
+
+- name: Add Android SDK to PATH in .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ developer_actual_user_home }}/.bashrc"
+    line: "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
+    regexp: ".*ANDROID_HOME/cmdline-tools.*"
+    state: present
+    create: true
+    owner: "{{ developer_actual_user_name }}"
+    group: "{{ developer_actual_user_name }}"
+    mode: "0644"
+  tags:
+    - android
+    - mobile
+
+- name: Accept Android SDK licenses
+  ansible.builtin.shell:
+    cmd: set -o pipefail && yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" --licenses
+  args:
+    creates: "{{ developer_actual_user_home }}/Android/Sdk/licenses/android-sdk-license"
+    executable: /bin/bash
+  environment:
+    ANDROID_HOME: "{{ developer_actual_user_home }}/Android/Sdk"
+  become: true
+  become_user: "{{ developer_actual_user_name }}"
+  when: not developer_android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Install Android SDK components
+  ansible.builtin.shell:
+    cmd: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+  args:
+    creates: "{{ developer_actual_user_home }}/Android/Sdk/platform-tools/adb"
+  environment:
+    ANDROID_HOME: "{{ developer_actual_user_home }}/Android/Sdk"
+  become: true
+  become_user: "{{ developer_actual_user_name }}"
+  when: not developer_android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile

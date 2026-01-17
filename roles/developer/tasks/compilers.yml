@@ -2,10 +2,69 @@
 # SPDX-License-Identifier: MIT-0
 # Compilers & CLI Tools installation tasks
 
+- name: Install Adoptium Temurin Java Repository
+  ansible.builtin.dnf:
+    name: adoptium-temurin-java-repository
+    state: present
+  become: true
+  tags:
+    - compilers
+    - development-tools
+
+- name: Enable Fedora third-party repositories
+  ansible.builtin.command:
+    cmd: fedora-third-party enable
+  become: true
+  changed_when: false
+  failed_when: false
+  tags:
+    - compilers
+    - development-tools
+
+- name: Remove all OpenJDK packages
+  ansible.builtin.dnf:
+    name:
+      - java-21-openjdk
+      - java-21-openjdk-devel
+      - java-21-openjdk-headless
+      - java-25-openjdk
+      - java-25-openjdk-devel
+      - java-25-openjdk-headless
+      - java-25-openjdk-crypto-adapter
+      - java-latest-openjdk
+      - java-latest-openjdk-devel
+      - java-latest-openjdk-headless
+    state: absent
+  become: true
+  failed_when: false
+  tags:
+    - compilers
+    - development-tools
+
 - name: Install development compilers and tools
   ansible.builtin.dnf:
     name: "{{ developer_compilers_packages }}"
     state: present
+  become: true
+  tags:
+    - compilers
+    - development-tools
+
+- name: Set Java 17 (Temurin) as default alternative
+  community.general.alternatives:
+    name: java
+    path: /usr/lib/jvm/temurin-17-jdk/bin/java
+    link: /usr/bin/java
+  become: true
+  tags:
+    - compilers
+    - development-tools
+
+- name: Set javac 17 (Temurin) as default alternative
+  community.general.alternatives:
+    name: javac
+    path: /usr/lib/jvm/temurin-17-jdk/bin/javac
+    link: /usr/bin/javac
   become: true
   tags:
     - compilers

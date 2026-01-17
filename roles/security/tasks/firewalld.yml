@@ -1,4 +1,4 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 # Firewalld configuration and service startup
 
@@ -14,7 +14,7 @@
 - name: Enable firewalld service
   ansible.builtin.systemd:
     name: firewalld
-    enabled: yes
+    enabled: true
     state: started
   become: true
   tags:

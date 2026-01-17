@@ -1,10 +1,12 @@
+---
 galaxy_info:
+  role_name: git
   author: parinya-ao
   description: Configure git with optional SSH signing support
   company: personal
   license: MIT-0
 
-  min_ansible_version: 2.10
+  min_ansible_version: "2.10"
 
   platforms:
     - name: Fedora

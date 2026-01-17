@@ -17,7 +17,7 @@
     - packages
 
 - name: Display Docker version
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: docker --version
   register: docker_version
   changed_when: false

@@ -1,4 +1,4 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 argument_specs:
   main:
@@ -8,7 +8,7 @@ argument_specs:
       - Automatically opens SSH port (default 22)
       - Supports opening custom ports with TCP/UDP protocols
       - All changes are permanent and immediate
-    version_added: '1.0.0'
+    version_added: "1.0.0"
     author: Parinya Luangchaisuk
     options:
       security_enable_firewalld:

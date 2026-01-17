@@ -1,8 +1,16 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 # handlers file for roles/desktop
 
-- name: restart bash
-  ansible.builtin.shell: exec bash
+- name: Restart bash
+  ansible.builtin.command: exec bash
+  changed_when: false
   listen: restart bash configuration
 
+- name: Refresh icon cache
+  ansible.builtin.command: gtk-update-icon-cache /usr/share/icons/hicolor
+  changed_when: false
+
+- name: Update desktop database
+  ansible.builtin.command: update-desktop-database /usr/share/applications
+  changed_when: false

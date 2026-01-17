@@ -54,3 +54,11 @@
   tags:
     - developers
     - flutter
+
+# Android SDK
+- name: Install Android SDK
+  ansible.builtin.import_tasks: android-sdk.yml
+  when: developer_install_android_sdk
+  tags:
+    - developers
+    - android

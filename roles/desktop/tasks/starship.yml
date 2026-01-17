@@ -1,9 +1,15 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 # Install and configure Starship prompt
 
 - name: Install Starship prompt
-  ansible.builtin.shell: curl -sS {{ starship_install_url }} | sh -s -- --yes
+  ansible.builtin.get_url:
+    url: "{{ desktop_starship_install_url }}"
+    dest: /tmp/starship-install.sh
+    mode: "0755"
+
+- name: Run Starship installer
+  ansible.builtin.command: /tmp/starship-install.sh --yes
   args:
     creates: /usr/local/bin/starship
 
@@ -12,4 +18,5 @@
     path: /etc/bashrc
     line: 'eval "$(starship init bash)"'
     state: present
-    create: yes
+    create: true
+    mode: "0644"
