@@ -8,6 +8,7 @@ developer_install_nodejs: true
 developer_install_bun: true
 developer_install_uv: true
 developer_install_flutter: true
+developer_install_android_sdk: true
 
 # Compilers and development tools package list
 developer_compilers_packages:

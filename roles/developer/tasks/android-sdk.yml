@@ -1,0 +1,157 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Android SDK command-line tools installation
+
+- name: Get actual user info
+  ansible.builtin.set_fact:
+    actual_user_home: "{{ lookup('env', 'HOME') }}"
+    actual_user_name: "{{ lookup('env', 'USER') }}"
+  tags:
+    - android
+    - mobile
+
+- name: Check if Android SDK is already installed
+  ansible.builtin.stat:
+    path: "{{ actual_user_home }}/Android/Sdk/cmdline-tools/latest/bin/sdkmanager"
+  register: android_sdk_check
+  tags:
+    - android
+    - mobile
+
+- name: Debug Android SDK variables
+  ansible.builtin.debug:
+    msg:
+      - "User Home: {{ actual_user_home }}"
+      - "Android SDK Path: {{ actual_user_home }}/Android/Sdk"
+      - "SDK Manager exists: {{ android_sdk_check.stat.exists }}"
+  tags:
+    - android
+    - mobile
+
+- name: Install Android SDK dependencies
+  ansible.builtin.dnf:
+    name:
+      - unzip
+      - rsync
+      - java-21-openjdk
+      - java-21-openjdk-devel
+    state: present
+  become: true
+  tags:
+    - android
+    - mobile
+
+- name: Fetch Android SDK command-line tools URL
+  ansible.builtin.shell: |
+    curl -s https://developer.android.com/studio | \
+    grep -oP 'https://dl.google.com/android/repository/commandlinetools-linux-[0-9]+_latest.zip' | head -n1
+  register: android_sdk_url
+  changed_when: false
+  when: not android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Download Android SDK command-line tools
+  ansible.builtin.get_url:
+    url: "{{ android_sdk_url.stdout }}"
+    dest: "/tmp/commandlinetools-linux-latest.zip"
+    mode: "0644"
+  when: not android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Create Android SDK directory structure
+  ansible.builtin.file:
+    path: "{{ actual_user_home }}/Android/Sdk/cmdline-tools/latest"
+    state: directory
+    mode: "0755"
+    owner: "{{ actual_user_name }}"
+    group: "{{ actual_user_name }}"
+  when: not android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Extract Android SDK command-line tools to temp directory
+  ansible.builtin.unarchive:
+    src: "/tmp/commandlinetools-linux-latest.zip"
+    dest: "/tmp"
+    remote_src: yes
+  when: not android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Move command-line tools to final location
+  ansible.builtin.shell: |
+    rsync -a /tmp/cmdline-tools/ {{ actual_user_home }}/Android/Sdk/cmdline-tools/latest/
+    chown -R {{ actual_user_name }}:{{ actual_user_name }} {{ actual_user_home }}/Android/Sdk
+  when: not android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Clean up temporary files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/tmp/cmdline-tools"
+    - "/tmp/commandlinetools-linux-latest.zip"
+  when: not android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Add ANDROID_HOME to .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ actual_user_home }}/.bashrc"
+    line: "export ANDROID_HOME=$HOME/Android/Sdk"
+    regexp: "^export ANDROID_HOME="
+    state: present
+    create: yes
+    owner: "{{ actual_user_name }}"
+    group: "{{ actual_user_name }}"
+  tags:
+    - android
+    - mobile
+
+- name: Add Android SDK to PATH in .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ actual_user_home }}/.bashrc"
+    line: "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
+    regexp: ".*ANDROID_HOME/cmdline-tools.*"
+    state: present
+    create: yes
+    owner: "{{ actual_user_name }}"
+    group: "{{ actual_user_name }}"
+  tags:
+    - android
+    - mobile
+
+- name: Accept Android SDK licenses
+  ansible.builtin.shell: |
+    export ANDROID_HOME={{ actual_user_home }}/Android/Sdk
+    yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" --licenses
+  args:
+    creates: "{{ actual_user_home }}/Android/Sdk/licenses/android-sdk-license"
+  become_user: "{{ actual_user_name }}"
+  when: not android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
+
+- name: Install Android SDK components
+  ansible.builtin.shell: |
+    export ANDROID_HOME={{ actual_user_home }}/Android/Sdk
+    $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" \
+      "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+  args:
+    creates: "{{ actual_user_home }}/Android/Sdk/platform-tools/adb"
+  become_user: "{{ actual_user_name }}"
+  when: not android_sdk_check.stat.exists
+  tags:
+    - android
+    - mobile
