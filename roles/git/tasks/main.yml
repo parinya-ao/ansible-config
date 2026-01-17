@@ -3,13 +3,6 @@
 # tasks file for roles/git
 # Configures git globally with optional SSH signing if key exists
 
-- name: Check if SSH public key exists
-  stat:
-    path: "{{ git_ssh_pubkey_path }}"
-  register: ssh_pubkey_stat
-  become: true
-  become_user: "{{ git_config_user }}"
-
 # ============================================================================
 # Git Identity Configuration
 # ============================================================================
@@ -139,18 +132,17 @@
   become_user: "{{ git_config_user }}"
 
 # ============================================================================
-# SSH Signing Configuration (Conditional)
+# SSH Signing Configuration
 # ============================================================================
 
-- name: Configure git SSH signing (if SSH key exists)
-  when: ssh_pubkey_stat.stat.exists
+- name: Configure git SSH signing
   become: true
   become_user: "{{ git_config_user }}"
   block:
     - name: Set git signing key to SSH public key
       community.general.git_config:
         name: user.signingkey
-        value: "{{ git_ssh_pubkey_path }}"
+        value: "{{ ansible_user_dir }}/.ssh/id_ed25519.pub"
         scope: "{{ git_config_scope }}"
 
     - name: Use SSH format for git signing

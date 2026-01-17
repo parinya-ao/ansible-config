@@ -1,25 +1,8 @@
 ---
-# SPDX-License-Identifier: MIT-0
-# Docker CE repository configuration
-
-- name: Add Docker CE repository
-  ansible.builtin.shell:
-    cmd: dnf config-manager --add-repo {{ docker_repo_url }}
-  args:
-    creates: /etc/yum.repos.d/docker-ce.repo
+- name: Add Docker CE repository (Fedora)
   become: true
-  notify:
-    - DNF cache updated
-  tags:
-    - docker
-    - repository
-
-- name: Enable Docker CE repository
-  ansible.builtin.command:
-    cmd: dnf config-manager --set-enabled docker-ce-stable
-  become: true
-  changed_when: true
-  when: docker_enable_repo
-  tags:
-    - docker
-    - repository
+  ansible.builtin.yum_repository:
+    name: docker-ce-stable
+    description: Docker CE Stable - Fedora
+    baseurl: https://download.docker.com/linux/fedora/$releasever/$basearch/stable
+    enabled: true

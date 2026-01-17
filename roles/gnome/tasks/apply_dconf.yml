@@ -4,7 +4,7 @@
     key: "{{ section.path }}{{ item.key }}"
     value: "{{ item.value }}"
     state: present
-  loop: "{{ section.values | dict2items }}"
+  loop: "{{ section['settings'] | dict2items }}"
   loop_control:
     label: "{{ section.path }}{{ item.key }}"
   become: true

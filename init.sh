@@ -140,7 +140,7 @@ fi
 print_step "5/5" "Executing Ansible Playbook"
 echo ""
 
-if ansible-playbook playbook.yaml -K -vvv; then
+if ansible-playbook playbook.yaml -K; then
     echo ""
     print_header "INSTALLATION COMPLETED SUCCESSFULLY"
     echo ""

@@ -4,5 +4,6 @@
     name:
       - dconf
       - gsettings-desktop-schemas
+      - python3-psutil
     state: present
   become: true
