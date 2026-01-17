@@ -15,7 +15,8 @@
   ansible.builtin.command:
     cmd: fedora-third-party enable
   become: true
-  ignore_errors: true
+  changed_when: false
+  failed_when: false
   tags:
     - compilers
     - development-tools
@@ -35,7 +36,7 @@
       - java-latest-openjdk-headless
     state: absent
   become: true
-  ignore_errors: true
+  failed_when: false
   tags:
     - compilers
     - development-tools

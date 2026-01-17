@@ -8,16 +8,16 @@
 
 - name: Get actual user info
   ansible.builtin.set_fact:
-    actual_user_home: "{{ lookup('env', 'HOME') }}"
-    actual_user_name: "{{ lookup('env', 'USER') }}"
+    developer_actual_user_home: "{{ lookup('env', 'HOME') }}"
+    developer_actual_user_name: "{{ lookup('env', 'USER') }}"
   tags:
     - flutter
     - mobile
 
 - name: Check if Flutter SDK is already installed
   ansible.builtin.stat:
-    path: "{{ actual_user_home }}/develop/flutter/bin/flutter"
-  register: flutter_bin_check
+    path: "{{ developer_actual_user_home }}/develop/flutter/bin/flutter"
+  register: developer_flutter_bin_check
   tags:
     - flutter
     - mobile
@@ -25,10 +25,10 @@
 - name: Debug Flutter variables
   ansible.builtin.debug:
     msg:
-      - "Actual User Home: {{ actual_user_home }}"
-      - "Install Dir: {{ actual_user_home }}/develop"
-      - "Check Path: {{ actual_user_home }}/develop/flutter/bin/flutter"
-      - "Stat Result: {{ flutter_bin_check.stat.exists }}"
+      - "Actual User Home: {{ developer_actual_user_home }}"
+      - "Install Dir: {{ developer_actual_user_home }}/develop"
+      - "Check Path: {{ developer_actual_user_home }}/develop/flutter/bin/flutter"
+      - "Stat Result: {{ developer_flutter_bin_check.stat.exists }}"
   tags:
     - flutter
     - mobile
@@ -50,11 +50,11 @@
 
 - name: Create development directory
   ansible.builtin.file:
-    path: "{{ actual_user_home }}/develop"
+    path: "{{ developer_actual_user_home }}/develop"
     state: directory
     mode: "0755"
-    owner: "{{ actual_user_name }}"
-    group: "{{ actual_user_name }}"
+    owner: "{{ developer_actual_user_name }}"
+    group: "{{ developer_actual_user_name }}"
   tags:
     - flutter
     - mobile
@@ -72,33 +72,35 @@
 - name: Extract Flutter SDK
   ansible.builtin.unarchive:
     src: "/tmp/flutter_linux_{{ developer_flutter_version }}-stable.tar.xz"
-    dest: "{{ actual_user_home }}/develop"
+    dest: "{{ developer_actual_user_home }}/develop"
     remote_src: true
-    owner: "{{ actual_user_name }}"
-    group: "{{ actual_user_name }}"
-  when: not flutter_bin_check.stat.exists
+    owner: "{{ developer_actual_user_name }}"
+    group: "{{ developer_actual_user_name }}"
+  when: not developer_flutter_bin_check.stat.exists
   tags:
     - flutter
     - mobile
 
 - name: Add Flutter to PATH in .bashrc
   ansible.builtin.lineinfile:
-    path: "{{ actual_user_home }}/.bashrc"
-    line: 'export PATH="{{ actual_user_home }}/develop/flutter/bin:$PATH"'
+    path: "{{ developer_actual_user_home }}/.bashrc"
+    line: 'export PATH="{{ developer_actual_user_home }}/develop/flutter/bin:$PATH"'
     regexp: 'export PATH=".*flutter/bin:\$PATH"'
     state: present
     create: true
-    owner: "{{ actual_user_name }}"
-    group: "{{ actual_user_name }}"
+    owner: "{{ developer_actual_user_name }}"
+    group: "{{ developer_actual_user_name }}"
+    mode: "0644"
   tags:
     - flutter
     - mobile
 
 - name: Initial flutter precache
-  ansible.builtin.command: "{{ actual_user_home }}/develop/flutter/bin/flutter precache"
+  ansible.builtin.command: "{{ developer_actual_user_home }}/develop/flutter/bin/flutter precache"
   changed_when: true
-  when: not flutter_bin_check.stat.exists
-  become_user: "{{ actual_user_name }}"
+  when: not developer_flutter_bin_check.stat.exists
+  become: true
+  become_user: "{{ developer_actual_user_name }}"
   tags:
     - flutter
     - mobile

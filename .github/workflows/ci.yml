@@ -50,7 +50,9 @@ jobs:
           echo "=== Checking Role Syntax ==="
           for role in roles/*/; do
             echo "Checking role: $(basename $role)"
-            ansible-playbook --syntax-check -i inventory.ini -e "ansible_python_interpreter=/usr/bin/python3" -c local --list-tasks roles/$(basename $role)/tasks/main.yml || true
+            ansible-playbook --syntax-check -i inventory.ini \
+              -e "ansible_python_interpreter=/usr/bin/python3" -c local \
+              --list-tasks roles/$(basename $role)/tasks/main.yml || true
           done
 
       - name: Run ansible-lint

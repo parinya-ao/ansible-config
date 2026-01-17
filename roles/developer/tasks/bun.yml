@@ -3,8 +3,18 @@
 # Bun JavaScript runtime installation
 
 - name: Install Bun JavaScript runtime
-  ansible.builtin.shell:
-    cmd: curl -fsSL {{ developer_bun_install_url }} | bash
+  ansible.builtin.get_url:
+    url: "{{ developer_bun_install_url }}"
+    dest: /tmp/install-bun.sh
+    mode: "0755"
+  become: false
+  tags:
+    - bun
+    - javascript
+
+- name: Execute Bun installer
+  ansible.builtin.command:
+    cmd: /tmp/install-bun.sh
   args:
     creates: "{{ lookup('env', 'HOME') }}/.bun/bin/bun"
   become: false
@@ -12,10 +22,18 @@
     - bun
     - javascript
 
+- name: Clean up installer script
+  ansible.builtin.file:
+    path: /tmp/install-bun.sh
+    state: absent
+  tags:
+    - bun
+    - javascript
+
 - name: Verify Bun installation
   ansible.builtin.command:
     cmd: "{{ lookup('env', 'HOME') }}/.bun/bin/bun --version"
-  register: bun_version
+  register: developer_bun_version
   changed_when: false
   become: false
   tags:
@@ -24,8 +42,8 @@
 
 - name: Display Bun version
   ansible.builtin.debug:
-    msg: "Bun {{ bun_version.stdout }} installed"
-  when: bun_version.stdout is defined
+    msg: "Bun {{ developer_bun_version.stdout }} installed"
+  when: developer_bun_version.stdout is defined
   tags:
     - bun
     - javascript
