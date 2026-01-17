@@ -11,20 +11,20 @@
   ansible.builtin.get_url:
     url: "{{ zed_download_url }}"
     dest: /tmp/zed-linux-x86_64.tar.gz
-    mode: '0644'
+    mode: "0644"
   when: not zed_binary.stat.exists
 
 - name: Ensure .local directory exists
   ansible.builtin.file:
     path: "{{ ansible_user_dir }}/.local"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Extract Zed to .local
   ansible.builtin.unarchive:
     src: /tmp/zed-linux-x86_64.tar.gz
     dest: "{{ ansible_user_dir }}/.local"
-    mode: '0755'
+    mode: "0755"
     remote_src: true
   when: not zed_binary.stat.exists
 
@@ -32,7 +32,7 @@
   ansible.builtin.file:
     path: "{{ ansible_user_dir }}/.local/bin"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Create symlink for Zed binary
   ansible.builtin.file:
@@ -45,29 +45,29 @@
   ansible.builtin.file:
     path: "{{ ansible_user_dir }}/.local/share/applications"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Install Zed desktop entry
   ansible.builtin.copy:
     src: "{{ ansible_user_dir }}/.local/zed.app/share/applications/zed.desktop"
     dest: "{{ ansible_user_dir }}/.local/share/applications/dev.zed.Zed.desktop"
-    mode: '0644'
+    mode: "0644"
     remote_src: true
   when: not zed_binary.stat.exists
 
 - name: Update desktop entry icon path
   ansible.builtin.lineinfile:
     path: "{{ ansible_user_dir }}/.local/share/applications/dev.zed.Zed.desktop"
-    regexp: '^Icon=zed$'
-    line: 'Icon={{ ansible_user_dir }}/.local/zed.app/share/icons/hicolor/512x512/apps/zed.png'
+    regexp: "^Icon=zed$"
+    line: "Icon={{ ansible_user_dir }}/.local/zed.app/share/icons/hicolor/512x512/apps/zed.png"
     backrefs: true
   when: not zed_binary.stat.exists
 
 - name: Update desktop entry exec path
   ansible.builtin.lineinfile:
     path: "{{ ansible_user_dir }}/.local/share/applications/dev.zed.Zed.desktop"
-    regexp: '^Exec=zed$'
-    line: 'Exec={{ ansible_user_dir }}/.local/zed.app/libexec/zed-editor'
+    regexp: "^Exec=zed$"
+    line: "Exec={{ ansible_user_dir }}/.local/zed.app/libexec/zed-editor"
     backrefs: true
   when: not zed_binary.stat.exists
 

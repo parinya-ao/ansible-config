@@ -13,7 +13,7 @@
     - javascript
 
 - name: Verify Bun installation
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: "{{ lookup('env', 'HOME') }}/.bun/bin/bun --version"
   register: bun_version
   changed_when: false

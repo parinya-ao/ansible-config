@@ -9,4 +9,3 @@ vscode_repo_description: Visual Studio Code
 
 # Starship binary path
 starship_bin_path: /usr/local/bin/starship
-

@@ -1,3 +1,4 @@
+---
 name: Ansible Configuration CI
 
 on:
@@ -10,7 +11,6 @@ on:
       - main
       - develop
   workflow_dispatch:
-
 jobs:
   # Job 1: Syntax Check and Linting
   lint:
@@ -23,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12.12'
+          python-version: "3.12.12"
 
       - name: Install Ansible and lint tools
         run: |
@@ -78,8 +78,9 @@ jobs:
       - name: Install basic dependencies
         run: |
           echo "=== Installing base dependencies on Fedora ==="
-          dnf install -y --allowerasing python3 python3-pip git curl wget \
-          xorg-x11-server-Xvfb dbus-x11 dconf glib2 gsettings-desktop-schemas
+          dnf install -y --allowerasing python3 python3-pip git curl \
+            xorg-x11-server-Xvfb dbus-x11 dconf glib2 \
+            gsettings-desktop-schemas
 
       - name: Install Ansible
         run: |

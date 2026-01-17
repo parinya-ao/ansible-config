@@ -73,7 +73,7 @@
   ansible.builtin.unarchive:
     src: "/tmp/flutter_linux_{{ developer_flutter_version }}-stable.tar.xz"
     dest: "{{ actual_user_home }}/develop"
-    remote_src: yes
+    remote_src: true
     owner: "{{ actual_user_name }}"
     group: "{{ actual_user_name }}"
   when: not flutter_bin_check.stat.exists
@@ -87,7 +87,7 @@
     line: 'export PATH="{{ actual_user_home }}/develop/flutter/bin:$PATH"'
     regexp: 'export PATH=".*flutter/bin:\$PATH"'
     state: present
-    create: yes
+    create: true
     owner: "{{ actual_user_name }}"
     group: "{{ actual_user_name }}"
   tags:

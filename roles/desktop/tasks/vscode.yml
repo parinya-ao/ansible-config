@@ -4,7 +4,7 @@
     name: code
     description: Visual Studio Code
     baseurl: "{{ vscode_repo_baseurl }}"
-    enabled: yes
+    enabled: true
 
 - name: Install Visual Studio Code
   ansible.builtin.dnf:
@@ -15,18 +15,18 @@
   ansible.builtin.file:
     path: "{{ ansible_user_dir }}/.config/Code/User"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Check if VS Code settings file exists
   ansible.builtin.stat:
     path: "{{ playbook_dir }}/roles/desktop/files/vscode/settings.json"
   register: vscode_settings_stat
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Copy VS Code Settings if file exists
   ansible.builtin.copy:
     src: vscode/settings.json
     dest: "{{ ansible_user_dir }}/.config/Code/User/settings.json"
-    mode: '0644'
-    backup: yes
+    mode: "0644"
+    backup: true
   when: vscode_settings_stat.stat.exists

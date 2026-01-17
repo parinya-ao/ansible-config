@@ -13,7 +13,7 @@
     - uv
 
 - name: Verify uv installation
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: "{{ lookup('env', 'HOME') }}/.local/bin/uv --version"
   register: uv_version
   changed_when: false

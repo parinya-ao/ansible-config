@@ -135,10 +135,31 @@
 # SSH Signing Configuration
 # ============================================================================
 
+- name: Check if SSH public key exists
+  ansible.builtin.stat:
+    path: "{{ actual_user_home }}/.ssh/id_ed25519.pub"
+  register: ssh_public_key
+  become: true
+  become_user: "{{ actual_user_name }}"
+
 - name: Configure git SSH signing
   become: true
   become_user: "{{ actual_user_name }}"
+  when: ssh_public_key.stat.exists
   block:
+    - name: Read SSH public key content
+      ansible.builtin.slurp:
+        path: "{{ actual_user_home }}/.ssh/id_ed25519.pub"
+      register: ssh_pubkey_content
+
+    - name: Create allowed_signers file
+      ansible.builtin.copy:
+        content: "{{ git_config_email }} namespaces=\"git\" {{ ssh_pubkey_content.content | b64decode | trim }}\n"
+        dest: "{{ actual_user_home }}/.ssh/allowed_signers"
+        mode: "0644"
+        owner: "{{ actual_user_name }}"
+        group: "{{ actual_user_name }}"
+
     - name: Set git signing key to SSH public key
       community.general.git_config:
         name: user.signingkey
@@ -149,6 +170,12 @@
       community.general.git_config:
         name: gpg.format
         value: ssh
+        scope: "{{ git_config_scope }}"
+
+    - name: Set allowed signers file
+      community.general.git_config:
+        name: gpg.ssh.allowedSignersFile
+        value: "{{ actual_user_home }}/.ssh/allowed_signers"
         scope: "{{ git_config_scope }}"
 
     - name: Enable commit signing

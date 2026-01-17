@@ -13,7 +13,7 @@
     - compilers
 
 - name: Verify Rust installation
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: "{{ lookup('env', 'HOME') }}/.cargo/bin/rustc --version"
   register: rust_version
   changed_when: false

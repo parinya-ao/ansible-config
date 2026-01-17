@@ -79,7 +79,7 @@
     - mobile
 
 - name: Set Java 17 (Temurin) as default alternative
-  ansible.builtin.alternatives:
+  community.general.alternatives:
     name: java
     path: /usr/lib/jvm/temurin-17-jdk/bin/java
     link: /usr/bin/java
@@ -89,7 +89,7 @@
     - mobile
 
 - name: Set javac 17 (Temurin) as default alternative
-  ansible.builtin.alternatives:
+  community.general.alternatives:
     name: javac
     path: /usr/lib/jvm/temurin-17-jdk/bin/javac
     link: /usr/bin/javac
@@ -135,7 +135,7 @@
   ansible.builtin.unarchive:
     src: "/tmp/commandlinetools-linux-latest.zip"
     dest: "/tmp"
-    remote_src: yes
+    remote_src: true
   when: not android_sdk_check.stat.exists
   tags:
     - android
@@ -168,7 +168,7 @@
     line: "export ANDROID_HOME=$HOME/Android/Sdk"
     regexp: "^export ANDROID_HOME="
     state: present
-    create: yes
+    create: true
     owner: "{{ actual_user_name }}"
     group: "{{ actual_user_name }}"
   tags:
@@ -181,7 +181,7 @@
     line: "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
     regexp: ".*ANDROID_HOME/cmdline-tools.*"
     state: present
-    create: yes
+    create: true
     owner: "{{ actual_user_name }}"
     group: "{{ actual_user_name }}"
   tags:

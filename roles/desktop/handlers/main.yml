@@ -2,7 +2,6 @@
 ---
 # handlers file for roles/desktop
 
-- name: restart bash
-  ansible.builtin.shell: exec bash
+- name: Restart bash
+  ansible.builtin.command: exec bash
   listen: restart bash configuration
-

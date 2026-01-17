@@ -50,7 +50,7 @@
     - development-tools
 
 - name: Set Java 17 (Temurin) as default alternative
-  ansible.builtin.alternatives:
+  community.general.alternatives:
     name: java
     path: /usr/lib/jvm/temurin-17-jdk/bin/java
     link: /usr/bin/java
@@ -60,7 +60,7 @@
     - development-tools
 
 - name: Set javac 17 (Temurin) as default alternative
-  ansible.builtin.alternatives:
+  community.general.alternatives:
     name: javac
     path: /usr/lib/jvm/temurin-17-jdk/bin/javac
     link: /usr/bin/javac

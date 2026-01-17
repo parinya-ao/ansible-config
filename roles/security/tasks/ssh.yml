@@ -3,7 +3,7 @@
 # SSH port configuration using firewalld
 
 - name: Open SSH port {{ security_ssh_port }} with firewalld
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: firewall-cmd --permanent --add-port={{ security_ssh_port }}/tcp
   become: true
   register: ssh_port_result
@@ -13,7 +13,7 @@
     - ssh
 
 - name: Reload firewalld for SSH port
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: firewall-cmd --reload
   become: true
   when: ssh_port_result.changed

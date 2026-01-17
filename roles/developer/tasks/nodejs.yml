@@ -20,7 +20,7 @@
     - javascript
 
 - name: Verify Node.js installation
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: node -v
   register: node_version
   changed_when: false

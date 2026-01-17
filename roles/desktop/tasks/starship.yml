@@ -12,4 +12,4 @@
     path: /etc/bashrc
     line: 'eval "$(starship init bash)"'
     state: present
-    create: yes
+    create: true

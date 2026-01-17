@@ -3,7 +3,7 @@
 # Custom ports configuration using firewalld
 
 - name: Open custom ports in firewalld
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: firewall-cmd --permanent --add-port={{ item.port }}/{{ item.protocol | default('tcp') }}
   loop: "{{ security_custom_ports }}"
   when: (item.state | default('enabled')) == 'enabled'
@@ -14,7 +14,7 @@
     - custom-ports
 
 - name: Reload firewalld for custom ports
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: firewall-cmd --reload
   become: true
   when: custom_ports_result.changed | default(false)

@@ -27,6 +27,8 @@ developer_compilers_packages:
   - make
   - automake
   - autoconf
+  - ansible-lint
+  - yamllint
 
 # Node.js major version to install via NodeSource package stream
 developer_node_version: "24"

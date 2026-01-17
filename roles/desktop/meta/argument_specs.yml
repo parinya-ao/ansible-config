@@ -7,7 +7,7 @@ argument_specs:
       - This role automates the setup of a fully-functional GNOME-based desktop environment
       - Installs flatpak, VS Code, Starship prompt, and various desktop applications
       - Requires the common role as a prerequisite for base system setup
-    version_added: '1.0.0'
+    version_added: "1.0.0"
     author: Parinya Luangchaisuk
     options:
       install_desktop_packages:

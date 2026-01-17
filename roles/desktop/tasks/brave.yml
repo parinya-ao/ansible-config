@@ -14,7 +14,7 @@
     dest: /etc/yum.repos.d/brave-browser.repo
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   become: true
 
 - name: Import Brave GPG key
@@ -36,7 +36,7 @@
     remote_src: true
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   become: true
   register: icon_injected
 
