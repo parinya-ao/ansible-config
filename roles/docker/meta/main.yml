@@ -21,7 +21,7 @@ galaxy_info:
     - docker
     - containers
     - containerization
-    - docker-ce
+    - dockerce
     - containerd
     - devops
 

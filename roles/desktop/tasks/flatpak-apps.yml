@@ -1,4 +1,4 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 # Install Flatpak applications
 
@@ -6,10 +6,10 @@
   community.general.flatpak_remote:
     name: flathub
     state: present
-    flatpakrepo_url: "{{ flathub_repo_url }}"
+    flatpakrepo_url: "{{ desktop_flathub_repo_url }}"
   become: true
 
 - name: Install Flatpak applications
   community.general.flatpak:
-    name: "{{ flatpak_apps_list }}"
+    name: "{{ desktop_flatpak_apps_list }}"
     state: present

@@ -5,14 +5,14 @@
 - name: Check if Zed is already installed
   ansible.builtin.stat:
     path: "{{ ansible_user_dir }}/.local/bin/zed"
-  register: zed_binary
+  register: desktop_zed_binary
 
 - name: Download Zed tarball
   ansible.builtin.get_url:
-    url: "{{ zed_download_url }}"
+    url: "{{ desktop_zed_download_url }}"
     dest: /tmp/zed-linux-x86_64.tar.gz
     mode: "0644"
-  when: not zed_binary.stat.exists
+  when: not desktop_zed_binary.stat.exists
 
 - name: Ensure .local directory exists
   ansible.builtin.file:
@@ -26,7 +26,7 @@
     dest: "{{ ansible_user_dir }}/.local"
     mode: "0755"
     remote_src: true
-  when: not zed_binary.stat.exists
+  when: not desktop_zed_binary.stat.exists
 
 - name: Ensure .local/bin directory exists
   ansible.builtin.file:
@@ -39,7 +39,7 @@
     src: "{{ ansible_user_dir }}/.local/zed.app/bin/zed"
     dest: "{{ ansible_user_dir }}/.local/bin/zed"
     state: link
-  when: not zed_binary.stat.exists
+  when: not desktop_zed_binary.stat.exists
 
 - name: Ensure .local/share/applications directory exists
   ansible.builtin.file:
@@ -53,7 +53,7 @@
     dest: "{{ ansible_user_dir }}/.local/share/applications/dev.zed.Zed.desktop"
     mode: "0644"
     remote_src: true
-  when: not zed_binary.stat.exists
+  when: not desktop_zed_binary.stat.exists
 
 - name: Update desktop entry icon path
   ansible.builtin.lineinfile:
@@ -61,7 +61,7 @@
     regexp: "^Icon=zed$"
     line: "Icon={{ ansible_user_dir }}/.local/zed.app/share/icons/hicolor/512x512/apps/zed.png"
     backrefs: true
-  when: not zed_binary.stat.exists
+  when: not desktop_zed_binary.stat.exists
 
 - name: Update desktop entry exec path
   ansible.builtin.lineinfile:
@@ -69,13 +69,13 @@
     regexp: "^Exec=zed$"
     line: "Exec={{ ansible_user_dir }}/.local/zed.app/libexec/zed-editor"
     backrefs: true
-  when: not zed_binary.stat.exists
+  when: not desktop_zed_binary.stat.exists
 
 - name: Clean up downloaded tarball
   ansible.builtin.file:
     path: /tmp/zed-linux-x86_64.tar.gz
     state: absent
-  when: not zed_binary.stat.exists
+  when: not desktop_zed_binary.stat.exists
 
 - name: Display Zed installation complete
   ansible.builtin.debug:

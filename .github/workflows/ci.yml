@@ -292,7 +292,9 @@ jobs:
           echo "Fedora Verify Test: ${{ needs.test-fedora-verify.result }}"
           echo ""
 
-          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs.test-fedora.result }}" != "success" || "${{ needs.test-fedora-verify.result }}" != "success" ]]; then
+          if [[ "${{ needs.lint.result }}" != "success" || \
+                "${{ needs.test-fedora.result }}" != "success" || \
+                "${{ needs.test-fedora-verify.result }}" != "success" ]]; then
               echo "✗ Some checks failed"
               exit 1
           fi
@@ -301,7 +303,7 @@ jobs:
 
       - name: Display summary
         if: always()
-        run: |
+        run: |-
           echo "=== Build Summary ==="
           echo "Repository: ${{ github.repository }}"
           echo "Branch: ${{ github.ref_name }}"

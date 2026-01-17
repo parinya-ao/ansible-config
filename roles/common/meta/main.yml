@@ -21,7 +21,7 @@ galaxy_info:
     - system
     - base
     - dnf
-    - package-manager
+    - packagemanager
     - fedora
     - initialization
 

@@ -1,4 +1,4 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 argument_specs:
   main:
@@ -10,31 +10,31 @@ argument_specs:
     version_added: "1.0.0"
     author: Parinya Luangchaisuk
     options:
-      install_desktop_packages:
+      desktop_install_desktop_packages:
         type: bool
         default: true
         required: false
         description: Install base desktop packages (okular, xclip, gnome-tweaks, etc.)
 
-      install_vscode:
+      desktop_install_vscode:
         type: bool
         default: true
         required: false
         description: Install and configure Visual Studio Code from Microsoft repository
 
-      install_starship:
+      desktop_install_starship:
         type: bool
         default: true
         required: false
         description: Install and configure Starship command prompt
 
-      install_flatpak_apps:
+      desktop_install_flatpak_apps:
         type: bool
         default: true
         required: false
         description: Install flatpak applications (Discord, Postman, Signal, OBS, Anki)
 
-      flatpak_apps_list:
+      desktop_flatpak_apps_list:
         type: list
         elements: str
         default:

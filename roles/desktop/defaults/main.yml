@@ -1,28 +1,28 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 # defaults file for roles/desktop
 # These are low-priority variables that can be overridden by playbooks or host variables
 
 # Feature flags for conditional role execution
-install_desktop_packages: true
-install_vscode: true
-install_starship: true
-install_flatpak_apps: true
-install_zed: true
+desktop_install_desktop_packages: true
+desktop_install_vscode: true
+desktop_install_starship: true
+desktop_install_flatpak_apps: true
+desktop_install_zed: true
 
 # Zed editor download URL
-zed_download_url: "https://github.com/zed-industries/zed/releases/latest/download/zed-linux-x86_64.tar.gz"
+desktop_zed_download_url: "https://github.com/zed-industries/zed/releases/latest/download/zed-linux-x86_64.tar.gz"
 
 # Brave browser URLs
-brave_repo_url: "https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo"
-brave_gpg_key_url: "https://brave-browser-rpm-release.s3.brave.com/brave-core.asc"
+desktop_brave_repo_url: "https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo"
+desktop_brave_gpg_key_url: "https://brave-browser-rpm-release.s3.brave.com/brave-core.asc"
 
 # VSCode URLs
-vscode_gpg_key_url: "https://packages.microsoft.com/keys/microsoft.asc"
-vscode_repo_baseurl: "https://packages.microsoft.com/yumrepos/vscode"
+desktop_vscode_gpg_key_url: "https://packages.microsoft.com/keys/microsoft.asc"
+desktop_vscode_repo_baseurl: "https://packages.microsoft.com/yumrepos/vscode"
 
 # Flatpak applications to install
-flatpak_apps_list:
+desktop_flatpak_apps_list:
   - com.getpostman.Postman
   - org.signal.Signal
   - com.obsproject.Studio
@@ -37,10 +37,10 @@ desktop_packages:
   - gnome-tweaks
 
 # Starship configuration
-starship_install: true
-starship_config_path: /etc/bashrc
+desktop_starship_install: true
+desktop_starship_config_path: /etc/bashrc
 
 # Installation URLs
-flathub_repo_url: "https://dl.flathub.org/repo/flathub.flatpakrepo"
-flathub_repo_url_alt: "https://flathub.org/repo/flathub.flatpakrepo"
-starship_install_url: "https://starship.rs/install.sh"
+desktop_flathub_repo_url: "https://dl.flathub.org/repo/flathub.flatpakrepo"
+desktop_flathub_repo_url_alt: "https://flathub.org/repo/flathub.flatpakrepo"
+desktop_starship_install_url: "https://starship.rs/install.sh"

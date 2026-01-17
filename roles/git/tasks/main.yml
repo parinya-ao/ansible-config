@@ -13,7 +13,7 @@
     value: "{{ git_config_name }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 - name: Set git user.email
   community.general.git_config:
@@ -21,7 +21,7 @@
     value: "{{ git_config_email }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 # ============================================================================
 # Commit Configuration
@@ -33,7 +33,7 @@
     value: "{{ git_commit_verbose }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 # ============================================================================
 # Push and Pull Configuration
@@ -45,7 +45,7 @@
     value: "{{ git_push_autosetupremote }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 - name: Set pull.rebase
   community.general.git_config:
@@ -53,7 +53,7 @@
     value: "{{ git_pull_rebase }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 # ============================================================================
 # Rebase Configuration
@@ -65,7 +65,7 @@
     value: "{{ git_rebase_autostash }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 # ============================================================================
 # Fetch Configuration
@@ -77,7 +77,7 @@
     value: "{{ git_fetch_prune }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 # ============================================================================
 # Rerere Configuration
@@ -89,7 +89,7 @@
     value: "{{ git_rerere_enabled }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 - name: Enable rerere autoupdate
   community.general.git_config:
@@ -97,7 +97,7 @@
     value: "{{ git_rerere_autoupdate }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 # ============================================================================
 # Core Configuration
@@ -109,7 +109,7 @@
     value: "{{ git_core_autocrlf }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 - name: Set core.editor
   community.general.git_config:
@@ -117,7 +117,7 @@
     value: "{{ git_core_editor }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 # ============================================================================
 # Git Aliases
@@ -129,7 +129,7 @@
     value: "{{ git_alias_lg }}"
     scope: "{{ git_config_scope }}"
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 # ============================================================================
 # SSH Signing Configuration
@@ -137,33 +137,33 @@
 
 - name: Check if SSH public key exists
   ansible.builtin.stat:
-    path: "{{ actual_user_home }}/.ssh/id_ed25519.pub"
-  register: ssh_public_key
+    path: "{{ git_actual_user_home }}/.ssh/id_ed25519.pub"
+  register: git_ssh_public_key
   become: true
-  become_user: "{{ actual_user_name }}"
+  become_user: "{{ git_actual_user_name }}"
 
 - name: Configure git SSH signing
   become: true
-  become_user: "{{ actual_user_name }}"
-  when: ssh_public_key.stat.exists
+  become_user: "{{ git_actual_user_name }}"
+  when: git_ssh_public_key.stat.exists
   block:
     - name: Read SSH public key content
       ansible.builtin.slurp:
-        path: "{{ actual_user_home }}/.ssh/id_ed25519.pub"
-      register: ssh_pubkey_content
+        path: "{{ git_actual_user_home }}/.ssh/id_ed25519.pub"
+      register: git_ssh_pubkey_content
 
     - name: Create allowed_signers file
       ansible.builtin.copy:
-        content: "{{ git_config_email }} namespaces=\"git\" {{ ssh_pubkey_content.content | b64decode | trim }}\n"
-        dest: "{{ actual_user_home }}/.ssh/allowed_signers"
+        content: "{{ git_config_email }} namespaces=\"git\" {{ git_ssh_pubkey_content.content | b64decode | trim }}\n"
+        dest: "{{ git_actual_user_home }}/.ssh/allowed_signers"
         mode: "0644"
-        owner: "{{ actual_user_name }}"
-        group: "{{ actual_user_name }}"
+        owner: "{{ git_actual_user_name }}"
+        group: "{{ git_actual_user_name }}"
 
     - name: Set git signing key to SSH public key
       community.general.git_config:
         name: user.signingkey
-        value: "{{ actual_user_home }}/.ssh/id_ed25519.pub"
+        value: "{{ git_actual_user_home }}/.ssh/id_ed25519.pub"
         scope: "{{ git_config_scope }}"
 
     - name: Use SSH format for git signing
@@ -175,7 +175,7 @@
     - name: Set allowed signers file
       community.general.git_config:
         name: gpg.ssh.allowedSignersFile
-        value: "{{ actual_user_home }}/.ssh/allowed_signers"
+        value: "{{ git_actual_user_home }}/.ssh/allowed_signers"
         scope: "{{ git_config_scope }}"
 
     - name: Enable commit signing
