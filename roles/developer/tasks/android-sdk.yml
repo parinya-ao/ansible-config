@@ -28,14 +28,71 @@
     - android
     - mobile
 
+- name: Install Adoptium Temurin Java Repository
+  ansible.builtin.dnf:
+    name: adoptium-temurin-java-repository
+    state: present
+  become: true
+  tags:
+    - android
+    - mobile
+
+- name: Enable Fedora third-party repositories
+  ansible.builtin.command:
+    cmd: fedora-third-party enable
+  become: true
+  ignore_errors: true
+  tags:
+    - android
+    - mobile
+
+- name: Remove all OpenJDK packages
+  ansible.builtin.dnf:
+    name:
+      - java-21-openjdk
+      - java-21-openjdk-devel
+      - java-21-openjdk-headless
+      - java-25-openjdk
+      - java-25-openjdk-devel
+      - java-25-openjdk-headless
+      - java-25-openjdk-crypto-adapter
+      - java-latest-openjdk
+      - java-latest-openjdk-devel
+      - java-latest-openjdk-headless
+    state: absent
+  become: true
+  ignore_errors: true
+  tags:
+    - android
+    - mobile
+
 - name: Install Android SDK dependencies
   ansible.builtin.dnf:
     name:
       - unzip
       - rsync
-      - java-21-openjdk
-      - java-21-openjdk-devel
+      - temurin-17-jdk
     state: present
+  become: true
+  tags:
+    - android
+    - mobile
+
+- name: Set Java 17 (Temurin) as default alternative
+  ansible.builtin.alternatives:
+    name: java
+    path: /usr/lib/jvm/temurin-17-jdk/bin/java
+    link: /usr/bin/java
+  become: true
+  tags:
+    - android
+    - mobile
+
+- name: Set javac 17 (Temurin) as default alternative
+  ansible.builtin.alternatives:
+    name: javac
+    path: /usr/lib/jvm/temurin-17-jdk/bin/javac
+    link: /usr/bin/javac
   become: true
   tags:
     - android
