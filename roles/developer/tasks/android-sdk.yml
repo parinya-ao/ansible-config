@@ -99,11 +99,9 @@
     - android
     - mobile
 
-- name: Fetch Android SDK command-line tools URL
-  ansible.builtin.shell:
-    cmd: curl -s https://developer.android.com/studio | grep -oP 'https://dl.google.com/android/repository/commandlinetools-linux-[0-9]+_latest.zip' | head -n1
-  register: developer_android_sdk_url
-  changed_when: false
+- name: Set Android SDK command-line tools URL
+  ansible.builtin.set_fact:
+    developer_android_sdk_download_url: "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
   when: not developer_android_sdk_check.stat.exists
   tags:
     - android
@@ -111,7 +109,7 @@
 
 - name: Download Android SDK command-line tools
   ansible.builtin.get_url:
-    url: "{{ developer_android_sdk_url.stdout }}"
+    url: "{{ developer_android_sdk_download_url }}"
     dest: "/tmp/commandlinetools-linux-latest.zip"
     mode: "0644"
   when: not developer_android_sdk_check.stat.exists
@@ -142,12 +140,11 @@
     - mobile
 
 - name: Move command-line tools to final location
-  ansible.builtin.synchronize:
+  ansible.builtin.copy:
     src: /tmp/cmdline-tools/
     dest: "{{ developer_actual_user_home }}/Android/Sdk/cmdline-tools/latest/"
-    recursive: true
-    delete: false
-  delegate_to: localhost
+    remote_src: true
+    mode: preserve
   become: true
   when: not developer_android_sdk_check.stat.exists
   tags:
@@ -208,9 +205,10 @@
 
 - name: Accept Android SDK licenses
   ansible.builtin.shell:
-    cmd: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" --licenses
+    cmd: set -o pipefail && yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" --licenses
   args:
     creates: "{{ developer_actual_user_home }}/Android/Sdk/licenses/android-sdk-license"
+    executable: /bin/bash
   environment:
     ANDROID_HOME: "{{ developer_actual_user_home }}/Android/Sdk"
   become: true
