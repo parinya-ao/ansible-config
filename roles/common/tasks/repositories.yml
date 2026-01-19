@@ -2,11 +2,17 @@
 # SPDX-License-Identifier: MIT-0
 # Repository configuration tasks
 
+- name: Gather package facts
+  ansible.builtin.package_facts:
+    manager: auto
+  tags:
+    - repositories
+    - rpm-fusion
+    - terra
+
 - name: Check if RPM Fusion free repository is installed
-  ansible.builtin.shell: rpm -q rpmfusion-free-release
-  register: common_rpmfusion_free_check
-  changed_when: false
-  failed_when: false
+  ansible.builtin.set_fact:
+    common_rpmfusion_free_installed: "{{ 'rpmfusion-free-release' in ansible_facts.packages }}"
   tags:
     - repositories
     - rpm-fusion
@@ -18,17 +24,15 @@
     state: present
   when:
     - common_enable_rpm_fusion | bool
-    - common_rpmfusion_free_check.rc != 0
+    - not common_rpmfusion_free_installed | bool
   become: true
   tags:
     - repositories
     - rpm-fusion
 
 - name: Check if RPM Fusion nonfree repository is installed
-  ansible.builtin.shell: rpm -q rpmfusion-nonfree-release
-  register: common_rpmfusion_nonfree_check
-  changed_when: false
-  failed_when: false
+  ansible.builtin.set_fact:
+    common_rpmfusion_nonfree_installed: "{{ 'rpmfusion-nonfree-release' in ansible_facts.packages }}"
   tags:
     - repositories
     - rpm-fusion
@@ -40,7 +44,7 @@
     state: present
   when:
     - common_enable_rpm_fusion | bool
-    - common_rpmfusion_nonfree_check.rc != 0
+    - not common_rpmfusion_nonfree_installed | bool
   become: true
   tags:
     - repositories
@@ -57,10 +61,8 @@
     - rpm-fusion
 
 - name: Check if Terra repository is installed
-  ansible.builtin.shell: rpm -q terra-release
-  register: common_terra_check
-  changed_when: false
-  failed_when: false
+  ansible.builtin.set_fact:
+    common_terra_installed: "{{ 'terra-release' in ansible_facts.packages }}"
   tags:
     - repositories
     - terra
@@ -73,7 +75,7 @@
     state: present
   when:
     - common_enable_terra_repo | bool
-    - common_terra_check.rc != 0
+    - not common_terra_installed | bool
   become: true
   tags:
     - repositories
