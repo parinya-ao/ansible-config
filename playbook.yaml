@@ -36,6 +36,7 @@
           - "  5. developer   - Development tools and runtimes"
           - "  6. font        - Font installation"
           - "  7. gnome       - GNOME desktop configuration"
+          - "  8. multimedia  - Multimedia codecs and video acceleration"
           - "=========================================="
 
     - name: Display Ansible version
@@ -82,6 +83,11 @@
       tags:
         - gnome
         - desktop
+
+    - role: multimedia
+      tags:
+        - multimedia
+        - codecs
 
   # - role: security
   #   tags:

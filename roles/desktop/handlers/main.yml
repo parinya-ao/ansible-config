@@ -14,3 +14,9 @@
 - name: Update desktop database
   ansible.builtin.command: update-desktop-database /usr/share/applications
   changed_when: false
+
+- name: Reload firewalld
+  ansible.builtin.service:
+    name: firewalld
+    state: reloaded
+  become: true

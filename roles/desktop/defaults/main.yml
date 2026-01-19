@@ -8,7 +8,15 @@ desktop_install_desktop_packages: true
 desktop_install_vscode: true
 desktop_install_starship: true
 desktop_install_flatpak_apps: true
+desktop_install_flatpak: true
+desktop_enable_flatpak_user: true
+desktop_install_gnome_extensions: true
 desktop_install_zed: true
+
+# GNOME extensions
+desktop_gnome_extensions:
+  - gnome-shell-extension-pop-shell
+  - nautilus-python
 
 # Zed editor download URL
 desktop_zed_download_url: "https://github.com/zed-industries/zed/releases/latest/download/zed-linux-x86_64.tar.gz"
@@ -28,6 +36,43 @@ desktop_flatpak_apps_list:
   - com.obsproject.Studio
   - net.ankiweb.Anki
   - com.rustdesk.RustDesk
+  - it.mijorus.gearlever
+  - com.github.micahflee.torbrowser-launcher
+  - com.transmissionbt.Transmission
+  - org.gimp.GIMP
+  - org.kde.krita
+  - org.blender.Blender
+  - org.inkscape.Inkscape
+  - org.gnome.HandyGamer
+  - org.gnome.World.PikaBackup
+  - org.gnome.Snapshot
+  - org.gnome.baobab
+  - io.github.celluloid_player.Celluloid
+  - com.uploadedlobster.peek
+  - org.gnome.design.IconLibrary
+  - org.gnome.gitlab.YaLTeR.VideoTrimmer
+  - org.gnome.gitlab.jonasschmidtmann.VideoTranscoder
+  - org.gnome.gitlab.somas.AmbientNoise
+  - com.github.maoschanz.drawing
+  - com.rafaelmardojai.Blanket
+  - io.github.zen_browser.zen
+  - com.jgraph.drawio.desktop
+  - org.gnome.Calculator
+  - org.gnome.Calendar
+  - org.gnome.Clocks
+  - org.gnome.Contacts
+  - org.gnome.Documents
+  - org.gnome.Extensions
+  - org.gnome.Epiphany
+  - org.gnome.Logs
+  - org.gnome.Maps
+  - org.gnome.Music
+  - org.gnome.Nautilus
+  - org.gnome.Photos
+  - org.gnome.Rhythmbox3
+  - org.gnome.Software
+  - org.gnome.TextEditor
+  - org.gnome.Weather
 
 # Desktop packages to install
 desktop_packages:

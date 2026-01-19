@@ -20,3 +20,9 @@
     state: started
   become: true
   when: common_firewalld_enabled | default(true)
+
+- name: Restart systemd-resolved
+  ansible.builtin.service:
+    name: systemd-resolved
+    state: restarted
+  become: true

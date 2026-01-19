@@ -1,0 +1,53 @@
+---
+# SPDX-License-Identifier: MIT-0
+# NVIDIA drivers installation tasks
+
+- name: Check if NVIDIA GPU is present
+  ansible.builtin.command: lspci | grep -i nvidia
+  register: common_nvidia_gpu_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - nvidia
+
+- name: Install NVIDIA kernel module
+  ansible.builtin.dnf:
+    name: akmod-nvidia
+    state: present
+  when:
+    - common_install_nvidia_drivers | bool
+    - common_nvidia_gpu_check.rc == 0
+  become: true
+  tags:
+    - nvidia
+
+- name: Install NVIDIA CUDA support
+  ansible.builtin.dnf:
+    name: xorg-x11-drv-nvidia-cuda
+    state: present
+  when:
+    - common_install_nvidia_drivers | bool
+    - common_nvidia_gpu_check.rc == 0
+  become: true
+  tags:
+    - nvidia
+
+- name: Wait for NVIDIA kernel module to be built
+  ansible.builtin.pause:
+    minutes: 5
+  when:
+    - common_install_nvidia_drivers | bool
+    - common_nvidia_gpu_check.rc == 0
+  tags:
+    - nvidia
+
+- name: Check NVIDIA kernel module version
+  ansible.builtin.command: modinfo -F version nvidia
+  register: common_nvidia_module_check
+  changed_when: false
+  failed_when: false
+  when:
+    - common_install_nvidia_drivers | bool
+    - common_nvidia_gpu_check.rc == 0
+  tags:
+    - nvidia

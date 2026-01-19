@@ -1,0 +1,40 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Install GNOME extensions
+
+- name: Install GNOME extensions
+  ansible.builtin.dnf:
+    name: "{{ desktop_gnome_extensions }}"
+    state: present
+  become: true
+  when: desktop_install_gnome_extensions | bool
+  tags:
+    - desktop
+    - gnome
+    - extensions
+
+- name: Install GSConnect dependencies
+  ansible.builtin.dnf:
+    name: nautilus-python
+    state: present
+  become: true
+  when: desktop_install_gnome_extensions | bool
+  tags:
+    - desktop
+    - gnome
+    - extensions
+
+- name: Configure firewall for KDE Connect/GSConnect
+  ansible.posix.firewalld:
+    service: kdeconnect
+    permanent: true
+    state: enabled
+  become: true
+  when: desktop_install_gnome_extensions | bool
+  notify:
+    - Reload firewalld
+  tags:
+    - desktop
+    - gnome
+    - extensions
+    - firewall

@@ -5,6 +5,16 @@
 # - DNF package manager optimization
 # - System package updates
 # - Essential base packages
+# - Repository configuration (RPM Fusion, Terra)
+# - NVIDIA drivers (optional)
+# - System optimizations
+
+# Repository Configuration
+- name: Configure repositories
+  ansible.builtin.import_tasks: repositories.yml
+  tags:
+    - common
+    - repositories
 
 # DNF Configuration
 - name: Configure DNF package manager
@@ -26,6 +36,27 @@
   tags:
     - common
     - packages
+
+# NVIDIA Drivers
+- name: Install NVIDIA drivers
+  ansible.builtin.import_tasks: nvidia.yml
+  tags:
+    - common
+    - nvidia
+
+# Firmware Updates
+- name: Update firmware
+  ansible.builtin.import_tasks: firmware.yml
+  tags:
+    - common
+    - firmware
+
+# System Optimizations
+- name: Apply system optimizations
+  ansible.builtin.import_tasks: optimizations.yml
+  tags:
+    - common
+    - optimizations
 
 # System Maintenance
 - name: Configure system maintenance tasks

@@ -2,14 +2,34 @@
 ---
 # Install Flatpak applications
 
-- name: Add Flathub remote
+- name: Add Flathub remote (system-wide)
   community.general.flatpak_remote:
     name: flathub
     state: present
     flatpakrepo_url: "{{ desktop_flathub_repo_url }}"
   become: true
+  when: desktop_install_flatpak | bool
+  tags:
+    - flatpak
+    - flathub
+
+- name: Add Flathub remote (user-home installation)
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: "{{ desktop_flathub_repo_url_alt }}"
+    method: user
+  when: desktop_enable_flatpak_user | bool
+  tags:
+    - flatpak
+    - flathub
 
 - name: Install Flatpak applications
   community.general.flatpak:
     name: "{{ desktop_flatpak_apps_list }}"
     state: present
+  become: true
+  when: desktop_install_flatpak_apps | bool
+  tags:
+    - flatpak
+    - apps

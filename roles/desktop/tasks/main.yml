@@ -8,6 +8,12 @@
     - desktop
     - packages
 
+- name: Install GNOME extensions
+  ansible.builtin.import_tasks: gnome-extensions.yml
+  tags:
+    - desktop
+    - gnome
+
 - name: Install Visual Studio Code
   ansible.builtin.import_tasks: vscode.yml
   tags:

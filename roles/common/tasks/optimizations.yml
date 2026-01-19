@@ -1,0 +1,79 @@
+---
+# SPDX-License-Identifier: MIT-0
+# System optimization tasks
+
+- name: Enable nvidia-modeset for PRIME interoperability
+  ansible.builtin.command: grubby --update-kernel=ALL --args="nvidia-drm.modeset=1"
+  when: common_install_nvidia_drivers | bool
+  become: true
+  register: common_nvidia_modeset
+  changed_when: common_nvidia_modeset.rc == 0
+  tags:
+    - optimizations
+    - nvidia
+
+- name: Disable NetworkManager-wait-online.service
+  ansible.builtin.systemd:
+    name: NetworkManager-wait-online.service
+    enabled: false
+    state: stopped
+  when: common_apply_optimizations | bool
+  become: true
+  tags:
+    - optimizations
+    - boot
+
+- name: Remove Gnome Software from autostart
+  ansible.builtin.file:
+    path: /etc/xdg/autostart/org.gnome.Software.desktop
+    state: absent
+  when: common_apply_optimizations | bool
+  become: true
+  tags:
+    - optimizations
+    - gnome
+
+- name: Set system hostname
+  ansible.builtin.hostname:
+    name: "{{ common_hostname }}"
+  become: true
+  tags:
+    - optimizations
+    - hostname
+
+- name: Set UTC time (for dual boot systems)
+  ansible.builtin.command: timedatectl set-local-rtc 0
+  when: common_set_utc_time | bool
+  become: true
+  register: common_utc_time
+  changed_when: common_utc_time.rc == 0
+  tags:
+    - optimizations
+    - time
+
+- name: Configure custom DNS with DNS-over-TLS
+  ansible.builtin.blockinfile:
+    path: /etc/systemd/resolved.conf.d/99-dns-over-tls.conf
+    block: |
+      [Resolve]
+      DNS={{ common_dns_servers | join(' ') }}
+      DNSOverTLS=yes
+      Domains=~.
+    create: true
+    mode: "0644"
+  when: common_configure_custom_dns | bool
+  become: true
+  notify:
+    - Restart systemd-resolved
+  tags:
+    - optimizations
+    - dns
+
+- name: Remove Firefox default start page override
+  ansible.builtin.file:
+    path: /usr/lib64/firefox/browser/defaults/preferences/firefox-redhat-default-prefs.js
+    state: absent
+  become: true
+  tags:
+    - optimizations
+    - firefox
