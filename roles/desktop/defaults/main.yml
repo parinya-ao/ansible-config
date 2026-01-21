@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: MIT-0
 ---
 # defaults file for roles/desktop
-# These are low-priority variables that can be overridden by playbooks or host variables
+# These are low-priority variables that can be overridden by playbooks
+# or host variables
 
 # Feature flags for conditional role execution
 desktop_install_desktop_packages: true

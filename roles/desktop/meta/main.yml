@@ -2,7 +2,9 @@
 ---
 galaxy_info:
   author: Parinya Luangchaisuk
-  description: Configure GNOME-based desktop environment with essential applications and tools
+  description: >-
+    Configure GNOME-based desktop environment with essential
+    applications and tools
   company: Personal
   license: MIT-0
   min_ansible_version: "2.11"
