@@ -14,8 +14,8 @@
     # -----------------------------------------------------------------
     - name: "0. Force Enable WiFi Radio (Fix 'sw disabled')"
       ansible.builtin.command: nmcli radio wifi on
-      register: radio_wake
-      changed_when: "'disabled' in radio_wake.stderr or 'disabled' in radio_wake.stdout"
+      register: wifi_radio_wake
+      changed_when: "'disabled' in wifi_radio_wake.stderr or 'disabled' in wifi_radio_wake.stdout"
       # Wait for hardware to initialize
 
     - name: "Wait for WiFi device to become available"

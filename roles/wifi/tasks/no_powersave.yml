@@ -43,20 +43,21 @@
 
 - name: Check current kernel args
   ansible.builtin.command: grubby --info=DEFAULT
-  register: grubby_info
+  register: wifi_grubby_info
   changed_when: false
   failed_when: false
 
 - name: Disable kernel iwlwifi power save parameter
   ansible.builtin.command: grubby --update-kernel=ALL --args="iwlwifi.power_save=0"
-  when: "'iwlwifi.power_save=0' not in grubby_info.stdout"
+  when: "'iwlwifi.power_save=0' not in wifi_grubby_info.stdout"
+  changed_when: true
 
 - name: Check current power save status
   ansible.builtin.shell: |
     for iface in {{ wifi_ifaces.stdout_lines | join(' ') }}; do
       iw dev $iface get power_save
     done
-  register: current_power_save
+  register: wifi_current_power_save
   changed_when: false
 
 - name: Force power_save off on all Wi-Fi interfaces
@@ -64,4 +65,5 @@
     for iface in {{ wifi_ifaces.stdout_lines | join(' ') }}; do
       iw dev $iface set power_save off
     done
-  when: "'Power save: off' not in current_power_save.stdout"
+  when: wifi_current_power_save.stdout | length > 0
+  changed_when: true
