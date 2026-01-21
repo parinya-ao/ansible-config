@@ -1,11 +1,19 @@
 ---
 # SPDX-License-Identifier: MIT-0
+- name: Check if VSCode repository exists
+  ansible.builtin.stat:
+    path: /etc/yum.repos.d/vscode.repo
+  register: vscode_repo
+
 - name: Add VSCode repository
   ansible.builtin.yum_repository:
     name: code
     description: Visual Studio Code
     baseurl: "{{ desktop_vscode_repo_baseurl }}"
     enabled: true
+    gpgcheck: true
+    gpgkey: "{{ desktop_vscode_gpg_key_url }}"
+  when: not vscode_repo.stat.exists
 
 - name: Install Visual Studio Code
   ansible.builtin.dnf:

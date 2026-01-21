@@ -1,317 +1,131 @@
----
-name: Ansible Configuration CI
+name: 🛡️ Hardcore Ansible CI (Fedora Latest)
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [ main, develop ]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [ main, develop ]
   workflow_dispatch:
+
 jobs:
-  # Job 1: Syntax Check and Linting
-  lint:
-    name: Ansible Syntax & Lint Check
+  # ------------------------------------------------------------------
+  # JOB 1: Security & Secret Scanning (ด่านแรก ต้องผ่านก่อนถึงจะไปต่อ)
+  # ------------------------------------------------------------------
+  security-scan:
+    name: 🔒 Security Scan
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
         with:
-          python-version: "3.12.12"
+          fetch-depth: 0
 
-      - name: Install Ansible and lint tools
+      # 1. เช็คว่ามี Secret/Password หลุดมาไหม
+      - name: 🐷 TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      # 2. เช็ค Best Practices ด้านความปลอดภัยของ Code
+      - name: 🛡️ KICS IaC Security
+        uses: checkmarx/kics-github-action@v1.7.0
+        with:
+          path: "."
+          output_path: "kics-results"
+          ignore_on_exit: results # แจ้งเตือนแต่ไม่ทำ Fail (เปลี่ยนเป็น 'all' ถ้าอยากให้ Fail)
+
+  # ------------------------------------------------------------------
+  # JOB 2: Validation & Linting (เช็ค Syntax แบบเข้มข้น)
+  # ------------------------------------------------------------------
+  validate:
+    name: 🔍 Strict Validation
+    runs-on: ubuntu-latest
+    needs: [security-scan]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install Dependencies
+        run: pip install ansible-core ansible-lint yamllint
+
+      - name: 🧹 Ansible Lint (Strict Mode)
         run: |
-          python -m pip install --upgrade pip
-          pip install ansible ansible-lint yamllint
+          # ใช้ Profile 'production' เพื่อความโหดสูงสุด
+          ansible-lint --profile production --strict playbook.yaml roles/
 
-      - name: Display versions
-        run: |
-          echo "=== Ansible Version ==="
-          ansible --version
-          echo "=== Ansible-lint Version ==="
-          ansible-lint --version
-          echo "=== yamllint Version ==="
-          yamllint --version
-
-      - name: Validate playbook syntax
-        run: |
-          echo "=== Checking Playbook Syntax ==="
-          ansible-playbook playbook.yaml --syntax-check
-          echo "✓ Playbook syntax is valid"
-
-      - name: Validate role syntax
-        run: |
-          echo "=== Checking Role Syntax ==="
-          for role in roles/*/; do
-            echo "Checking role: $(basename $role)"
-            ansible-playbook --syntax-check -i inventory.ini \
-              -e "ansible_python_interpreter=/usr/bin/python3" \
-              -c local \
-              --list-tasks roles/$(basename $role)/tasks/main.yml || true
-          done
-
-      - name: Run ansible-lint
-        continue-on-error: true
-        run: |
-          echo "=== Running ansible-lint ==="
-          ansible-lint playbook.yaml roles/ -v || true
-
-      - name: Validate YAML syntax
-        run: |
-          echo "=== Checking YAML Syntax ==="
-          yamllint -d relaxed .
-
-  # Job 2: Test on Fedora
+  # ------------------------------------------------------------------
+  # JOB 3: Real Execution & Idempotence (Fedora Latest Only)
+  # ------------------------------------------------------------------
   test-fedora:
-    name: Test on Fedora
+    name: 🚀 Test on Fedora Latest
     runs-on: ubuntu-latest
+    needs: [validate]
     container:
-      image: fedora:latest
-      options: --privileged
+      image: fedora:latest # 🎯 บังคับใช้ตัวล่าสุดเท่านั้น
+      options: --privileged # เปิดสิทธิ์ให้แก้ไขระบบได้เต็มที่
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install basic dependencies
+      - name: 📦 Install CI Dependencies
         run: |
-          echo "=== Installing base dependencies on Fedora ==="
-          dnf install -y --allowerasing python3 python3-pip git \
-            curl xorg-x11-server-Xvfb dbus-x11 dconf glib2 \
-            gsettings-desktop-schemas
-
-      - name: Install Ansible
-        run: |
-          echo "=== Installing Ansible ==="
+          dnf install -y --allowerasing python3 python3-pip git
           pip3 install ansible-core
 
-      - name: Install Ansible collections
+      - name: Install Collections
+        run: ansible-galaxy collection install community.general
+
+      - name: 📝 Create Local Inventory
         run: |
-          echo "=== Installing required collections ==="
-          ansible-galaxy collection install community.general
+          echo "[local]" > inventory.ini
+          echo "localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3" >> inventory.ini
 
-      - name: Display system and Ansible info
+      # --- รอบที่ 1: รันจริง ---
+      - name: ▶️ First Run (Execution)
         run: |
-          echo "=== System Information ==="
-          cat /etc/os-release
-          echo ""
-          echo "=== Ansible Version ==="
-          ansible --version
-          echo ""
-          echo "=== Python Version ==="
-          python3 --version
+          echo "=== FIRST RUN STARTED ==="
+          ansible-playbook playbook.yaml -i inventory.ini
+        env:
+          ANSIBLE_FORCE_COLOR: '1'
 
-      - name: Create test inventory
+      # --- รอบที่ 2: เช็คความนิ่ง (Idempotence) ---
+      # กฎเหล็ก: รันซ้ำต้องไม่มีอะไรเปลี่ยน (changed=0)
+      - name: 🔄 Idempotence Check (The Hardcore Part)
         run: |
-          echo "=== Creating test inventory ==="
-          mkdir -p /tmp/ansible
-          cat > /tmp/ansible/inventory.ini << 'EOF'
-          [local]
-          localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
-          EOF
-          cat /tmp/ansible/inventory.ini
-
-      - name: Validate playbook syntax
-        run: |
-          echo "=== Validating playbook syntax on Fedora ==="
-          ansible-playbook playbook.yaml \
-            -i /tmp/ansible/inventory.ini --syntax-check
-
-      - name: List roles
-        run: |
-          echo "=== Available Roles ==="
-          ls -la roles/
-          echo ""
-          for role in roles/*/; do
-            echo "Role: $(basename $role)"
-            ls -la "$role"
-            echo ""
-          done
-
-      - name: Test common role
-        run: |
-          echo "=== Testing Common Role ==="
-          ansible-playbook -i /tmp/ansible/inventory.ini \
-            -e "ansible_python_interpreter=/usr/bin/python3" \
-            -c local \
-            -m import_playbook roles/common/tests/test.yml \
-            --check \
-            -v || true
-          echo "✓ Common role test completed"
-
-      - name: Test GNOME Role (with DBus/Xvfb)
-        run: |
-          echo "=== Testing GNOME Role ==="
-          # Start Xvfb
-          Xvfb :99 -screen 0 1024x768x24 &
-          export DISPLAY=:99
-
-          # Run Ansible for GNOME tags only first to ensure it passes
-          dbus-run-session -- ansible-playbook playbook.yaml \
-            -i /tmp/ansible/inventory.ini \
-            -e "ansible_python_interpreter=/usr/bin/python3" \
-            -c local \
-            --tags gnome \
-            -v
-
-      # - name: Verify GNOME Settings
-      #   run: |
-      #     echo "=== Verifying dconf settings ==="
-      #     export DISPLAY=:99
-      #     # Verify color scheme
-      #     RESULT=$(dbus-run-session -- gsettings get org.gnome.desktop.interface color-scheme)
-      #     echo "Current Color Scheme: $RESULT"
-      #     if [[ "$RESULT" == *"'prefer-dark'"* ]]; then
-      #        echo "✅ Test Passed: Dark mode is active."
-      #     else
-      #        echo "❌ Test Failed: Expected 'prefer-dark', got $RESULT"
-      #        # Don't fail the build for now if this is experimental, but normally we should exit 1
-      #        # exit 1
-      #     fi
-
-      - name: Dry-run main playbook
-        continue-on-error: true
-        run: |
-          echo "=== Dry-run Main Playbook (--check mode) ==="
-          # Also adding Xvfb/DBus here just in case
-          Xvfb :98 -screen 0 1024x768x24 &
-          export DISPLAY=:98
-
-          dbus-run-session -- ansible-playbook playbook.yaml \
-            -i /tmp/ansible/inventory.ini \
-            -e "ansible_python_interpreter=/usr/bin/python3" \
-            -c local \
-            --check \
-            -v 2>&1 | head -100
-          echo "✓ Playbook dry-run completed"
-
-      - name: Validate playbook structure
-        run: |
-          echo "=== Validating Playbook Structure ==="
-          python3 << 'EOF'
-          import yaml
-
-          with open('playbook.yaml', 'r') as f:
-              playbook = yaml.safe_load(f)
-
-          if playbook:
-              print(f"✓ Playbook is valid YAML")
-              print(f"  Number of plays: {len(playbook)}")
-              for i, play in enumerate(playbook):
-                  print(f"  Play {i+1}: hosts={play.get('hosts')}, roles={len(play.get('roles', []))}")
-          else:
-              print("✗ Playbook is empty")
-              exit(1)
-          EOF
-
-      - name: Test directory structure
-        run: |
-          echo "=== Validating Directory Structure ==="
-          python3 << 'EOF'
-          import os
-
-          required_dirs = ['roles', 'command']
-          for dir_name in required_dirs:
-              if os.path.isdir(dir_name):
-                  print(f"✓ {dir_name}/ exists")
-              else:
-                  print(f"✗ {dir_name}/ missing")
-
-          required_files = ['playbook.yaml', 'inventory.ini', 'init.sh']
-          for file_name in required_files:
-              if os.path.isfile(file_name):
-                  print(f"✓ {file_name} exists")
-              else:
-                  print(f"✗ {file_name} missing")
-          EOF
-
-  # Job 3: Test on Fedora (Alternative verification)
-  test-fedora-verify:
-    name: Test on Fedora (Verify)
-    runs-on: ubuntu-latest
-    container:
-      image: fedora:latest
-      options: --privileged
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install basic dependencies
-        run: |
-          echo "=== Installing base dependencies on Fedora (Verify) ==="
-          dnf install -y --allowerasing python3 python3-pip git curl wget
-
-      - name: Install Ansible
-        run: |
-          echo "=== Installing Ansible on Fedora ==="
-          pip3 install ansible-core
-
-      - name: Install Ansible collections
-        run: |
-          echo "=== Installing required collections ==="
-          ansible-galaxy collection install community.general
-
-      - name: Display system and Ansible info
-        run: |
-          echo "=== System Information ==="
-          cat /etc/os-release
-          echo ""
-          echo "=== Ansible Version ==="
-          ansible --version
-
-      - name: Create test inventory
-        run: |
-          mkdir -p /tmp/ansible
-          cat > /tmp/ansible/inventory.ini << 'EOF'
-          [local]
-          localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
-          EOF
-
-      - name: Validate playbook syntax
-        run: |
-          echo "=== Validating playbook syntax on Fedora ==="
-          ansible-playbook playbook.yaml -i /tmp/ansible/inventory.ini --syntax-check
-
-  # Job 4: Generate report
-  report:
-    name: CI Report
-    runs-on: ubuntu-latest
-    needs: [lint, test-fedora, test-fedora-verify]
-    if: always()
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Check job status
-        run: |
-          echo "=== CI Pipeline Status ==="
-          echo ""
-          echo "Lint Status: ${{ needs.lint.result }}"
-          echo "Fedora Test: ${{ needs.test-fedora.result }}"
-          echo "Fedora Verify Test: ${{ needs.test-fedora-verify.result }}"
-          echo ""
-
-          if [[ "${{ needs.lint.result }}" != "success" ]] || \
-             [[ "${{ needs.test-fedora.result }}" != "success" ]] || \
-             [[ "${{ needs.test-fedora-verify.result }}" != "success" ]]; then
-              echo "✗ Some checks failed"
-              exit 1
+          echo "=== IDEMPOTENCE CHECK STARTED ==="
+          
+          # รัน Playbook อีกรอบแล้วเก็บ Output ไว้
+          OUTPUT=$(ansible-playbook playbook.yaml -i inventory.ini)
+          echo "$OUTPUT"
+          
+          # ตรวจสอบว่ามี changed=0 และ failed=0 หรือไม่
+          if echo "$OUTPUT" | grep -q 'changed=0.*failed=0'; then
+            echo "✅ IDEMPOTENCE PASSED: System is stable."
+          else
+            echo "❌ IDEMPOTENCE FAILED: Changes detected on second run!"
+            exit 1
           fi
+        env:
+          ANSIBLE_FORCE_COLOR: '1'
 
-          echo "✓ All checks passed"
-
-      - name: Display summary
-        if: always()
-        run: |-
-          echo "=== Build Summary ==="
-          echo "Repository: ${{ github.repository }}"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Commit: ${{ github.sha }}"
-          echo "Triggered by: ${{ github.event_name }}"
-          echo ""
-          echo "✓ CI workflow completed"
+  # ------------------------------------------------------------------
+  # JOB 4: Final Report (สรุปผล)
+  # ------------------------------------------------------------------
+  report:
+    name: 📊 Final Report
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [test-fedora]
+    steps:
+      - name: Check Status
+        run: |
+          if [[ "${{ needs.test-fedora.result }}" == "success" ]]; then
+             echo "✅ PASSED: Fedora Latest is ready for production!"
+          else
+             echo "❌ FAILED: Something went wrong."
+             exit 1
+          fi

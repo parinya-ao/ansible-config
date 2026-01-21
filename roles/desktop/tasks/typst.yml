@@ -21,6 +21,12 @@
       }}
   when: desktop_install_typst | bool
 
+- name: Check if Typst binary exists
+  ansible.builtin.stat:
+    path: /usr/local/bin/typst
+  register: typst_bin
+  when: desktop_install_typst | bool
+
 - name: Download and Install Typst Binary
   ansible.builtin.unarchive:
     src: "{{ desktop_typst_download_url }}"
@@ -33,7 +39,9 @@
     owner: root
     group: root
     mode: "0755"
-  when: desktop_install_typst | bool
+  when:
+    - desktop_install_typst | bool
+    - not typst_bin.stat.exists
 
 - name: Verify Typst Installation
   ansible.builtin.command: typst --version
