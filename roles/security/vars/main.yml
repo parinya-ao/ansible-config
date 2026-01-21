@@ -1,7 +1,0 @@
-# SPDX-License-Identifier: MIT-0
----
-# vars file for roles/security
-# High-priority variables used internally by role
-
-# Firewalld service name
-security_firewalld_service: firewalld

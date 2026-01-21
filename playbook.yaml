@@ -91,15 +91,6 @@
         - multimedia
         - codecs
 
-  # - role: gnome
-  #   tags:
-  #     - gnome
-  #     - desktop
-
-  # - role: security
-  #   tags:
-  #     - security
-
   # Post-tasks: Display summary after running roles
   post_tasks:
     - name: Display completion summary
