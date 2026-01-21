@@ -15,6 +15,7 @@
   ansible.builtin.command: fwupdmgr get-updates
   register: common_firmware_updates
   changed_when: false
+  failed_when: common_firmware_updates.rc not in [0, 2]
   when: common_install_firmware_updates | bool
   tags:
     - firmware

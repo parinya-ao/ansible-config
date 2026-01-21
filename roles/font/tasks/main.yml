@@ -15,7 +15,7 @@
     dest: "{{ item.zip }}"
     mode: "0644"
   loop: "{{ font_fonts }}"
-  notify: refresh font cache
+  notify: Refresh font cache
 
 - name: Extract fonts
   ansible.builtin.unarchive:
@@ -24,4 +24,4 @@
     remote_src: true
     mode: "a+rX"
   loop: "{{ font_fonts }}"
-  notify: refresh font cache
+  notify: Refresh font cache

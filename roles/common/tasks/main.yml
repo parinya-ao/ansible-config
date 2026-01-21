@@ -5,7 +5,7 @@
 # - DNF package manager optimization
 # - System package updates
 # - Essential base packages
-# - Repository configuration (RPM Fusion, Terra)
+# - Repository configuration (RPM Fusion)
 # - NVIDIA drivers (optional)
 # - System optimizations
 

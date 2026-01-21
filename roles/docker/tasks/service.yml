@@ -26,10 +26,7 @@
 
 - name: Display Docker system info
   ansible.builtin.debug:
-    msg: >
-      Docker is running. Containers: {{ docker_info.stdout | regex_search('Containers: \\d+', '\\0')
-      | first | regex_replace('Containers: ', '') }}, Images: {{ docker_info.stdout
-      | regex_search('Images: \\d+', '\\0') | first | regex_replace('Images: ', '') }}
+    msg: "Docker is running successfully"
   when:
     - docker_info.stdout is defined
     - "'Server:' in docker_info.stdout"

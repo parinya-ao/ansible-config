@@ -8,7 +8,7 @@
     block: |
       max_parallel_downloads={{ common_dnf_max_parallel_downloads }}
       fastestmirror={{ common_dnf_fastestmirror }}
-      deltarpm={{ common_dnf_deltarpm }}
+      metadata_expire={{ common_dnf_metadata_expire }}
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
     create: true
     mode: "0644"

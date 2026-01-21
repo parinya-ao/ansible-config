@@ -8,7 +8,6 @@
   tags:
     - repositories
     - rpm-fusion
-    - terra
 
 - name: Check if RPM Fusion free repository is installed
   ansible.builtin.set_fact:
@@ -59,24 +58,3 @@
   tags:
     - repositories
     - rpm-fusion
-
-- name: Check if Terra repository is installed
-  ansible.builtin.set_fact:
-    common_terra_installed: "{{ 'terra-release' in ansible_facts.packages }}"
-  tags:
-    - repositories
-    - terra
-
-- name: Install Terra repository
-  ansible.builtin.dnf:
-    name: "terra-release"
-    disable_gpg_check: true
-    enablerepo: "{{ common_terra_repo }}"
-    state: present
-  when:
-    - common_enable_terra_repo | bool
-    - not common_terra_installed | bool
-  become: true
-  tags:
-    - repositories
-    - terra

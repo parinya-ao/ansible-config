@@ -12,19 +12,20 @@
     - multimedia
     - codecs
 
-- name: Install FFMPEG and related packages
+- name: Swap to full FFMPEG (remove conflicting free packages)
   ansible.builtin.dnf:
-    name: "{{ multimedia_codec_packages }}"
+    name: "ffmpeg"
     state: present
+    allowerasing: true
   when: multimedia_install_codecs | bool
   become: true
   tags:
     - multimedia
     - codecs
 
-- name: Swap to full FFMPEG
+- name: Install FFMPEG and related packages
   ansible.builtin.dnf:
-    name: "ffmpeg"
+    name: "{{ multimedia_codec_packages }}"
     state: present
     allowerasing: true
   when: multimedia_install_codecs | bool

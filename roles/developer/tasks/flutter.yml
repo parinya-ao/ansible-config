@@ -64,7 +64,7 @@
     url: "{{ developer_flutter_download_url }}"
     dest: "/tmp/flutter_linux_{{ developer_flutter_version }}-stable.tar.xz"
     mode: "0644"
-  when: not flutter_bin_check.stat.exists
+  when: not developer_flutter_bin_check.stat.exists
   tags:
     - flutter
     - mobile

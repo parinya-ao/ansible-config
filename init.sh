@@ -114,30 +114,15 @@ fi
 
 
 ################################################################################
-#                      STEP 4: CONFIRMATION PROMPT                            #
+#                  STEP 4: RUN ANSIBLE PLAYBOOK                               #
 ################################################################################
 
-print_step "4/5" "Ready to Begin"
+print_step "4/4" "Executing Ansible Playbook"
 echo ""
 print_warn "You will be prompted to enter your sudo password"
 echo ""
 print_hr
 echo ""
-read -p "  ${COLOR_BOLD}Continue with installation?${COLOR_RESET} [${COLOR_GREEN}Y${COLOR_RESET}/${COLOR_RED}n${COLOR_RESET}] " -n 1 -r
-echo ""
-echo ""
-
-if [[ $REPLY =~ ^[Nn]$ ]]; then
-    print_warn "Installation aborted by user"
-    exit 0
-fi
-
-
-################################################################################
-#                  STEP 5: RUN ANSIBLE PLAYBOOK                               #
-################################################################################
-
-print_step "5/5" "Executing Ansible Playbook"
 echo ""
 
 if ansible-playbook playbook.yaml -K; then
