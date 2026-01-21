@@ -6,48 +6,51 @@
 
   tasks:
     - name: Check rfkill status
-      command: rfkill list
+      ansible.builtin.command: rfkill list
       register: rfkill_status
       changed_when: false
       failed_when: false
 
     - name: Show rfkill status (debug)
-      debug:
+      ansible.builtin.debug:
         msg: "{{ rfkill_status.stdout }}"
 
     - name: Unblock all rfkill devices
-      command: rfkill unblock all
+      ansible.builtin.command: rfkill unblock all
+      register: rfkill_unblock
+      changed_when: rfkill_unblock.rc == 0
       when: "'Soft blocked: yes' in rfkill_status.stdout"
 
     - name: Ensure NetworkManager Wi-Fi is enabled
-      command: nmcli radio wifi on
+      ansible.builtin.command: nmcli radio wifi on
       changed_when: false
       failed_when: false
 
     - name: Ensure NetworkManager is running
-      systemd:
+      ansible.builtin.systemd:
         name: NetworkManager
         state: started
         enabled: true
 
     # ---------- Vendor-specific protection (safe) ----------
     - name: Detect acer_wmi module
-      command: lsmod
+      ansible.builtin.command: lsmod
       register: lsmod_out
       changed_when: false
       failed_when: false
 
     - name: Disable acer_wmi to prevent Wi-Fi soft block (Acer only)
-      copy:
+      ansible.builtin.copy:
         dest: /etc/modprobe.d/acer-wmi.conf
         content: |
           blacklist acer_wmi
+        mode: '0644'
       when: "'acer_wmi' in lsmod_out.stdout"
-      notify: reboot_if_needed
+      notify: Reboot_if_needed
 
     # ---------- Persistent Wi-Fi enable ----------
     - name: Force Wi-Fi enabled at boot via NetworkManager config
-      copy:
+      ansible.builtin.copy:
         dest: /etc/NetworkManager/conf.d/10-wifi-always-on.conf
         content: |
           [device]
@@ -55,16 +58,17 @@
 
           [connection]
           wifi.powersave=2
+        mode: '0644'
 
-      notify: restart_nm
+      notify: Restart_nm
 
   handlers:
-    - name: restart_nm
-      systemd:
+    - name: Restart_nm
+      ansible.builtin.systemd:
         name: NetworkManager
         state: restarted
 
-    - name: reboot_if_needed
-      reboot:
+    - name: Reboot_if_needed
+      ansible.builtin.reboot:
         msg: "Rebooting to apply Wi-Fi unblock policy"
         reboot_timeout: 600
