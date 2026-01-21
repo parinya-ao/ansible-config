@@ -13,7 +13,7 @@
     dest: /etc/NetworkManager/conf.d/20-wifi-powersave.conf
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
     content: |
       [connection]
       wifi.powersave=2
@@ -24,7 +24,7 @@
     dest: /etc/modprobe.d/iwlwifi-powersave.conf
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
     content: |
       options iwlwifi power_level=0
 

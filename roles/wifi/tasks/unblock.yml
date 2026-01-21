@@ -37,7 +37,7 @@
     dest: /etc/modprobe.d/acer-wmi.conf
     content: |
       blacklist acer_wmi
-    mode: '0644'
+    mode: "0644"
   when: "'acer_wmi' in wifi_lsmod_out.stdout"
   notify: Reboot_if_needed
 
@@ -50,5 +50,5 @@
 
       [connection]
       wifi.powersave=2
-    mode: '0644'
+    mode: "0644"
   notify: Restart NetworkManager

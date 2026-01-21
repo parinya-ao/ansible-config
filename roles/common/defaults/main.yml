@@ -12,6 +12,7 @@ common_install_firmware_updates: true
 common_apply_optimizations: true
 common_set_utc_time: true
 common_configure_custom_dns: false
+common_firewalld_enabled: false
 
 # System configuration
 common_hostname: "fedora-workstation"
@@ -49,7 +50,6 @@ common_base_packages:
   - dnf-plugins-core
   - python3
   - python3-pip
-  - firewalld
   - openssl-devel
   - fuse
   - fwupd
