@@ -1,0 +1,88 @@
+---
+- name: Apply Bulletproof WiFi Policies Globally on Fedora
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    # Values to apply to all connections
+    dhcp_timeout: 90
+    ipv4_may_fail: "no"
+
+  tasks:
+    # -----------------------------------------------------------------
+    # STEP 0: Rescue Operation (recover disabled WiFi)
+    # -----------------------------------------------------------------
+    - name: "0. Force Enable WiFi Radio (Fix 'sw disabled')"
+      ansible.builtin.command: nmcli radio wifi on
+      register: radio_wake
+      changed_when: "'disabled' in radio_wake.stderr or 'disabled' in radio_wake.stdout"
+      # Wait for hardware to initialize
+
+    - name: "Wait for WiFi device to become available"
+      ansible.builtin.pause:
+        seconds: 2
+
+    # -----------------------------------------------------------------
+    # STEP 1: Global Configuration (config files for system)
+    # Effect: Applies to ALL "new" networks that will be connected in the future
+    # -----------------------------------------------------------------
+    - name: "1. Global: Disable MAC Randomization (Stability King)"
+      ansible.builtin.copy:
+        dest: /etc/NetworkManager/conf.d/00-global-mac-randomization.conf
+        content: |
+          [device]
+          wifi.scan-rand-mac-address=no
+
+          [connection]
+          wifi.cloned-mac-address=permanent
+          ethernet.cloned-mac-address=permanent
+        mode: '0644'
+      notify: Restart NetworkManager
+
+    - name: "2. Global: Disable Power Saving (Fix Intel CNVi Drops)"
+      ansible.builtin.copy:
+        dest: /etc/NetworkManager/conf.d/00-global-wifi-powersave.conf
+        content: |
+          [connection]
+          # 2 = disable power saving (continuous mode)
+          wifi.powersave=2
+        mode: '0644'
+      notify: Restart NetworkManager
+
+    - name: "3. Global: Prevent RFKill & Carrier Drops"
+      ansible.builtin.copy:
+        dest: /etc/NetworkManager/conf.d/00-global-rfkill.conf
+        content: |
+          [device]
+          wifi.disable-rfkill=yes
+        mode: '0644'
+      notify: Restart NetworkManager
+
+    # -----------------------------------------------------------------
+    # STEP 2: Remediation (fix existing old connections)
+    # Effect: Loop through all WiFi names in system (KUWIN, @Home, TrueWifi, etc.)
+    # -----------------------------------------------------------------
+    - name: "Get list of all Wi-Fi connections"
+      ansible.builtin.command: nmcli -g NAME connection show --type wifi
+      register: wifi_list
+      changed_when: false
+
+    - name: "4. Apply Stability Patch to ALL existing Wi-Fi profiles"
+      ansible.builtin.shell: |
+        nmcli connection modify "{{ item }}" ipv4.dhcp-timeout {{ dhcp_timeout }}
+        nmcli connection modify "{{ item }}" ipv4.may-fail {{ ipv4_may_fail }}
+        nmcli connection modify "{{ item }}" 802-11-wireless.cloned-mac-address permanent
+        nmcli connection modify "{{ item }}" wifi.powersave 2
+      loop: "{{ wifi_list.stdout_lines }}"
+      when: wifi_list.stdout_lines | length > 0
+      changed_when: false
+      # No need to notify restart because nmcli has immediate effect on profiles
+
+  # -----------------------------------------------------------------
+  # HANDLERS
+  # -----------------------------------------------------------------
+  handlers:
+    - name: Restart NetworkManager
+      ansible.builtin.service:
+        name: NetworkManager
+        state: restarted

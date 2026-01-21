@@ -1,0 +1,54 @@
+---
+- name: Detect Wi-Fi interfaces
+  ansible.builtin.shell: |
+    set -o pipefail
+    iw dev | awk '/Interface/ {print $2}'
+  register: wifi_ifaces
+  changed_when: false
+  failed_when: false
+
+- name: Stop if no Wi-Fi interface found
+  ansible.builtin.meta: end_play
+  when: wifi_ifaces.stdout_lines | length == 0
+
+- name: Disable Wi-Fi power save in NetworkManager
+  ansible.builtin.copy:
+    dest: /etc/NetworkManager/conf.d/20-wifi-powersave.conf
+    mode: '0644'
+    content: |
+      [connection]
+      wifi.powersave=2
+  notify: Restart NetworkManager
+
+- name: Disable MAC randomization globally
+  ansible.builtin.copy:
+    dest: /etc/NetworkManager/conf.d/30-wifi-mac.conf
+    mode: '0644'
+    content: |
+      [device]
+      wifi.scan-rand-mac-address=no
+
+      [connection]
+      wifi.cloned-mac-address=permanent
+  notify: Restart NetworkManager
+
+- name: Disable iwlwifi firmware power saving
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/iwlwifi-stability.conf
+    mode: '0644'
+    content: |
+      options iwlwifi power_level=0
+      options iwlwifi power_save=0
+      options iwlwifi disable_11ax=1
+
+- name: Disable kernel iwlwifi power save parameter
+  ansible.builtin.command: grubby --update-kernel=ALL --args="iwlwifi.power_save=0"
+  changed_when: false
+  failed_when: false
+
+- name: Force power_save off on all Wi-Fi interfaces
+  ansible.builtin.shell: |
+    for iface in {{ wifi_ifaces.stdout_lines | join(' ') }}; do
+      iw dev $iface set power_save off || true
+    done
+  changed_when: false

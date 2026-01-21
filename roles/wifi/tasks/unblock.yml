@@ -1,0 +1,54 @@
+---
+- name: Check rfkill status
+  ansible.builtin.command: rfkill list
+  register: wifi_rfkill_status
+  changed_when: false
+  failed_when: false
+
+- name: Show rfkill status (debug)
+  ansible.builtin.debug:
+    msg: "{{ wifi_rfkill_status.stdout }}"
+
+- name: Unblock all rfkill devices
+  ansible.builtin.command: rfkill unblock all
+  register: wifi_rfkill_unblock
+  changed_when: wifi_rfkill_unblock.rc == 0
+  when: "'Soft blocked: yes' in wifi_rfkill_status.stdout"
+
+- name: Ensure NetworkManager Wi-Fi is enabled
+  ansible.builtin.command: nmcli radio wifi on
+  changed_when: false
+  failed_when: false
+
+- name: Ensure NetworkManager is running
+  ansible.builtin.systemd:
+    name: NetworkManager
+    state: started
+    enabled: true
+
+- name: Detect acer_wmi module
+  ansible.builtin.command: lsmod
+  register: wifi_lsmod_out
+  changed_when: false
+  failed_when: false
+
+- name: Disable acer_wmi to prevent Wi-Fi soft block (Acer only)
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/acer-wmi.conf
+    content: |
+      blacklist acer_wmi
+    mode: '0644'
+  when: "'acer_wmi' in wifi_lsmod_out.stdout"
+  notify: Reboot_if_needed
+
+- name: Force Wi-Fi enabled at boot via NetworkManager config
+  ansible.builtin.copy:
+    dest: /etc/NetworkManager/conf.d/10-wifi-always-on.conf
+    content: |
+      [device]
+      wifi.scan-rand-mac-address=no
+
+      [connection]
+      wifi.powersave=2
+    mode: '0644'
+  notify: Restart NetworkManager
