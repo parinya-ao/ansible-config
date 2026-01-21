@@ -1,0 +1,12 @@
+---
+# Handlers for Wi-Fi configuration role
+
+- name: Restart NetworkManager
+  ansible.builtin.systemd:
+    name: NetworkManager
+    state: restarted
+
+- name: Reboot_if_needed
+  ansible.builtin.reboot:
+    msg: "Rebooting to apply Wi-Fi configuration"
+    reboot_timeout: 600

@@ -1,14 +1,23 @@
 # SPDX-License-Identifier: MIT-0
 ---
 # defaults file for roles/desktop
-# These are low-priority variables that can be overridden by playbooks or host variables
+# These are low-priority variables that can be overridden by playbooks
+# or host variables
 
 # Feature flags for conditional role execution
 desktop_install_desktop_packages: true
 desktop_install_vscode: true
 desktop_install_starship: true
 desktop_install_flatpak_apps: true
+desktop_install_flatpak: true
+desktop_enable_flatpak_user: true
+desktop_install_gnome_extensions: true
 desktop_install_zed: true
+
+# GNOME extensions
+desktop_gnome_extensions:
+  - gnome-shell-extension-pop-shell
+  - nautilus-python
 
 # Zed editor download URL
 desktop_zed_download_url: "https://github.com/zed-industries/zed/releases/latest/download/zed-linux-x86_64.tar.gz"

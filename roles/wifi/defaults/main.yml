@@ -1,0 +1,9 @@
+---
+# Default variables for Wi-Fi role
+
+# Which Wi-Fi task to run
+# Options:
+#   - unblock: Unblock Wi-Fi and ensure it stays enabled
+#   - disable_powersave: Disable Wi-Fi power save (Intel only)
+#   - no_powersave: Disable ALL Wi-Fi power saving for maximum stability
+wifi_task: "no_powersave"

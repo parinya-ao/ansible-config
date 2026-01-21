@@ -12,6 +12,25 @@
     - docker
     - users
 
+- name: Check docker socket permissions
+  ansible.builtin.stat:
+    path: /var/run/docker.sock
+  register: docker_socket_stat
+  tags:
+    - docker
+    - users
+
+- name: Debug docker socket info
+  ansible.builtin.debug:
+    msg:
+      - "Socket exists: {{ docker_socket_stat.stat.exists }}"
+      - "Socket mode: {{ docker_socket_stat.stat.mode }}"
+      - "Socket owner: {{ docker_socket_stat.stat.pw_name }}:{{ docker_socket_stat.stat.gr_name }}"
+  when: docker_socket_stat.stat.exists
+  tags:
+    - docker
+    - users
+
 - name: Add user to docker group
   ansible.builtin.user:
     name: "{{ docker_user }}"
@@ -21,6 +40,44 @@
   when: docker_add_user_to_group
   notify:
     - User added to docker group
+  register: docker_user_modified
+  tags:
+    - docker
+    - users
+
+- name: Check current user groups
+  ansible.builtin.command:
+    cmd: groups "{{ docker_user }}"
+  changed_when: false
+  register: docker_user_groups
+  tags:
+    - docker
+    - users
+
+- name: Verify docker group membership
+  ansible.builtin.debug:
+    msg: |
+      User '{{ docker_user }}' groups:
+      {{ docker_user_groups.stdout }}
+  tags:
+    - docker
+    - users
+
+- name: Test docker socket access
+  ansible.builtin.shell:
+    cmd: test -r /var/run/docker.sock && test -w /var/run/docker.sock && echo "✓ Socket accessible" || echo "✗ Socket NOT accessible"
+  changed_when: false
+  become: true
+  become_user: "{{ docker_user }}"
+  register: docker_socket_test
+  failed_when: false
+  tags:
+    - docker
+    - users
+
+- name: Display docker socket access result
+  ansible.builtin.debug:
+    msg: "{{ docker_socket_test.stdout }}"
   tags:
     - docker
     - users
@@ -28,9 +85,17 @@
 - name: Display group addition notice
   ansible.builtin.debug:
     msg: |
-      User '{{ docker_user }}' has been added to the docker group.
-      Please log out and log back in for the changes to take effect,
-      or run: newgrp docker
+      ✓ User '{{ docker_user }}' has been configured for Docker access.
+
+      Current status: {{ docker_socket_test.stdout }}
+
+      If socket is NOT accessible, please:
+      1. Log out completely (or use: newgrp docker)
+      2. Log back in to apply group changes
+      3. Verify with: docker ps
+
+      NOTE: User '{{ docker_user }}' now has implicit root access.
+            Be careful with Docker command permissions in production.
   when:
     - docker_add_user_to_group
   tags:

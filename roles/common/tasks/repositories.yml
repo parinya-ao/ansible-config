@@ -1,0 +1,82 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Repository configuration tasks
+
+- name: Gather package facts
+  ansible.builtin.package_facts:
+    manager: auto
+  tags:
+    - repositories
+    - rpm-fusion
+    - terra
+
+- name: Check if RPM Fusion free repository is installed
+  ansible.builtin.set_fact:
+    common_rpmfusion_free_installed: "{{ 'rpmfusion-free-release' in ansible_facts.packages }}"
+  tags:
+    - repositories
+    - rpm-fusion
+
+- name: Install RPM Fusion free repository
+  ansible.builtin.dnf:
+    name: "{{ common_rpm_fusion_free_url }}"
+    disable_gpg_check: true
+    state: present
+  when:
+    - common_enable_rpm_fusion | bool
+    - not common_rpmfusion_free_installed | bool
+  become: true
+  tags:
+    - repositories
+    - rpm-fusion
+
+- name: Check if RPM Fusion nonfree repository is installed
+  ansible.builtin.set_fact:
+    common_rpmfusion_nonfree_installed: "{{ 'rpmfusion-nonfree-release' in ansible_facts.packages }}"
+  tags:
+    - repositories
+    - rpm-fusion
+
+- name: Install RPM Fusion nonfree repository
+  ansible.builtin.dnf:
+    name: "{{ common_rpm_fusion_nonfree_url }}"
+    disable_gpg_check: true
+    state: present
+  when:
+    - common_enable_rpm_fusion | bool
+    - not common_rpmfusion_nonfree_installed | bool
+  become: true
+  tags:
+    - repositories
+    - rpm-fusion
+
+- name: Install app-stream metadata
+  ansible.builtin.dnf:
+    name: "@core"
+    state: present
+  become: true
+  when: common_enable_rpm_fusion | bool
+  tags:
+    - repositories
+    - rpm-fusion
+
+- name: Check if Terra repository is installed
+  ansible.builtin.set_fact:
+    common_terra_installed: "{{ 'terra-release' in ansible_facts.packages }}"
+  tags:
+    - repositories
+    - terra
+
+- name: Install Terra repository
+  ansible.builtin.dnf:
+    name: "terra-release"
+    disable_gpg_check: true
+    enablerepo: "{{ common_terra_repo }}"
+    state: present
+  when:
+    - common_enable_terra_repo | bool
+    - not common_terra_installed | bool
+  become: true
+  tags:
+    - repositories
+    - terra

@@ -1,0 +1,104 @@
+---
+# SPDX-License-Identifier: MIT-0
+# tasks file for roles/multimedia
+
+- name: Install multimedia codec packages
+  ansible.builtin.dnf:
+    name: "@multimedia"
+    state: present
+  when: multimedia_install_codecs | bool
+  become: true
+  tags:
+    - multimedia
+    - codecs
+
+- name: Install FFMPEG and related packages
+  ansible.builtin.dnf:
+    name: "{{ multimedia_codec_packages }}"
+    state: present
+  when: multimedia_install_codecs | bool
+  become: true
+  tags:
+    - multimedia
+    - codecs
+
+- name: Swap to full FFMPEG
+  ansible.builtin.dnf:
+    name: "ffmpeg"
+    state: present
+    allowerasing: true
+  when: multimedia_install_codecs | bool
+  become: true
+  tags:
+    - multimedia
+    - codecs
+
+- name: Install sound and video complementary packages
+  ansible.builtin.dnf:
+    name: "@sound-and-video"
+    state: present
+  when: multimedia_install_codecs | bool
+  become: true
+  tags:
+    - multimedia
+    - codecs
+
+- name: Install hardware video acceleration base packages
+  ansible.builtin.dnf:
+    name:
+      - ffmpeg-libs
+      - libva
+      - libva-utils
+    state: present
+  when: multimedia_install_video_acceleration | bool
+  become: true
+  tags:
+    - multimedia
+    - video-acceleration
+
+- name: Install Intel video acceleration drivers
+  ansible.builtin.dnf:
+    name: "{{ multimedia_intel_packages }}"
+    state: present
+  when:
+    - multimedia_install_video_acceleration | bool
+    - multimedia_gpu_vendor == "intel"
+  become: true
+  tags:
+    - multimedia
+    - video-acceleration
+    - intel
+
+- name: Install AMD video acceleration drivers
+  ansible.builtin.dnf:
+    name: "{{ multimedia_amd_packages }}"
+    state: present
+    allowerasing: true
+  when:
+    - multimedia_install_video_acceleration | bool
+    - multimedia_gpu_vendor == "amd"
+  become: true
+  tags:
+    - multimedia
+    - video-acceleration
+    - amd
+
+- name: Install OpenH264 packages
+  ansible.builtin.dnf:
+    name: "{{ multimedia_openh264_packages }}"
+    state: present
+  when: multimedia_install_openh264 | bool
+  become: true
+  tags:
+    - multimedia
+    - openh264
+
+- name: Enable Cisco OpenH264 repository
+  ansible.builtin.command: dnf config-manager setopt fedora-cisco-openh264.enabled=1
+  when: multimedia_install_openh264 | bool
+  become: true
+  register: multimedia_openh264_repo
+  changed_when: multimedia_openh264_repo.rc == 0
+  tags:
+    - multimedia
+    - openh264

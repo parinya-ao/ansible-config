@@ -6,17 +6,8 @@
   ansible.builtin.debug:
     msg: "DNF configuration has been updated. Changes will take effect on next DNF operation."
 
-- name: Restart firewalld
+- name: Restart systemd-resolved
   ansible.builtin.service:
-    name: firewalld
+    name: systemd-resolved
     state: restarted
   become: true
-  when: common_firewalld_enabled | default(true)
-
-- name: Enable firewalld
-  ansible.builtin.service:
-    name: firewalld
-    enabled: true
-    state: started
-  become: true
-  when: common_firewalld_enabled | default(true)

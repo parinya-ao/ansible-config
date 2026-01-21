@@ -9,7 +9,6 @@ The developer role automates the setup of a fully-functional development environ
 - Development editors (Neovim, Tmux)
 - Language runtimes (Golang, Java 21 OpenJDK)
 - Rust toolchain via rustup
-- Node.js via NodeSource rpm
 - Bun JavaScript runtime
 - uv (modern Python package manager)
 
@@ -27,7 +26,6 @@ Control which components are installed by setting these variables to `true` or `
 
 ```yaml
 developer_install_rust: true        # Install Rust toolchain via rustup
-developer_install_nodejs: true      # Install Node.js via the NodeSource rpm stream
 developer_install_bun: true         # Install Bun runtime
 developer_install_uv: true          # Install uv (Python package manager)
 ```
@@ -54,12 +52,6 @@ developer_compilers_packages:
   - make           # Build automation tool
   - automake       # Make file generator
   - autoconf       # Configuration script generator
-```
-
-### Node.js Configuration
-
-```yaml
-developer_node_version: "24"        # Node.js major version to install via the NodeSource rpm stream
 ```
 
 ### Rust Configuration
@@ -97,9 +89,6 @@ None. This role is self-contained and can be used independently.
   roles:
     - role: developer
       vars:
-        # Install specific Node.js version
-        developer_node_version: "20"
-
         # Skip Rust installation
         developer_install_rust: false
 
@@ -119,14 +108,8 @@ None. This role is self-contained and can be used independently.
 # Install only compilers and system tools
 ansible-playbook playbook.yml --tags "compilers"
 
-# Install only Node.js
-ansible-playbook playbook.yml --tags "nodejs"
-
 # Install only Rust
 ansible-playbook playbook.yml --tags "rust"
-
-# Install JavaScript tools (Node.js + Bun)
-ansible-playbook playbook.yml --tags "javascript"
 ```
 
 ## Installed Tools Overview
@@ -139,7 +122,6 @@ ansible-playbook playbook.yml --tags "javascript"
 | Go | Golang | System (dnf) |
 | Java | OpenJDK 21 | System (dnf) |
 | Rust | rustup + cargo | rustup |
-| Node.js | NodeSource rpm | System package via rpm stream |
 | Bun | Bun | Installer (per-user) |
 | Python | uv | Installer (per-user) |
 
@@ -157,7 +139,6 @@ roles/developer/
 │   ├── main.yml          # Main entry point
 │   ├── compilers.yml     # System compilers and tools
 │   ├── rust.yml          # Rust toolchain
-│   ├── nodejs.yml        # Node.js via the NodeSource rpm stream
 │   ├── bun.yml           # Bun runtime
 │   └── python.yml        # uv Python tooling
 ├── tests/

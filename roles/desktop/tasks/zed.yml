@@ -59,7 +59,8 @@
   ansible.builtin.lineinfile:
     path: "{{ ansible_user_dir }}/.local/share/applications/dev.zed.Zed.desktop"
     regexp: "^Icon=zed$"
-    line: "Icon={{ ansible_user_dir }}/.local/zed.app/share/icons/hicolor/512x512/apps/zed.png"
+    line: >-
+      Icon={{ ansible_user_dir }}/.local/zed.app/share/icons/hicolor/512x512/apps/zed.png
     backrefs: true
   when: not desktop_zed_binary.stat.exists
 

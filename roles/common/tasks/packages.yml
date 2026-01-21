@@ -14,7 +14,9 @@
 
 - name: Display installed packages summary
   ansible.builtin.debug:
-    msg: "{{ common_packages_install_result.results | default([]) | length }} packages processed"
+    msg: >-
+      {{ common_packages_install_result.results | default([]) | length }}
+      packages processed
   changed_when: false
   tags:
     - packages

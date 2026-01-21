@@ -35,7 +35,8 @@
           - "  4. desktop     - Desktop environment and applications"
           - "  5. developer   - Development tools and runtimes"
           - "  6. font        - Font installation"
-          - "  7. gnome       - GNOME desktop configuration"
+          - "  7. wifi        - Wi-Fi configuration and optimization"
+          - "  8. multimedia  - Multimedia codecs and video acceleration"
           - "=========================================="
 
     - name: Display Ansible version
@@ -78,14 +79,17 @@
         - font
         - fonts
 
-    - role: gnome
+    - role: wifi
+      vars:
+        wifi_task: "no_powersave"
       tags:
-        - gnome
-        - desktop
+        - wifi
+        - network
 
-  # - role: security
-  #   tags:
-  #     - security
+    - role: multimedia
+      tags:
+        - multimedia
+        - codecs
 
   # Post-tasks: Display summary after running roles
   post_tasks:

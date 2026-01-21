@@ -1,0 +1,24 @@
+---
+# Wi-Fi configuration role
+# Choose which task to run by importing the appropriate task file
+
+- name: Include unblock tasks
+  ansible.builtin.include_tasks: unblock.yml
+  when: wifi_task == "unblock"
+  tags:
+    - wifi
+    - unblock
+
+- name: Include disable powersave tasks
+  ansible.builtin.include_tasks: disable_powersave.yml
+  when: wifi_task == "disable_powersave"
+  tags:
+    - wifi
+    - disable_powersave
+
+- name: Include no powersave tasks
+  ansible.builtin.include_tasks: no_powersave.yml
+  when: wifi_task == "no_powersave"
+  tags:
+    - wifi
+    - no_powersave
