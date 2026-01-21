@@ -5,13 +5,15 @@
 - name: Gather package facts
   ansible.builtin.package_facts:
     manager: auto
+  register: common_package_facts_result
+  failed_when: false
   tags:
     - repositories
     - rpm-fusion
 
 - name: Check if RPM Fusion free repository is installed
   ansible.builtin.set_fact:
-    common_rpmfusion_free_installed: "{{ 'rpmfusion-free-release' in ansible_facts.packages }}"
+    common_rpmfusion_free_installed: "{{ ansible_facts.packages is defined and 'rpmfusion-free-release' in ansible_facts.packages }}"
   tags:
     - repositories
     - rpm-fusion
@@ -31,7 +33,7 @@
 
 - name: Check if RPM Fusion nonfree repository is installed
   ansible.builtin.set_fact:
-    common_rpmfusion_nonfree_installed: "{{ 'rpmfusion-nonfree-release' in ansible_facts.packages }}"
+    common_rpmfusion_nonfree_installed: "{{ ansible_facts.packages is defined and 'rpmfusion-nonfree-release' in ansible_facts.packages }}"
   tags:
     - repositories
     - rpm-fusion

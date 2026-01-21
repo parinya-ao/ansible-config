@@ -1,4 +1,3 @@
----
 name: Ansible CI Pipeline
 
 on:
@@ -90,6 +89,7 @@ jobs:
           ansible-playbook playbook.yaml -i inventory.ini
         env:
           ANSIBLE_FORCE_COLOR: "1"
+          CI: "true"
 
       # Run 2: Idempotence check
       - name: Idempotence Check
@@ -107,6 +107,7 @@ jobs:
           fi
         env:
           ANSIBLE_FORCE_COLOR: "1"
+          CI: "true"
 
   # ------------------------------------------------------------------
   # JOB 4: Final Report
