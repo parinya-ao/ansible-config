@@ -53,3 +53,7 @@ desktop_starship_config_path: /etc/bashrc
 desktop_flathub_repo_url: "https://dl.flathub.org/repo/flathub.flatpakrepo"
 desktop_flathub_repo_url_alt: "https://flathub.org/repo/flathub.flatpakrepo"
 desktop_starship_install_url: "https://starship.rs/install.sh"
+
+# Typst configuration
+desktop_install_typst: true
+desktop_typst_version: "latest"

@@ -37,3 +37,9 @@
   tags:
     - desktop
     - brave
+
+- name: Install Typst
+  ansible.builtin.import_tasks: typst.yml
+  tags:
+    - desktop
+    - typst
