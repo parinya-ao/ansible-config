@@ -4,7 +4,6 @@
 # This role installs a complete development environment including:
 # - System compilers and development tools
 # - Rust toolchain via rustup
-# - Node.js via NodeSource rpm stream
 # - Bun JavaScript runtime
 # - uv Python package manager
 
@@ -22,14 +21,6 @@
   tags:
     - developers
     - rust
-
-# Node.js
-- name: Install Node.js
-  ansible.builtin.import_tasks: nodejs.yml
-  when: developer_install_nodejs
-  tags:
-    - developers
-    - nodejs
 
 # Bun runtime
 - name: Install Bun
