@@ -16,7 +16,7 @@
     desktop_typst_download_url: >-
       {{
       (desktop_typst_api.json.assets
-      | selectattr('name', 'search', 'x86_64-unknown-linux-musl.tar.gz')
+      | selectattr('name', 'search', 'x86_64-unknown-linux-musl.tar.xz')
       | first).browser_download_url
       }}
   when: desktop_install_typst | bool
@@ -27,18 +27,51 @@
   register: desktop_typst_bin
   when: desktop_install_typst | bool
 
-- name: Download and Install Typst Binary
+- name: Create temporary directory for Typst
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: typst
+  register: typst_temp_dir
+  when:
+    - desktop_install_typst | bool
+    - not desktop_typst_bin.stat.exists
+
+- name: Download and unarchive Typst
   ansible.builtin.unarchive:
     src: "{{ desktop_typst_download_url }}"
-    dest: /usr/local/bin
+    dest: "{{ typst_temp_dir.path }}"
     remote_src: true
-    extra_opts:
-      - "--strip-components=1"
-      - "--wildcards"
-      - "*/typst"
-    owner: root
-    group: root
+  when:
+    - desktop_install_typst | bool
+    - not desktop_typst_bin.stat.exists
+
+- name: Find Typst binary in extracted files
+  ansible.builtin.find:
+    paths: "{{ typst_temp_dir.path }}"
+    patterns: "typst"
+    recurse: true
+    file_type: file
+  register: typst_binary_found
+  when:
+    - desktop_install_typst | bool
+    - not desktop_typst_bin.stat.exists
+
+- name: Move Typst binary to /usr/local/bin
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: /usr/local/bin/typst
     mode: "0755"
+    remote_src: true
+  loop: "{{ typst_binary_found.files }}"
+  become: true
+  when:
+    - desktop_install_typst | bool
+    - not desktop_typst_bin.stat.exists
+
+- name: Cleanup temporary directory
+  ansible.builtin.file:
+    path: "{{ typst_temp_dir.path }}"
+    state: absent
   when:
     - desktop_install_typst | bool
     - not desktop_typst_bin.stat.exists
