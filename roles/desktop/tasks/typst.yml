@@ -1,24 +1,12 @@
 # SPDX-License-Identifier: MIT-0
 ---
-- name: Get Typst release metadata from GitHub
-  ansible.builtin.uri:
-    url: >-
-      https://api.github.com/repos/typst/typst/releases/{{
-      'latest' if desktop_typst_version == 'latest'
-      else 'tags/v' + desktop_typst_version
-      }}
-    return_content: true
-  register: desktop_typst_api
-  when: desktop_install_typst | bool
-
 - name: Set Typst download URL
   ansible.builtin.set_fact:
     desktop_typst_download_url: >-
-      {{
-      (desktop_typst_api.json.assets
-      | selectattr('name', 'search', 'x86_64-unknown-linux-musl.tar.xz')
-      | first).browser_download_url
-      }}
+      https://github.com/typst/typst/releases/download/{{
+      'latest' if desktop_typst_version == 'latest'
+      else 'v' + desktop_typst_version
+      }}/typst-x86_64-unknown-linux-musl.tar.xz
   when: desktop_install_typst | bool
 
 - name: Check if Typst binary exists
