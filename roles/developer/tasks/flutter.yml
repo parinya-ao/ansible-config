@@ -8,8 +8,8 @@
 
 - name: Get actual user info
   ansible.builtin.set_fact:
-    developer_actual_user_home: "{{ lookup('env', 'HOME') }}"
-    developer_actual_user_name: "{{ lookup('env', 'USER') }}"
+    developer_actual_user_home: "{{ ansible_user_dir }}"
+    developer_actual_user_name: "{{ ansible_user_id }}"
   tags:
     - flutter
     - mobile
@@ -26,6 +26,7 @@
   ansible.builtin.debug:
     msg:
       - "Actual User Home: {{ developer_actual_user_home }}"
+      - "Actual User Name: {{ developer_actual_user_name }}"
       - "Install Dir: {{ developer_actual_user_home }}/develop"
       - "Check Path: {{ developer_actual_user_home }}/develop/flutter/bin/flutter"
       - "Stat Result: {{ developer_flutter_bin_check.stat.exists }}"
@@ -54,7 +55,6 @@
     state: directory
     mode: "0755"
     owner: "{{ developer_actual_user_name }}"
-    group: "{{ developer_actual_user_name }}"
   tags:
     - flutter
     - mobile
@@ -75,7 +75,6 @@
     dest: "{{ developer_actual_user_home }}/develop"
     remote_src: true
     owner: "{{ developer_actual_user_name }}"
-    group: "{{ developer_actual_user_name }}"
   when: not developer_flutter_bin_check.stat.exists
   tags:
     - flutter
@@ -89,7 +88,6 @@
     state: present
     create: true
     owner: "{{ developer_actual_user_name }}"
-    group: "{{ developer_actual_user_name }}"
     mode: "0644"
   tags:
     - flutter
