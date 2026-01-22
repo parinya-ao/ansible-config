@@ -46,4 +46,4 @@ developer_bun_install_url: "https://bun.sh/install"
 developer_uv_install_url: "https://astral.sh/uv/install.sh"
 developer_flutter_download_url: >-
   https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/
-  flutter_linux_{{ developer_flutter_version }}-stable.tar.xz
+  {{- 'flutter_linux_' }}{{ developer_flutter_version }}-stable.tar.xz
