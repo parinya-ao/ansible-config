@@ -4,8 +4,10 @@
 
 - name: Get actual user info
   ansible.builtin.set_fact:
-    developer_actual_user_home: "{{ lookup('env', 'HOME') }}"
-    developer_actual_user_name: "{{ lookup('env', 'USER') }}"
+    # Use ansible_user_dir instead of lookup env HOME (safer in CI)
+    developer_actual_user_home: "{{ ansible_user_dir }}"
+    # Use ansible_user_id instead of lookup env USER (fixes empty value in CI)
+    developer_actual_user_name: "{{ ansible_user_id }}"
   tags:
     - android
     - mobile
@@ -123,7 +125,6 @@
     state: directory
     mode: "0755"
     owner: "{{ developer_actual_user_name }}"
-    group: "{{ developer_actual_user_name }}"
   when: not developer_android_sdk_check.stat.exists
   tags:
     - android
@@ -157,7 +158,6 @@
     state: directory
     recurse: true
     owner: "{{ developer_actual_user_name }}"
-    group: "{{ developer_actual_user_name }}"
   when: not developer_android_sdk_check.stat.exists
   tags:
     - android
@@ -183,7 +183,6 @@
     state: present
     create: true
     owner: "{{ developer_actual_user_name }}"
-    group: "{{ developer_actual_user_name }}"
     mode: "0644"
   tags:
     - android
@@ -197,7 +196,6 @@
     state: present
     create: true
     owner: "{{ developer_actual_user_name }}"
-    group: "{{ developer_actual_user_name }}"
     mode: "0644"
   tags:
     - android
