@@ -31,7 +31,7 @@
   ansible.builtin.tempfile:
     state: directory
     suffix: typst
-  register: typst_temp_dir
+  register: desktop_typst_temp_dir
   when:
     - desktop_install_typst | bool
     - not desktop_typst_bin.stat.exists
@@ -39,7 +39,7 @@
 - name: Download and unarchive Typst
   ansible.builtin.unarchive:
     src: "{{ desktop_typst_download_url }}"
-    dest: "{{ typst_temp_dir.path }}"
+    dest: "{{ desktop_typst_temp_dir.path }}"
     remote_src: true
   when:
     - desktop_install_typst | bool
@@ -47,11 +47,11 @@
 
 - name: Find Typst binary in extracted files
   ansible.builtin.find:
-    paths: "{{ typst_temp_dir.path }}"
+    paths: "{{ desktop_typst_temp_dir.path }}"
     patterns: "typst"
     recurse: true
     file_type: file
-  register: typst_binary_found
+  register: desktop_typst_binary_found
   when:
     - desktop_install_typst | bool
     - not desktop_typst_bin.stat.exists
@@ -62,7 +62,7 @@
     dest: /usr/local/bin/typst
     mode: "0755"
     remote_src: true
-  loop: "{{ typst_binary_found.files }}"
+  loop: "{{ desktop_typst_binary_found.files }}"
   become: true
   when:
     - desktop_install_typst | bool
@@ -70,7 +70,7 @@
 
 - name: Cleanup temporary directory
   ansible.builtin.file:
-    path: "{{ typst_temp_dir.path }}"
+    path: "{{ desktop_typst_temp_dir.path }}"
     state: absent
   when:
     - desktop_install_typst | bool
