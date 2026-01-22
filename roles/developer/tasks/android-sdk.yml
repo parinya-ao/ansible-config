@@ -4,10 +4,9 @@
 
 - name: Get actual user info
   ansible.builtin.set_fact:
-    # Use ansible_user_dir instead of lookup env HOME (safer in CI)
-    developer_actual_user_home: "{{ ansible_user_dir }}"
-    # Use ansible_user_id instead of lookup env USER (fixes empty value in CI)
-    developer_actual_user_name: "{{ ansible_user_id }}"
+    # Use ansible_facts syntax as recommended by Ansible
+    developer_actual_user_home: "{{ ansible_facts['user_dir'] }}"
+    developer_actual_user_name: "{{ ansible_facts['user_id'] }}"
   tags:
     - android
     - mobile
@@ -203,7 +202,9 @@
 
 - name: Accept Android SDK licenses
   ansible.builtin.shell:
-    cmd: set -o pipefail && yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" --licenses
+    # noqa: risky-shell-pipe
+    # Removed set -o pipefail to allow yes to die without error (Fix RC 141 SIGPIPE)
+    cmd: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" --licenses
   args:
     creates: "{{ developer_actual_user_home }}/Android/Sdk/licenses/android-sdk-license"
     executable: /bin/bash
