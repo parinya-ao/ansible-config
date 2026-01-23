@@ -32,12 +32,6 @@
     - desktop
     - flatpak
 
-- name: Install Brave browser
-  ansible.builtin.import_tasks: brave.yml
-  tags:
-    - desktop
-    - brave
-
 - name: Install Typst
   ansible.builtin.import_tasks: typst.yml
   tags:

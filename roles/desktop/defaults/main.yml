@@ -22,10 +22,6 @@ desktop_gnome_extensions:
 # Zed editor download URL
 desktop_zed_download_url: "https://github.com/zed-industries/zed/releases/latest/download/zed-linux-x86_64.tar.gz"
 
-# Brave browser URLs
-desktop_brave_repo_url: "https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo"
-desktop_brave_gpg_key_url: "https://brave-browser-rpm-release.s3.brave.com/brave-core.asc"
-
 # VSCode URLs
 desktop_vscode_gpg_key_url: "https://packages.microsoft.com/keys/microsoft.asc"
 desktop_vscode_repo_baseurl: "https://packages.microsoft.com/yumrepos/vscode"

@@ -23,8 +23,13 @@
     - compilers
 
 - name: Install Rust toolchain via rustup
-  ansible.builtin.command:
-    cmd: /tmp/install-rustup.sh -y
+  ansible.builtin.shell: |
+    # Force set environment variables for correct installation path
+    export CARGO_HOME="{{ ansible_facts['user_dir'] }}/.cargo"
+    export RUSTUP_HOME="{{ ansible_facts['user_dir'] }}/.rustup"
+
+    # Run installer script with shell
+    sh /tmp/install-rustup.sh -y
   args:
     creates: "{{ ansible_facts['user_dir'] }}/.cargo/bin/rustc"
   become: false
