@@ -2,11 +2,23 @@
 # SPDX-License-Identifier: MIT-0
 # Python tooling installation (uv - modern Python package manager)
 
+- name: Check if uv is already installed
+  ansible.builtin.command:
+    cmd: command -v uv
+  register: developer_uv_installed
+  changed_when: false
+  ignore_errors: true
+  become: false
+  tags:
+    - python
+    - uv
+
 - name: Install uv (modern Python package manager)
   ansible.builtin.get_url:
     url: "{{ developer_uv_install_url }}"
     dest: /tmp/install-uv.sh
     mode: "0755"
+  when: developer_uv_installed.rc != 0
   tags:
     - python
     - uv
@@ -16,6 +28,8 @@
     cmd: /tmp/install-uv.sh
   args:
     creates: "{{ lookup('env', 'HOME') }}/.local/bin/uv"
+  register: developer_uv_install
+  when: developer_uv_installed.rc != 0
   become: false
   tags:
     - python
@@ -25,6 +39,7 @@
   ansible.builtin.file:
     path: /tmp/install-uv.sh
     state: absent
+  when: developer_uv_installed.rc != 0
   tags:
     - python
     - uv
