@@ -30,7 +30,7 @@ docker_packages:
   - docker-compose-plugin
 
 # User configuration
-docker_user: "{{ ansible_user_id }}"
+docker_user: "{{ ansible_facts['user_id'] }}"
 
 # Installation retry settings (for network resilience)
 docker_install_retries: 3

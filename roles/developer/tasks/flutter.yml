@@ -8,8 +8,8 @@
 
 - name: Get actual user info
   ansible.builtin.set_fact:
-    developer_actual_user_home: "{{ ansible_user_dir }}"
-    developer_actual_user_name: "{{ ansible_user_id }}"
+    developer_actual_user_home: "{{ ansible_facts['user_dir'] }}"
+    developer_actual_user_name: "{{ ansible_facts['user_id'] }}"
   tags:
     - flutter
     - mobile

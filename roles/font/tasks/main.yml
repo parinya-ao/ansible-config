@@ -9,12 +9,22 @@
     mode: "0755"
   loop: "{{ font_fonts }}"
 
+- name: Check if font archives exist
+  ansible.builtin.stat:
+    path: "{{ item.zip }}"
+  loop: "{{ font_fonts }}"
+  register: font_archives_stat
+  notify: Refresh font cache
+
 - name: Download fonts
   ansible.builtin.get_url:
     url: "{{ item.url }}"
     dest: "{{ item.zip }}"
     mode: "0644"
   loop: "{{ font_fonts }}"
+  loop_control:
+    index_var: idx
+  when: not font_archives_stat.results[idx].stat.exists
   notify: Refresh font cache
 
 - name: Extract fonts
@@ -24,4 +34,7 @@
     remote_src: true
     mode: "a+rX"
   loop: "{{ font_fonts }}"
+  loop_control:
+    index_var: idx
+  when: not font_archives_stat.results[idx].stat.exists
   notify: Refresh font cache

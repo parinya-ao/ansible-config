@@ -22,7 +22,7 @@
 
 - name: Ensure VS Code User Directory Exists
   ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/Code/User"
+    path: "{{ ansible_facts['user_dir'] }}/.config/Code/User"
     state: directory
     mode: "0755"
 
@@ -35,7 +35,7 @@
 - name: Copy VS Code Settings if file exists
   ansible.builtin.copy:
     src: vscode/settings.json
-    dest: "{{ ansible_user_dir }}/.config/Code/User/settings.json"
+    dest: "{{ ansible_facts['user_dir'] }}/.config/Code/User/settings.json"
     mode: "0644"
     backup: true
   when: desktop_vscode_settings_stat.stat.exists
