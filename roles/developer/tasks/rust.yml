@@ -4,7 +4,7 @@
 
 - name: Check if Rust binary exists
   ansible.builtin.stat:
-    path: "{{ ansible_user_dir }}/.cargo/bin/rustc"
+    path: "{{ ansible_facts['user_dir'] }}/.cargo/bin/rustc"
   register: developer_rust_check
   become: false
   tags:

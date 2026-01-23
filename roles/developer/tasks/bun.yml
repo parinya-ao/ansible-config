@@ -4,7 +4,7 @@
 
 - name: Check if Bun binary exists
   ansible.builtin.stat:
-    path: "{{ ansible_user_dir }}/.bun/bin/bun"
+    path: "{{ ansible_facts['user_dir'] }}/.bun/bin/bun"
   register: developer_bun_check
   become: false
   tags:

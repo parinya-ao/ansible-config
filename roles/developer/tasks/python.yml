@@ -4,7 +4,7 @@
 
 - name: Check if uv binary exists
   ansible.builtin.stat:
-    path: "{{ ansible_user_dir }}/.local/bin/uv"
+    path: "{{ ansible_facts['user_dir'] }}/.local/bin/uv"
   register: developer_uv_check
   become: false
   tags:
@@ -22,10 +22,10 @@
     - uv
 
 - name: Execute uv installer
-  ansible.builtin.command:
-    cmd: /tmp/install-uv.sh
+  ansible.builtin.shell: |
+    curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="{{ ansible_facts['user_dir'] }}/.local/bin" sh
   args:
-    creates: "{{ lookup('env', 'HOME') }}/.local/bin/uv"
+    creates: "{{ ansible_facts['user_dir'] }}/.local/bin/uv"
   register: developer_uv_install
   when: not developer_uv_check.stat.exists
   become: false
