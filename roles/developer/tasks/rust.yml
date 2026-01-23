@@ -2,12 +2,10 @@
 # SPDX-License-Identifier: MIT-0
 # Rust toolchain installation via rustup
 
-- name: Check if Rust is already installed
-  ansible.builtin.command:
-    cmd: command -v rustc
-  register: developer_rust_installed
-  changed_when: false
-  ignore_errors: true
+- name: Check if Rust binary exists
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.cargo/bin/rustc"
+  register: developer_rust_check
   become: false
   tags:
     - rust
@@ -18,7 +16,7 @@
     url: "{{ developer_rustup_install_url }}"
     dest: /tmp/install-rustup.sh
     mode: "0755"
-  when: developer_rust_installed.rc != 0
+  when: not developer_rust_check.stat.exists
   become: false
   tags:
     - rust
@@ -38,7 +36,7 @@
   ansible.builtin.file:
     path: /tmp/install-rustup.sh
     state: absent
-  when: developer_rust_installed.rc != 0
+  when: not developer_rust_check.stat.exists
   tags:
     - rust
     - compilers
