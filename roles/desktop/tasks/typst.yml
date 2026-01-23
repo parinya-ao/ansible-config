@@ -1,5 +1,11 @@
 # SPDX-License-Identifier: MIT-0
 ---
+- name: Check if Typst binary exists
+  ansible.builtin.stat:
+    path: /usr/local/bin/typst
+  register: desktop_typst_bin
+  when: desktop_install_typst | bool
+
 - name: Set Typst download URL
   ansible.builtin.set_fact:
     desktop_typst_download_url: >-
@@ -7,13 +13,9 @@
       'latest' if desktop_typst_version == 'latest'
       else 'v' + desktop_typst_version
       }}/typst-x86_64-unknown-linux-musl.tar.xz
-  when: desktop_install_typst | bool
-
-- name: Check if Typst binary exists
-  ansible.builtin.stat:
-    path: /usr/local/bin/typst
-  register: desktop_typst_bin
-  when: desktop_install_typst | bool
+  when:
+    - desktop_install_typst | bool
+    - not desktop_typst_bin.stat.exists
 
 - name: Create temporary directory for Typst
   ansible.builtin.tempfile:
