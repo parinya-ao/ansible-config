@@ -99,10 +99,23 @@ jobs:
           OUTPUT=$(ansible-playbook playbook.yaml -i inventory.ini)
           echo "$OUTPUT"
 
-          if echo "$OUTPUT" | grep -q 'changed=0.*failed=0'; then
+          # Check for idempotence: changed should be 0 and failed should be 0
+          # More robust pattern matching that works regardless of line breaks
+          CHANGED_COUNT=$(echo "$OUTPUT" | grep -oP 'changed=\K\d+' || echo "0")
+          FAILED_COUNT=$(echo "$OUTPUT" | grep -oP 'failed=\K\d+' || echo "0")
+          
+          # Use the last occurrence (from the final recap)
+          CHANGED_COUNT=$(echo "$CHANGED_COUNT" | tail -n1)
+          FAILED_COUNT=$(echo "$FAILED_COUNT" | tail -n1)
+          
+          echo "Idempotence Check Results: changed=$CHANGED_COUNT, failed=$FAILED_COUNT"
+          
+          if [ "$CHANGED_COUNT" = "0" ] && [ "$FAILED_COUNT" = "0" ]; then
             echo "PASSED: System is stable."
           else
-            echo "FAILED: Changes detected on second run!"
+            echo "FAILED: Changes or failures detected on second run!"
+            echo "  - Changed count: $CHANGED_COUNT (should be 0)"
+            echo "  - Failed count: $FAILED_COUNT (should be 0)"
             exit 1
           fi
         env:
