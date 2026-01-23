@@ -8,7 +8,7 @@ git_actual_user_home: "{{ lookup('env', 'HOME') }}"
 git_actual_user_name: "{{ lookup('env', 'USER') }}"
 
 # Git user account to configure (defaults to current user)
-git_config_user: "{{ ansible_user_id }}"
+git_config_user: "{{ ansible_facts['user_id'] }}"
 
 # Git identity configuration
 git_config_name: "parinya-ao"

@@ -19,6 +19,7 @@
     state: stopped
   when: common_apply_optimizations | bool
   become: true
+  failed_when: false
   tags:
     - optimizations
     - boot
@@ -37,6 +38,7 @@
   ansible.builtin.hostname:
     name: "{{ common_hostname }}"
   become: true
+  failed_when: false
   tags:
     - optimizations
     - hostname
@@ -47,6 +49,7 @@
   become: true
   register: common_utc_time
   changed_when: common_utc_time.rc == 0
+  failed_when: false
   tags:
     - optimizations
     - time

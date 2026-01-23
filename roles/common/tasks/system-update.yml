@@ -8,7 +8,9 @@
     update_cache: true
     update_only: true
   become: true
-  when: common_system_update_enabled
+  when:
+    - common_system_update_enabled
+    - lookup('env', 'CI') != 'true'
   register: common_dnf_update_result
   retries: "{{ common_dnf_retries }}"
   delay: "{{ common_dnf_delay }}"

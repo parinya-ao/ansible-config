@@ -1,0 +1,78 @@
+# SPDX-License-Identifier: MIT-0
+---
+- name: Check if Typst binary exists
+  ansible.builtin.stat:
+    path: /usr/local/bin/typst
+  register: desktop_typst_bin
+  when: desktop_install_typst | bool
+
+- name: Set Typst download URL
+  ansible.builtin.set_fact:
+    desktop_typst_download_url: >-
+      https://github.com/typst/typst/releases/download/{{
+      'latest' if desktop_typst_version == 'latest'
+      else 'v' + desktop_typst_version
+      }}/typst-x86_64-unknown-linux-musl.tar.xz
+  when:
+    - desktop_install_typst | bool
+    - not desktop_typst_bin.stat.exists
+
+- name: Create temporary directory for Typst
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: typst
+  register: desktop_typst_temp_dir
+  when:
+    - desktop_install_typst | bool
+    - not desktop_typst_bin.stat.exists
+
+- name: Download and unarchive Typst
+  ansible.builtin.unarchive:
+    src: "{{ desktop_typst_download_url }}"
+    dest: "{{ desktop_typst_temp_dir.path }}"
+    remote_src: true
+  when:
+    - desktop_install_typst | bool
+    - not desktop_typst_bin.stat.exists
+
+- name: Find Typst binary in extracted files
+  ansible.builtin.find:
+    paths: "{{ desktop_typst_temp_dir.path }}"
+    patterns: "typst"
+    recurse: true
+    file_type: file
+  register: desktop_typst_binary_found
+  when:
+    - desktop_install_typst | bool
+    - not desktop_typst_bin.stat.exists
+
+- name: Move Typst binary to /usr/local/bin
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: /usr/local/bin/typst
+    mode: "0755"
+    remote_src: true
+  loop: "{{ desktop_typst_binary_found.files }}"
+  become: true
+  when:
+    - desktop_install_typst | bool
+    - not desktop_typst_bin.stat.exists
+
+- name: Cleanup temporary directory
+  ansible.builtin.file:
+    path: "{{ desktop_typst_temp_dir.path }}"
+    state: absent
+  when:
+    - desktop_install_typst | bool
+    - not desktop_typst_bin.stat.exists
+
+- name: Verify Typst Installation
+  ansible.builtin.command: typst --version
+  register: desktop_typst_check
+  changed_when: false
+  when: desktop_install_typst | bool
+
+- name: Show Typst Version
+  ansible.builtin.debug:
+    msg: "Typst installed successfully: {{ desktop_typst_check.stdout }}"
+  when: desktop_install_typst | bool

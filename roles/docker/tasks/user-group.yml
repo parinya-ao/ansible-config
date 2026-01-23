@@ -24,8 +24,8 @@
   ansible.builtin.debug:
     msg:
       - "Socket exists: {{ docker_socket_stat.stat.exists }}"
-      - "Socket mode: {{ docker_socket_stat.stat.mode }}"
-      - "Socket owner: {{ docker_socket_stat.stat.pw_name }}:{{ docker_socket_stat.stat.gr_name }}"
+      - "Socket mode: {{ docker_socket_stat.stat.mode | default('unknown') }}"
+      - "Socket owner: {{ docker_socket_stat.stat.pw_name | default('unknown') }}:{{ docker_socket_stat.stat.gr_name | default('unknown') }}"
   when: docker_socket_stat.stat.exists
   tags:
     - docker

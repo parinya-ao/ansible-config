@@ -9,6 +9,7 @@
     enabled: true
     daemon_reload: true
   become: true
+  failed_when: false
   tags:
     - docker
     - service
@@ -19,6 +20,7 @@
   register: docker_info
   changed_when: false
   become: true
+  failed_when: false
   tags:
     - docker
     - service

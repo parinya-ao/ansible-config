@@ -4,8 +4,9 @@
 
 - name: Get actual user info
   ansible.builtin.set_fact:
-    developer_actual_user_home: "{{ lookup('env', 'HOME') }}"
-    developer_actual_user_name: "{{ lookup('env', 'USER') }}"
+    # Use ansible_facts syntax as recommended by Ansible
+    developer_actual_user_home: "{{ ansible_facts['user_dir'] }}"
+    developer_actual_user_name: "{{ ansible_facts['user_id'] }}"
   tags:
     - android
     - mobile
@@ -123,7 +124,6 @@
     state: directory
     mode: "0755"
     owner: "{{ developer_actual_user_name }}"
-    group: "{{ developer_actual_user_name }}"
   when: not developer_android_sdk_check.stat.exists
   tags:
     - android
@@ -157,7 +157,6 @@
     state: directory
     recurse: true
     owner: "{{ developer_actual_user_name }}"
-    group: "{{ developer_actual_user_name }}"
   when: not developer_android_sdk_check.stat.exists
   tags:
     - android
@@ -183,7 +182,6 @@
     state: present
     create: true
     owner: "{{ developer_actual_user_name }}"
-    group: "{{ developer_actual_user_name }}"
     mode: "0644"
   tags:
     - android
@@ -197,7 +195,6 @@
     state: present
     create: true
     owner: "{{ developer_actual_user_name }}"
-    group: "{{ developer_actual_user_name }}"
     mode: "0644"
   tags:
     - android
@@ -205,7 +202,9 @@
 
 - name: Accept Android SDK licenses
   ansible.builtin.shell:
-    cmd: set -o pipefail && yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" --licenses
+    # noqa: risky-shell-pipe
+    # Removed set -o pipefail to allow yes to die without error (Fix RC 141 SIGPIPE)
+    cmd: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" --licenses
   args:
     creates: "{{ developer_actual_user_home }}/Android/Sdk/licenses/android-sdk-license"
     executable: /bin/bash

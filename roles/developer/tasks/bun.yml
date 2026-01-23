@@ -2,21 +2,36 @@
 # SPDX-License-Identifier: MIT-0
 # Bun JavaScript runtime installation
 
-- name: Install Bun JavaScript runtime
+- name: Check if Bun binary exists
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['user_dir'] }}/.bun/bin/bun"
+  register: developer_bun_check
+  become: false
+  tags:
+    - bun
+    - javascript
+
+- name: Download Bun installer script
   ansible.builtin.get_url:
     url: "{{ developer_bun_install_url }}"
     dest: /tmp/install-bun.sh
     mode: "0755"
+  when: not developer_bun_check.stat.exists
   become: false
   tags:
     - bun
     - javascript
 
 - name: Execute Bun installer
-  ansible.builtin.command:
-    cmd: /tmp/install-bun.sh
+  ansible.builtin.shell: |
+    # Force set environment variable for correct installation path
+    export BUN_INSTALL="{{ ansible_facts['user_dir'] }}/.bun"
+
+    # Run installer script
+    bash /tmp/install-bun.sh
   args:
-    creates: "{{ lookup('env', 'HOME') }}/.bun/bin/bun"
+    creates: "{{ ansible_facts['user_dir'] }}/.bun/bin/bun"
+  when: not developer_bun_check.stat.exists
   become: false
   tags:
     - bun
@@ -26,13 +41,14 @@
   ansible.builtin.file:
     path: /tmp/install-bun.sh
     state: absent
+  when: not developer_bun_check.stat.exists
   tags:
     - bun
     - javascript
 
 - name: Verify Bun installation
   ansible.builtin.command:
-    cmd: "{{ lookup('env', 'HOME') }}/.bun/bin/bun --version"
+    cmd: "{{ ansible_facts['user_dir'] }}/.bun/bin/bun --version"
   register: developer_bun_version
   changed_when: false
   become: false

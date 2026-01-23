@@ -6,3 +6,5 @@
     description: Docker CE Stable - Fedora
     baseurl: https://download.docker.com/linux/fedora/$releasever/$basearch/stable
     enabled: true
+    gpgcheck: true
+    gpgkey: https://download.docker.com/linux/fedora/gpg

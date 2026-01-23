@@ -2,8 +2,7 @@
 # SPDX-License-Identifier: MIT-0
 # Developer role - Main entry point
 # This role installs a complete development environment including:
-# - System compilers and development tools
-# - Rust toolchain via rustup
+# - System compilers and development tools (includes Rust via dnf)
 # - Bun JavaScript runtime
 # - uv Python package manager
 
@@ -13,14 +12,6 @@
   tags:
     - developers
     - compilers
-
-# Rust toolchain
-- name: Install Rust toolchain
-  ansible.builtin.import_tasks: rust.yml
-  when: developer_install_rust
-  tags:
-    - developers
-    - rust
 
 # Bun runtime
 - name: Install Bun

@@ -6,7 +6,9 @@
   ansible.builtin.command: fwupdmgr refresh --force
   register: common_fwupdmgr_refresh
   changed_when: common_fwupdmgr_refresh.rc == 0
-  when: common_install_firmware_updates | bool
+  when:
+    - common_install_firmware_updates | bool
+    - lookup('env', 'CI') != 'true'
   become: true
   tags:
     - firmware
@@ -16,7 +18,9 @@
   register: common_firmware_updates
   changed_when: false
   failed_when: common_firmware_updates.rc not in [0, 2]
-  when: common_install_firmware_updates | bool
+  when:
+    - common_install_firmware_updates | bool
+    - lookup('env', 'CI') != 'true'
   tags:
     - firmware
 
@@ -26,7 +30,8 @@
   changed_when: common_fwupdmgr_update.rc == 0
   when:
     - common_install_firmware_updates | bool
-    - common_firmware_updates.stdout | length > 0
+    - common_firmware_updates.stdout | default('') | length > 0
+    - lookup('env', 'CI') != 'true'
   become: true
   tags:
     - firmware

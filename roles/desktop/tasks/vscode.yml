@@ -1,11 +1,19 @@
 ---
 # SPDX-License-Identifier: MIT-0
+- name: Check if VSCode repository exists
+  ansible.builtin.stat:
+    path: /etc/yum.repos.d/vscode.repo
+  register: desktop_vscode_repo
+
 - name: Add VSCode repository
   ansible.builtin.yum_repository:
     name: code
     description: Visual Studio Code
     baseurl: "{{ desktop_vscode_repo_baseurl }}"
     enabled: true
+    gpgcheck: true
+    gpgkey: "{{ desktop_vscode_gpg_key_url }}"
+  when: not desktop_vscode_repo.stat.exists
 
 - name: Install Visual Studio Code
   ansible.builtin.dnf:
@@ -14,7 +22,7 @@
 
 - name: Ensure VS Code User Directory Exists
   ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/Code/User"
+    path: "{{ ansible_facts['user_dir'] }}/.config/Code/User"
     state: directory
     mode: "0755"
 
@@ -27,7 +35,7 @@
 - name: Copy VS Code Settings if file exists
   ansible.builtin.copy:
     src: vscode/settings.json
-    dest: "{{ ansible_user_dir }}/.config/Code/User/settings.json"
+    dest: "{{ ansible_facts['user_dir'] }}/.config/Code/User/settings.json"
     mode: "0644"
     backup: true
   when: desktop_vscode_settings_stat.stat.exists
