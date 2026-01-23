@@ -56,4 +56,4 @@ desktop_starship_install_url: "https://starship.rs/install.sh"
 
 # Typst configuration
 desktop_install_typst: true
-desktop_typst_version: "latest"
+desktop_typst_version: "0.14.2"
