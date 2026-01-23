@@ -26,7 +26,7 @@
   ansible.builtin.command:
     cmd: /tmp/install-rustup.sh -y
   args:
-    creates: "{{ lookup('env', 'HOME') }}/.cargo/bin/rustc"
+    creates: "{{ ansible_facts['user_dir'] }}/.cargo/bin/rustc"
   become: false
   tags:
     - rust
@@ -43,7 +43,7 @@
 
 - name: Verify Rust installation
   ansible.builtin.command:
-    cmd: "{{ lookup('env', 'HOME') }}/.cargo/bin/rustc --version"
+    cmd: "{{ ansible_facts['user_dir'] }}/.cargo/bin/rustc --version"
   register: developer_rust_version
   changed_when: false
   become: false
