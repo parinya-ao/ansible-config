@@ -28,8 +28,8 @@
     export CARGO_HOME="{{ ansible_facts['user_dir'] }}/.cargo"
     export RUSTUP_HOME="{{ ansible_facts['user_dir'] }}/.rustup"
 
-    # Run installer script with shell
-    sh /tmp/install-rustup.sh -y
+    # Run installer with default stable toolchain to ensure compiler is installed
+    sh /tmp/install-rustup.sh -y --default-toolchain stable
   args:
     creates: "{{ ansible_facts['user_dir'] }}/.cargo/bin/rustc"
   become: false
