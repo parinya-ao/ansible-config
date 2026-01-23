@@ -23,7 +23,8 @@
 
 - name: Execute uv installer
   ansible.builtin.shell: |
-    curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="{{ ansible_facts['user_dir'] }}/.local/bin" sh
+    set -o pipefail
+    UV_INSTALL_DIR="{{ ansible_facts['user_dir'] }}/.local/bin" bash /tmp/install-uv.sh
   args:
     creates: "{{ ansible_facts['user_dir'] }}/.local/bin/uv"
   register: developer_uv_install
