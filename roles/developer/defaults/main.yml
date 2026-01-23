@@ -29,6 +29,8 @@ developer_compilers_packages:
   - ansible-lint
   - yamllint
   - nodejs
+  - rust
+  - cargo
 
 # Rust configuration
 developer_rustup_default_host: "x86_64-unknown-linux-gnu"
