@@ -31,8 +31,9 @@ developer_compilers_packages:
   - nodejs
   - rust
   - cargo
-  - rust-analysis
   - rust-src
+  - rustfmt
+  - clippy
 
 # Rust configuration
 developer_rustup_default_host: "x86_64-unknown-linux-gnu"
