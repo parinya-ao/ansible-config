@@ -11,7 +11,7 @@
     - bun
     - javascript
 
-- name: Install Bun JavaScript runtime
+- name: Download Bun installer script
   ansible.builtin.get_url:
     url: "{{ developer_bun_install_url }}"
     dest: /tmp/install-bun.sh
@@ -23,11 +23,14 @@
     - javascript
 
 - name: Execute Bun installer
-  ansible.builtin.command:
-    cmd: /tmp/install-bun.sh
+  ansible.builtin.shell: |
+    # Force set environment variable for correct installation path
+    export BUN_INSTALL="{{ ansible_facts['user_dir'] }}/.bun"
+
+    # Run installer script
+    bash /tmp/install-bun.sh
   args:
     creates: "{{ ansible_facts['user_dir'] }}/.bun/bin/bun"
-  register: developer_bun_install
   when: not developer_bun_check.stat.exists
   become: false
   tags:
