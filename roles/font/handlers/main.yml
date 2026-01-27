@@ -3,5 +3,5 @@
 # handlers file for roles/font
 
 - name: Refresh font cache
-  ansible.builtin.command: fc-cache -f -v
+  ansible.builtin.command: "{{ font_cache_command }}"
   changed_when: false

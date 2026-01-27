@@ -2,8 +2,10 @@
 ---
 # defaults file for roles/font
 
+# Base directory for custom fonts
 font_base_dir: /usr/share/fonts
 
+# Custom fonts to download and install
 font_fonts:
   - name: th-sarabun-new
     dir: "{{ font_base_dir }}/th-sarabun-new"
@@ -17,3 +19,39 @@ font_fonts:
     dir: "{{ font_base_dir }}/IntelOneMono"
     url: https://github.com/intel/intel-one-mono/releases/download/V1.4.0/ttf.zip
     zip: /tmp/IntelOneMono-1.4.0.zip
+
+# Enable or disable dnf package installation by category
+font_install_thai: true
+font_install_unicode: true
+font_install_code: true
+font_install_emoji: true
+font_install_microsoft: false # Requires rpmfusion repository
+
+# Font cache refresh command
+font_cache_command: fc-cache -fv
+
+# Thai language fonts (installed via dnf)
+font_packages_thai:
+  - tlwg-fonts # Standard Thai fonts (Loma, Norasi, Garuda, Kinnari)
+  - google-noto-sans-thai # Noto Thai Sans - good quality replacement for Cordia
+  - google-noto-serif-thai # Noto Thai Serif - good quality replacement for Angsana
+  - sarabun-fonts # TH Sarabun - official Thai government font
+
+# Unicode and multilingual fonts (installed via dnf)
+font_packages_unicode:
+  - google-noto-fonts-all # Comprehensive coverage for most languages
+  - google-noto-cjk-fonts # Chinese, Japanese, Korean fonts
+
+# Code and terminal fonts (installed via dnf)
+font_packages_code:
+  - fira-code-fonts # Popular coding font with ligatures
+  - jetbrains-mono-fonts # Another popular developer font
+  - powerline-fonts # Required for shell themes with special symbols
+
+# Emoji and symbol fonts (installed via dnf)
+font_packages_emoji:
+  - google-noto-emoji-fonts # Prevents emoji display issues
+
+# Microsoft fonts (requires rpmfusion repository)
+font_packages_microsoft:
+  - msttcore-fonts # Times New Roman, Arial, Courier New for old Word files
