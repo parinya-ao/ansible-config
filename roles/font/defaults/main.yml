@@ -32,10 +32,10 @@ font_cache_command: fc-cache -fv
 
 # Thai language fonts (installed via dnf)
 font_packages_thai:
-  - tlwg-fonts # Standard Thai fonts (Loma, Norasi, Garuda, Kinnari)
-  - google-noto-sans-thai # Noto Thai Sans - good quality replacement for Cordia
-  - google-noto-serif-thai # Noto Thai Serif - good quality replacement for Angsana
-  - sarabun-fonts # TH Sarabun - official Thai government font
+  - default-fonts-th # Metapackage for default Thai fonts
+  - google-noto-sans-thai-fonts # Noto Thai Sans - good quality replacement for Cordia
+  - google-noto-serif-thai-fonts # Noto Thai Serif - good quality replacement for Angsana
+  # Note: TH Sarabun is installed separately via custom font download
 
 # Unicode and multilingual fonts (installed via dnf)
 font_packages_unicode:
