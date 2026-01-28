@@ -58,6 +58,7 @@ common_base_packages:
   - p7zip-plugins
   - unrar
   - lm_sensors
+  - bat
 
 # Additional packages (extend this list in your playbook)
 common_extra_packages: []

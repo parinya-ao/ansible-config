@@ -2,21 +2,57 @@
 ---
 # tasks file for roles/font
 
-- name: Create font directories
+- name: Install Thai language fonts via dnf
+  ansible.builtin.dnf:
+    name: "{{ font_packages_thai }}"
+    state: present
+  when: font_install_thai
+  notify: Refresh font cache
+
+- name: Install Unicode and multilingual fonts via dnf
+  ansible.builtin.dnf:
+    name: "{{ font_packages_unicode }}"
+    state: present
+  when: font_install_unicode
+  notify: Refresh font cache
+
+- name: Install code and terminal fonts via dnf
+  ansible.builtin.dnf:
+    name: "{{ font_packages_code }}"
+    state: present
+  when: font_install_code
+  notify: Refresh font cache
+
+- name: Install emoji fonts via dnf
+  ansible.builtin.dnf:
+    name: "{{ font_packages_emoji }}"
+    state: present
+  when: font_install_emoji
+  notify: Refresh font cache
+
+- name: Install Microsoft fonts (requires rpmfusion)
+  ansible.builtin.dnf:
+    name: "{{ font_packages_microsoft }}"
+    state: present
+  when: font_install_microsoft
+  notify: Refresh font cache
+  failed_when: false # Don't fail if rpmfusion is not enabled
+
+- name: Create custom font directories
   ansible.builtin.file:
     path: "{{ item.dir }}"
     state: directory
     mode: "0755"
   loop: "{{ font_fonts }}"
 
-- name: Check if font archives exist
+- name: Check if custom font archives exist
   ansible.builtin.stat:
     path: "{{ item.zip }}"
   loop: "{{ font_fonts }}"
   register: font_archives_stat
   notify: Refresh font cache
 
-- name: Download fonts
+- name: Download custom fonts
   ansible.builtin.get_url:
     url: "{{ item.url }}"
     dest: "{{ item.zip }}"
@@ -27,7 +63,7 @@
   when: not font_archives_stat.results[idx].stat.exists
   notify: Refresh font cache
 
-- name: Extract fonts
+- name: Extract custom fonts
   ansible.builtin.unarchive:
     src: "{{ item.zip }}"
     dest: "{{ item.dir }}"
