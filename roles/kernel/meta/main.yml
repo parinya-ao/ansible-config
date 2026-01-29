@@ -1,0 +1,15 @@
+---
+# SPDX-License-Identifier: MIT-0
+galaxy_info:
+  author: Ansible Configuration Team
+  description: Fedora 43 Kernel LTS (kernel-longterm-6.12) installation and migration role
+  company: ""
+  license: MIT-0
+  min_ansible_version: "2.13"
+  galaxy_tags:
+    - kernel
+    - lts
+    - fedora
+    - system
+
+dependencies: []

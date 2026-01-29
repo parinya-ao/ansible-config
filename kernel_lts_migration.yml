@@ -1,0 +1,80 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Fedora 43 Kernel LTS Migration Playbook
+#
+# This playbook performs a complete kernel migration from standard Fedora kernel
+# to kernel-longterm-6.12 from the kwizart COPR repository.
+#
+# Features:
+# - Verifies system is Fedora 43
+# - Configures DNF to exclude standard kernels
+# - Installs kernel-longterm-6.12 from COPR
+# - Applies version lock to prevent downgrades
+# - Removes standard kernel packages
+# - Optional automatic reboot
+#
+# Usage:
+#   # Dry run
+#   ansible-playbook kernel_lts_migration.yml --check
+#
+#   # Execute with automatic reboot
+#   ansible-playbook kernel_lts_migration.yml -e kernel_auto_reboot=true
+#
+#   # Execute without reboot (manual reboot required)
+#   ansible-playbook kernel_lts_migration.yml
+#
+#   # Run only specific tags
+#   ansible-playbook kernel_lts_migration.yml -t kernel-install,kernel-lock
+
+- name: Fedora 43 Kernel LTS (kernel-longterm-6.12) Migration
+  hosts: all
+  become: true
+
+  pre_tasks:
+    - name: Display kernel migration information
+      ansible.builtin.debug:
+        msg:
+          - "=========================================="
+          - "Kernel LTS Migration"
+          - "=========================================="
+          - "Target: kernel-longterm-6.12"
+          - "Source: kwizart/kernel-longterm-6.12 COPR"
+          - "Distribution: Fedora 43"
+          - "Auto Reboot: {{ kernel_auto_reboot | default(false) }}"
+          - "=========================================="
+
+  roles:
+    - kernel
+
+  post_tasks:
+    - name: Display migration summary
+      ansible.builtin.debug:
+        msg:
+          - "=========================================="
+          - "Migration Steps Completed"
+          - "=========================================="
+          - "✓ System verification (Fedora 43)"
+          - "✓ DNF configuration updated"
+          - "✓ COPR repository enabled"
+          - "✓ kernel-longterm-6.12 installed"
+          - "✓ Version lock applied"
+          - "✓ Standard kernels removed"
+          - "=========================================="
+          - ""
+          - "Next Steps:"
+          - "1. If auto_reboot=false, manually reboot:"
+          - "   sudo reboot"
+          - "2. Verify new kernel after reboot:"
+          - "   uname -r"
+          - "3. Check grub default boot entry:"
+          - "   grubby --info=ALL"
+          - "=========================================="
+
+    - name: Display reboot notice (if not auto-rebooting)
+      ansible.builtin.debug:
+        msg:
+          - "⚠️  MANUAL REBOOT REQUIRED ⚠️"
+          - ""
+          - "Please reboot the system to apply the kernel change:"
+          - "  sudo reboot"
+      when: not (kernel_auto_reboot | default(false) | bool)

@@ -18,9 +18,27 @@ multimedia_codec_packages:
   - libva-utils
   - gstreamer1-plugins-base
   - gstreamer1-plugins-good
+  - gstreamer1-plugins-good-extras
   - gstreamer1-plugins-ugly
+  - gstreamer1-plugins-ugly-nonfree
   - gstreamer1-plugins-bad-free
+  - gstreamer1-plugins-bad-nonfree
   - gstreamer1-libav
+  - gstreamer1-plugin-libav
+  - gstreamer1-plugins-base-tools
+
+# DVD playback support packages
+multimedia_dvd_packages:
+  - libdvdcss
+  - libdvdread
+  - libdvdnav
+
+# Audio codec packages
+multimedia_audio_codec_packages:
+  - lame
+  - faac
+  - flac
+  - vorbis-tools
 
 # OpenH264 packages
 multimedia_openh264_packages:

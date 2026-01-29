@@ -1,0 +1,41 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Default variables for kernel role
+
+# Feature toggles
+kernel_install_lts: true
+kernel_exclude_standard: true
+kernel_apply_versionlock: true
+kernel_remove_standard_kernels: true
+kernel_auto_reboot: false
+
+# System requirements
+kernel_required_distro: "Fedora"
+kernel_required_version: "43"
+
+# LTS Kernel Configuration
+kernel_lts_copr_repo: "kwizart/kernel-longterm-6.12"
+kernel_lts_packages:
+  - kernel-longterm
+  - kernel-longterm-core
+  - kernel-longterm-modules
+  - kernel-longterm-modules-extra
+  - kernel-longterm-devel
+
+# DNF plugins required
+kernel_dnf_plugins:
+  - dnf5-plugins-core
+  - python3-dnf-plugin-versionlock
+
+# Standard kernel packages to exclude from DNF
+kernel_standard_exclude_list:
+  - kernel
+  - kernel-core
+  - kernel-modules
+  - kernel-modules-extra
+  - kernel-devel
+  - kernel-headers
+
+# Reboot settings
+kernel_reboot_timeout: 600
+kernel_reboot_message: "Rebooting to switch to Kernel LTS 6.12 (kernel-longterm)"

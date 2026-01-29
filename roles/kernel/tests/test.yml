@@ -1,0 +1,9 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Test playbook for kernel role
+- name: Test kernel LTS migration role
+  hosts: localhost
+  remote_user: root
+  become: true
+  roles:
+    - kernel

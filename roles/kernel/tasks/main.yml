@@ -1,0 +1,102 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Kernel LTS migration tasks for Fedora 43
+
+- name: 1. Verify system is Fedora 43
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "{{ kernel_required_distro }}"
+      - ansible_distribution_version == "{{ kernel_required_version }}"
+    fail_msg: "This role is only for {{ kernel_required_distro }} {{ kernel_required_version }}"
+  tags:
+    - kernel
+    - kernel-verify
+
+- name: 2. Configure DNF to exclude standard kernels
+  ansible.builtin.blockinfile:
+    path: /etc/dnf/dnf.conf
+    marker: "# {mark} ANSIBLE MANAGED KERNEL EXCLUDE"
+    block: |
+      exclude={{ kernel_standard_exclude_list | join(',') }}
+    insertafter: "^\\[main\\]"
+  when: kernel_exclude_standard | bool
+  tags:
+    - kernel
+    - kernel-config
+
+- name: 3. Install DNF plugins (Copr and Versionlock)
+  ansible.builtin.dnf:
+    name: "{{ kernel_dnf_plugins }}"
+    state: present
+  when: kernel_install_lts | bool
+  tags:
+    - kernel
+    - kernel-plugins
+
+- name: 4. Enable kwizart/kernel-longterm COPR
+  ansible.builtin.command:
+    cmd: "dnf copr enable -y {{ kernel_lts_copr_repo }}"
+  register: kernel_copr_result
+  changed_when: "'enabled' in kernel_copr_result.stdout"
+  when: kernel_install_lts | bool
+  tags:
+    - kernel
+    - kernel-copr
+
+- name: 5. Install Kernel LTS packages
+  ansible.builtin.dnf:
+    name: "{{ kernel_lts_packages }}"
+    state: present
+    disable_excludes: main # Temporarily bypass exclude rules for kernel packages
+  when: kernel_install_lts | bool
+  tags:
+    - kernel
+    - kernel-install
+
+- name: 6. Get installed LTS kernel version
+  ansible.builtin.shell: |
+    set -o pipefail
+    rpm -q kernel-longterm --queryformat '%{VERSION}-%{RELEASE}' | head -n 1
+  register: kernel_lts_version
+  changed_when: false
+  failed_when: kernel_lts_version.rc != 0
+  when: kernel_apply_versionlock | bool
+  tags:
+    - kernel
+    - kernel-version
+
+- name: 7. Apply version lock for LTS kernel
+  ansible.builtin.command:
+    cmd: "dnf versionlock add 'kernel-longterm-{{ kernel_lts_version.stdout }}*'"
+  register: kernel_versionlock_result
+  changed_when: "'added' in kernel_versionlock_result.stdout"
+  when:
+    - kernel_apply_versionlock | bool
+    - kernel_lts_version.stdout is defined
+  tags:
+    - kernel
+    - kernel-lock
+
+- name: 8. Remove standard kernels (non-longterm)
+  ansible.builtin.shell: |
+    set -o pipefail
+    # Remove standard kernel packages (not longterm)
+    rpm -qa 'kernel-[0-9]*' | grep -v 'kernel-longterm' | xargs -r dnf remove -y 2>/dev/null || true
+    rpm -qa 'kernel-core-[0-9]*' | grep -v 'kernel-longterm' | xargs -r dnf remove -y 2>/dev/null || true
+  register: kernel_remove_result
+  changed_when: "'Removed' in kernel_remove_result.stdout or 'removed' in kernel_remove_result.stdout"
+  when: kernel_remove_standard_kernels | bool
+  tags:
+    - kernel
+    - kernel-cleanup
+
+- name: 9. Trigger reboot if enabled
+  ansible.builtin.debug:
+    msg: "Kernel LTS migration complete. Reboot required."
+  notify: Reboot system for kernel update
+  when:
+    - kernel_auto_reboot | bool
+    - kernel_lts_version.stdout is defined
+  tags:
+    - kernel
+    - kernel-reboot

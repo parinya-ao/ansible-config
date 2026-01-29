@@ -1,0 +1,9 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Handlers for kernel role
+
+- name: Reboot system for kernel update
+  ansible.builtin.reboot:
+    msg: "{{ kernel_reboot_message }}"
+    reboot_timeout: "{{ kernel_reboot_timeout }}"
+  when: kernel_auto_reboot | bool
