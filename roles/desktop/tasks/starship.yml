@@ -7,6 +7,7 @@
     url: "{{ desktop_starship_install_url }}"
     dest: /tmp/starship-install.sh
     mode: "0755"
+    timeout: 60
 
 - name: Run Starship installer
   ansible.builtin.command: /tmp/starship-install.sh --yes
