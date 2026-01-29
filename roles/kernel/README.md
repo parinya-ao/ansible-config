@@ -1,6 +1,6 @@
 # Kernel LTS Migration Role
 
-This role manages Fedora 43 kernel migration to kernel-longterm-6.12 with version locking and automatic cleanup of standard kernels.
+This role manages Fedora 43 kernel migration to a long-term support (LTS) kernel with version locking and automatic cleanup of standard kernels.
 
 ## Features
 
@@ -12,7 +12,7 @@ This role manages Fedora 43 kernel migration to kernel-longterm-6.12 with versio
 
 ### 📦 Kernel Management
 
-- Automatic installation of kernel-longterm-6.12 from COPR repository
+- Automatic installation of Kernel LTS (e.g., kernel-longterm-6.12) from COPR repository
 - DNF configuration to prevent standard kernel reinstallation
 - Smart cleanup that removes only standard kernels, preserving LTS
 
@@ -47,21 +47,22 @@ This role manages Fedora 43 kernel migration to kernel-longterm-6.12 with versio
 
 ### System Configuration
 
-| Variable                  | Default             | Description                 |
-| ------------------------- | ------------------- | --------------------------- |
-| `kernel_required_distro`  | `Fedora`            | Required distribution       |
-| `kernel_required_version` | `43`                | Required Fedora version     |
-| `kernel_reboot_timeout`   | `600`               | Reboot timeout in seconds   |
-| `kernel_reboot_message`   | Descriptive message | Message shown during reboot |
+| Variable                   | Default             | Description                 |
+| -------------------------- | ------------------- | --------------------------- |
+| `kernel_required_distro`   | `Fedora`            | Required distribution       |
+| `kernel_required_version`  | `43`                | Required Fedora version     |
+| `kernel_reboot_timeout`    | `600`               | Reboot timeout in seconds   |
+| `kernel_reboot_message`    | Descriptive message | Message shown during reboot |
+| `kernel_lts_version_major` | `6.12`              | LTS Major version to target |
 
 ### Package & Repository Configuration
 
-| Variable                       | Default                        | Description                    |
-| ------------------------------ | ------------------------------ | ------------------------------ |
-| `kernel_lts_copr_repo`         | `kwizart/kernel-longterm-6.12` | COPR repository for LTS kernel |
-| `kernel_lts_packages`          | List of LTS packages           | Kernel packages to install     |
-| `kernel_dnf_plugins`           | DNF core & versionlock         | Required DNF plugins           |
-| `kernel_standard_exclude_list` | Standard kernel packages       | Packages to exclude from DNF   |
+| Variable                       | Default                                                  | Description                    |
+| ------------------------------ | -------------------------------------------------------- | ------------------------------ |
+| `kernel_lts_copr_repo`         | `kwizart/kernel-longterm-{{ kernel_lts_version_major }}` | COPR repository for LTS kernel |
+| `kernel_lts_packages`          | List of LTS packages                                     | Kernel packages to install     |
+| `kernel_dnf_plugins`           | DNF core & versionlock                                   | Required DNF plugins           |
+| `kernel_standard_exclude_list` | Standard kernel packages                                 | Packages to exclude from DNF   |
 
 ## Examples
 
@@ -117,7 +118,7 @@ This role manages Fedora 43 kernel migration to kernel-longterm-6.12 with versio
 1. **Verify System**: Assert Fedora 43
 2. **Configure DNF**: Add kernel exclusions to `/etc/dnf/dnf.conf`
 3. **Install Plugins**: Install dnf5-plugins-core and python3-dnf-plugin-versionlock
-4. **Enable COPR**: Add kwizart/kernel-longterm-6.12 repository
+4. **Enable COPR**: Add LTS repository (defined by `kernel_lts_copr_repo`)
 5. **Install LTS**: Install kernel-longterm packages (bypassing temporary DNF excludes)
 6. **Get Version**: Query installed LTS kernel version
 7. **Apply Lock**: Lock LTS kernel version with versionlock
@@ -167,7 +168,7 @@ Available tags:
 ### Kernel Installation Fails
 
 1. Verify Fedora 43: `cat /etc/os-release`
-2. Check COPR availability: `dnf copr status kwizart/kernel-longterm-6.12`
+2. Check COPR availability: `dnf copr status kwizart/kernel-longterm-X.XX`
 3. Check DNF cache: `dnf clean all && dnf makecache`
 
 ### Versionlock Plugin Missing

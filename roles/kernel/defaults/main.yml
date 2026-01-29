@@ -14,7 +14,8 @@ kernel_required_distro: "Fedora"
 kernel_required_version: "43"
 
 # LTS Kernel Configuration
-kernel_lts_copr_repo: "kwizart/kernel-longterm-6.12"
+kernel_lts_version_major: "6.12"
+kernel_lts_copr_repo: "kwizart/kernel-longterm-{{ kernel_lts_version_major }}"
 kernel_lts_packages:
   - kernel-longterm
   - kernel-longterm-core
@@ -38,4 +39,4 @@ kernel_standard_exclude_list:
 
 # Reboot settings
 kernel_reboot_timeout: 600
-kernel_reboot_message: "Rebooting to switch to Kernel LTS 6.12 (kernel-longterm)"
+kernel_reboot_message: "Rebooting to switch to Kernel LTS {{ kernel_lts_version_major }} (kernel-longterm)"

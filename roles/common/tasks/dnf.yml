@@ -9,6 +9,9 @@
       max_parallel_downloads={{ common_dnf_max_parallel_downloads }}
       fastestmirror={{ common_dnf_fastestmirror }}
       metadata_expire={{ common_dnf_metadata_expire }}
+      {% if common_dnf_exclude | length > 0 %}
+      exclude={{ common_dnf_exclude | join(',') }}
+      {% endif %}
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
     create: true
     mode: "0644"
