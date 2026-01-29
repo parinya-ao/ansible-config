@@ -27,7 +27,13 @@ common_dns_servers:
 common_dnf_max_parallel_downloads: 20
 common_dnf_fastestmirror: "True"
 common_dnf_metadata_expire: "6h"
-common_dnf_exclude: []
+common_dnf_exclude:
+  - kernel
+  - kernel-core
+  - kernel-modules
+  - kernel-modules-extra
+  - kernel-devel
+  - kernel-headers
 
 # DNF retry settings (for network resilience)
 common_dnf_retries: 3
