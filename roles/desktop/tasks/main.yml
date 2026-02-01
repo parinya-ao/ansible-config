@@ -14,11 +14,11 @@
     - desktop
     - gnome
 
-- name: Install Visual Studio Code
-  ansible.builtin.import_tasks: vscode.yml
+- name: Install Zed editor
+  ansible.builtin.import_tasks: zed.yml
   tags:
     - desktop
-    - vscode
+    - zed
 
 - name: Install Starship prompt
   ansible.builtin.import_tasks: starship.yml

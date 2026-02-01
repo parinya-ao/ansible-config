@@ -6,7 +6,6 @@
 
 # Feature flags for conditional role execution
 desktop_install_desktop_packages: true
-desktop_install_vscode: true
 desktop_install_starship: true
 desktop_install_flatpak_apps: true
 desktop_install_flatpak: true
@@ -21,10 +20,6 @@ desktop_gnome_extensions:
 
 # Zed editor download URL
 desktop_zed_download_url: "https://github.com/zed-industries/zed/releases/latest/download/zed-linux-x86_64.tar.gz"
-
-# VSCode URLs
-desktop_vscode_gpg_key_url: "https://packages.microsoft.com/keys/microsoft.asc"
-desktop_vscode_repo_baseurl: "https://packages.microsoft.com/yumrepos/vscode"
 
 # Flatpak applications to install
 desktop_flatpak_apps_list:
