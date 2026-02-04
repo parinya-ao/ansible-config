@@ -30,32 +30,81 @@
     state: present
   when: desktop_ghostty_binary.rc != 0
 
+- name: Check current custom keybindings
+  ansible.builtin.command: >
+    gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings
+  register: desktop_ghostty_current_keybindings
+  changed_when: false
+  failed_when: false
+  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+
 - name: Configure Ctrl+Alt+T keyboard shortcut for Ghostty
   ansible.builtin.command: >
     gsettings set org.gnome.settings-daemon.plugins.media-keys
     custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
-  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded
+  when:
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - "'/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/' not in (desktop_ghostty_current_keybindings.stdout | default(''))"
   changed_when: true
+
+- name: Check current Ghostty shortcut name
+  ansible.builtin.command: >
+    gsettings get
+    org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/
+    name
+  register: desktop_ghostty_current_name
+  changed_when: false
+  failed_when: false
+  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
 
 - name: Set Ghostty keyboard shortcut name
   ansible.builtin.command: >
-    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/
+    gsettings set
+    org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/
     name 'Ghostty Terminal'
-  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded
+  when:
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_current_name.stdout | default('') != "'Ghostty Terminal'"
   changed_when: true
+
+- name: Check current Ghostty shortcut command
+  ansible.builtin.command: >
+    gsettings get
+    org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/
+    command
+  register: desktop_ghostty_current_cmd
+  changed_when: false
+  failed_when: false
+  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
 
 - name: Set Ghostty keyboard shortcut command
   ansible.builtin.command: >
-    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/
+    gsettings set
+    org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/
     command 'ghostty'
-  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded
+  when:
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_current_cmd.stdout | default('') != "'ghostty'"
   changed_when: true
+
+- name: Check current Ghostty shortcut binding
+  ansible.builtin.command: >
+    gsettings get
+    org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/
+    binding
+  register: desktop_ghostty_current_binding
+  changed_when: false
+  failed_when: false
+  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
 
 - name: Set Ghostty keyboard shortcut binding (Ctrl+Alt+T)
   ansible.builtin.command: >
-    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/
+    gsettings set
+    org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/
     binding '<Ctrl><Alt>t'
-  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded
+  when:
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_current_binding.stdout | default('') != "'<Ctrl><Alt>t'"
   changed_when: true
 
 - name: Display Ghostty installation complete
