@@ -37,3 +37,11 @@
   tags:
     - desktop
     - typst
+
+- name: Install Ghostty terminal
+  ansible.builtin.import_tasks: ghostty.yml
+  when: desktop_install_ghostty
+  tags:
+    - desktop
+    - ghostty
+    - terminal
