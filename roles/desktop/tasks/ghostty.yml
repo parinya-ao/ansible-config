@@ -30,6 +30,12 @@
       state: present
   when: desktop_ghostty_binary.rc != 0
 
+- name: Ensure python3-psutil is installed for dconf module
+  ansible.builtin.dnf:
+      name: python3-psutil
+      state: present
+  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+
 - name: Configure Ctrl+Alt+T keyboard shortcut for Ghostty
   community.general.dconf:
       key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings
