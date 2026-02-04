@@ -30,40 +30,61 @@
       state: present
   when: desktop_ghostty_binary.rc != 0
 
+- name: Check if D-Bus session is available
+  ansible.builtin.command: dbus-run-session --version
+  register: desktop_ghostty_dbus_check
+  changed_when: false
+  failed_when: false
+  when:
+      - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+      - lookup('env', 'CI') != 'true'
+
 - name: Ensure python3-psutil is installed for dconf module
   ansible.builtin.dnf:
       name: python3-psutil
       state: present
-  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+  when:
+      - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+      - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Configure Ctrl+Alt+T keyboard shortcut for Ghostty
   community.general.dconf:
       key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings
       value: "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
       state: present
-  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+  when:
+      - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+      - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Set Ghostty keyboard shortcut name
   community.general.dconf:
       key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/name
       value: "'Ghostty Terminal'"
       state: present
-  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+  when:
+      - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+      - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Set Ghostty keyboard shortcut command
   community.general.dconf:
       key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/command
       value: "'ghostty'"
       state: present
-  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+  when:
+      - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+      - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Set Ghostty keyboard shortcut binding (Ctrl+Alt+T)
   community.general.dconf:
       key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/binding
       value: "'<Ctrl><Alt>t'"
       state: present
-  when: desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+  when:
+      - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+      - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Display Ghostty installation complete
   ansible.builtin.debug:
-      msg: "Ghostty terminal emulator installed successfully with Ctrl+Alt+T shortcut configured."
+      msg: >-
+          Ghostty terminal emulator installed successfully
+          {{ ' with Ctrl+Alt+T shortcut configured' if (desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0) else '' }}.
