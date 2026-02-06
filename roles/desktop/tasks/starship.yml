@@ -13,10 +13,24 @@
   args:
     creates: /usr/local/bin/starship
 
-- name: Configure Starship for all users
+- name: Configure Starship for bash
   ansible.builtin.lineinfile:
     path: /etc/bashrc
     line: 'eval "$(starship init bash)"'
+    state: present
+    create: true
+    mode: "0644"
+
+- name: Ensure fish config directory exists
+  ansible.builtin.file:
+    path: /etc/fish
+    state: directory
+    mode: "0755"
+
+- name: Configure Starship for fish
+  ansible.builtin.lineinfile:
+    path: "{{ desktop_starship_fish_config_path }}"
+    line: "starship init fish | source"
     state: present
     create: true
     mode: "0644"

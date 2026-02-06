@@ -20,6 +20,13 @@
     - desktop
     - vscode
 
+- name: Install Fish shell
+  ansible.builtin.import_tasks: fish.yml
+  when: desktop_install_fish
+  tags:
+    - desktop
+    - fish
+
 - name: Install Starship prompt
   ansible.builtin.import_tasks: starship.yml
   tags:

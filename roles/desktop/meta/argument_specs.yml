@@ -59,3 +59,15 @@ argument_specs:
         description:
           - List of flatpak application IDs to install
           - Can be overridden to customize the applications installed
+
+      desktop_install_fish:
+        type: bool
+        default: true
+        required: false
+        description: Install Fish shell
+
+      desktop_fish_set_default:
+        type: bool
+        default: true
+        required: false
+        description: Set Fish as the default shell for the user

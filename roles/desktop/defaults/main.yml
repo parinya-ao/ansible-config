@@ -13,6 +13,8 @@ desktop_install_flatpak: true
 desktop_enable_flatpak_user: true
 desktop_install_gnome_extensions: true
 desktop_install_zed: true
+desktop_install_fish: true
+desktop_fish_set_default: true
 
 # GNOME extensions
 desktop_gnome_extensions:
@@ -44,6 +46,7 @@ desktop_packages:
 # Starship configuration
 desktop_starship_install: true
 desktop_starship_config_path: /etc/bashrc
+desktop_starship_fish_config_path: /etc/fish/config.fish
 
 # Installation URLs
 desktop_flathub_repo_url: "https://dl.flathub.org/repo/flathub.flatpakrepo"

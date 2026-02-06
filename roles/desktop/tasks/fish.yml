@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Install and configure Fish shell
+
+- name: Install Fish shell
+  ansible.builtin.dnf:
+    name: fish
+    state: present
+
+- name: Ensure fish config directory exists
+  ansible.builtin.file:
+    path: /etc/fish
+    state: directory
+    mode: "0755"
+
+- name: Set Fish as default shell for user
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    shell: /usr/bin/fish
+  when: desktop_fish_set_default
