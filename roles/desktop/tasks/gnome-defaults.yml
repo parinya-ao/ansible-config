@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Configure GNOME default applications
+
+- name: Set Ghostty as default terminal emulator
+  ansible.builtin.command: >
+    gsettings set org.gnome.desktop.default-applications.terminal exec 'ghostty'
+  changed_when: true
+
+- name: Set Ghostty terminal exec-arg
+  ansible.builtin.command: >
+    gsettings set org.gnome.desktop.default-applications.terminal exec-arg ''
+  changed_when: true
