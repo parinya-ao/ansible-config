@@ -10,6 +10,7 @@ font_packages:
   - jetbrains-mono-fonts
   - fira-code-fonts
   - inter-fonts
+  - google-arimo-fonts
 
 # COPR repository for JetBrains Mono fonts
 font_jetbrains_copr_repo: elxreno/jetbrains-mono-fonts

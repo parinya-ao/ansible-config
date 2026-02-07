@@ -30,7 +30,7 @@ desktop_vscode_repo_baseurl: "https://packages.microsoft.com/yumrepos/vscode"
 
 # Flatpak applications to install
 desktop_flatpak_apps_list:
-  - com.getpostman.Postman
+  - com.usebruno.Bruno
   - org.signal.Signal
   - com.obsproject.Studio
   - net.ankiweb.Anki

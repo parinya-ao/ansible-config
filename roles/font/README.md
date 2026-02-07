@@ -1,9 +1,11 @@
 # Ansible Role: font
 
 Install custom fonts:
+
 - TH Sarabun New
 - Inter
 - Intel One Mono
+- Google Arimo
 
 ## Usage
 
@@ -11,4 +13,5 @@ Install custom fonts:
 - hosts: all
   become: true
   roles:
-    - font
+      - font
+```
