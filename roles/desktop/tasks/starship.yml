@@ -53,4 +53,3 @@
     src: starship/starship.toml
     dest: "{{ ansible_facts.env.HOME }}/.config/starship.toml"
     mode: "0644"
-    force: true

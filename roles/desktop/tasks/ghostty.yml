@@ -93,7 +93,6 @@
     src: ghostty/config
     dest: "{{ ansible_facts.env.HOME }}/.config/ghostty/config"
     mode: "0644"
-    force: true
 
 - name: Display Ghostty installation complete
   ansible.builtin.debug:
