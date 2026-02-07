@@ -23,14 +23,13 @@
     - javascript
 
 - name: Execute Bun installer
-  ansible.builtin.shell: |
-    # Force set environment variable for correct installation path
-    export BUN_INSTALL="{{ ansible_facts['user_dir'] }}/.bun"
-
-    # Run installer script
-    bash /tmp/install-bun.sh
+  ansible.builtin.shell:
+    cmd: |
+      export BUN_INSTALL="{{ ansible_facts['user_dir'] }}/.bun"
+      bash /tmp/install-bun.sh
   args:
     creates: "{{ ansible_facts['user_dir'] }}/.bun/bin/bun"
+    executable: /bin/bash
   when: not developer_bun_check.stat.exists
   become: false
   tags:

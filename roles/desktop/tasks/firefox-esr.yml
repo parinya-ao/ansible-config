@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Install Firefox ESR from Copr repository
+
+- name: Enable erizur/firefox-esr Copr repository
+  ansible.builtin.command: dnf copr enable -y erizur/firefox-esr
+  args:
+    creates: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:erizur:firefox-esr.repo
+
+- name: Install Firefox ESR
+  ansible.builtin.dnf:
+    name: firefox-esr
+    state: present

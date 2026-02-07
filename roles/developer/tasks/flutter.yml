@@ -95,10 +95,10 @@
 
 - name: Initial flutter precache
   ansible.builtin.command: "{{ developer_actual_user_home }}/develop/flutter/bin/flutter precache"
-  changed_when: true
   when: not developer_flutter_bin_check.stat.exists
   become: true
   become_user: "{{ developer_actual_user_name }}"
+  changed_when: false
   tags:
     - flutter
     - mobile

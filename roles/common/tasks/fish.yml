@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Install and configure Fish shell early in the process
+# After installation, all subsequent Ansible tasks will use Fish shell
+
+- name: Install Fish shell
+  ansible.builtin.dnf:
+    name: fish
+    state: present
+
+- name: Ensure fish config directory exists
+  ansible.builtin.file:
+    path: /etc/fish
+    state: directory
+    mode: "0755"
+
+- name: Verify Fish installation
+  ansible.builtin.command: command -v fish
+  register: common_fish_path
+  changed_when: false
+
+- name: Set Fish as default shell for user
+  ansible.builtin.user:
+    name: "{{ ansible_facts.user_id }}"
+    shell: "{{ common_fish_path.stdout }}"
+  when: common_fish_set_default
+
+- name: Configure Ansible to use Fish shell for all subsequent tasks
+  ansible.builtin.set_fact:
+    # noqa: var-naming - ansible_shell_executable is an Ansible internal variable
+    ansible_shell_executable: "{{ common_fish_path.stdout }}"
+    ansible_shell_type: fish
+  when: common_fish_set_default
+
+- name: Display shell configuration
+  ansible.builtin.debug:
+    msg:
+      - "Fish shell installed at: {{ common_fish_path.stdout }}"
+      - "Default user shell set to: {{ common_fish_path.stdout }}"
+      - "Ansible shell executable: {{ ansible_shell_executable | default('/bin/bash') }}" # noqa: var-naming
+      - "All subsequent tasks will use Fish shell"
+  changed_when: false

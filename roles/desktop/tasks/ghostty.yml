@@ -13,21 +13,20 @@
 
 - name: Check if Ghostty COPR repository is enabled
   ansible.builtin.stat:
-      path: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:scottames:ghostty.repo
+    path: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:scottames:ghostty.repo
   register: desktop_ghostty_copr_repo
 
 - name: Enable Ghostty COPR repository
   ansible.builtin.command: dnf copr enable -y scottames/ghostty
   when:
-      - not desktop_ghostty_copr_repo.stat.exists
-      - desktop_ghostty_binary.rc != 0
-  register: desktop_ghostty_copr_enable
-  changed_when: desktop_ghostty_copr_enable.rc == 0
+    - not desktop_ghostty_copr_repo.stat.exists
+    - desktop_ghostty_binary.rc != 0
+  changed_when: false
 
 - name: Install Ghostty terminal emulator
   ansible.builtin.dnf:
-      name: ghostty
-      state: present
+    name: ghostty
+    state: present
   when: desktop_ghostty_binary.rc != 0
 
 - name: Check if D-Bus session is available
@@ -36,55 +35,67 @@
   changed_when: false
   failed_when: false
   when:
-      - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
-      - lookup('env', 'CI') != 'true'
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - lookup('env', 'CI') != 'true'
 
 - name: Ensure python3-psutil is installed for dconf module
   ansible.builtin.dnf:
-      name: python3-psutil
-      state: present
+    name: python3-psutil
+    state: present
   when:
-      - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
-      - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Configure Ctrl+Alt+T keyboard shortcut for Ghostty
   community.general.dconf:
-      key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings
-      value: "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
-      state: present
+    key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings
+    value: "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
+    state: present
   when:
-      - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
-      - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Set Ghostty keyboard shortcut name
   community.general.dconf:
-      key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/name
-      value: "'Ghostty Terminal'"
-      state: present
+    key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/name
+    value: "'Ghostty Terminal'"
+    state: present
   when:
-      - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
-      - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Set Ghostty keyboard shortcut command
   community.general.dconf:
-      key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/command
-      value: "'ghostty'"
-      state: present
+    key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/command
+    value: "'ghostty'"
+    state: present
   when:
-      - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
-      - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Set Ghostty keyboard shortcut binding (Ctrl+Alt+T)
   community.general.dconf:
-      key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/binding
-      value: "'<Ctrl><Alt>t'"
-      state: present
+    key: /org/gnome/settings-daemon/plugins/media-keys/custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/binding
+    value: "'<Ctrl><Alt>t'"
+    state: present
   when:
-      - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
-      - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
+
+- name: Ensure Ghostty config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts.env.HOME }}/.config/ghostty"
+    state: directory
+    mode: "0755"
+
+- name: Copy Ghostty configuration file
+  ansible.builtin.copy:
+    src: ghostty/config
+    dest: "{{ ansible_facts.env.HOME }}/.config/ghostty/config"
+    mode: "0644"
 
 - name: Display Ghostty installation complete
   ansible.builtin.debug:
-      msg: >-
-          Ghostty terminal emulator installed successfully
-          {{ ' with Ctrl+Alt+T shortcut configured' if (desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0) else '' }}.
+    msg: >-
+      Ghostty terminal emulator installed successfully
+      {{ ' with Ctrl+Alt+T shortcut configured' if (desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0) else '' }}.

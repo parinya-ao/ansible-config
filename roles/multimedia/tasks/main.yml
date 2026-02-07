@@ -94,12 +94,29 @@
     - multimedia
     - openh264
 
-- name: Enable Cisco OpenH264 repository
-  ansible.builtin.command: dnf config-manager setopt fedora-cisco-openh264.enabled=1
+- name: Check Cisco OpenH264 repository status
+  ansible.builtin.shell: |
+    set -o pipefail
+    dnf repolist enabled 2>/dev/null | grep -q "fedora-cisco-openh264" || \
+    dnf config-manager repo-fedora-cisco-openh264 2>/dev/null | grep -q "enabled = 1" || \
+    grep -q "^enabled=1" /etc/yum.repos.d/fedora-cisco-openh264.repo 2>/dev/null && echo "enabled" || echo "disabled"
+  register: multimedia_openh264_status
+  changed_when: false
+  failed_when: false
   when: multimedia_install_openh264 | bool
   become: true
-  register: multimedia_openh264_repo
-  changed_when: multimedia_openh264_repo.rc == 0
+  tags:
+    - multimedia
+    - openh264
+
+- name: Enable Cisco OpenH264 repository
+  ansible.builtin.command: dnf config-manager setopt fedora-cisco-openh264.enabled=1
+  when:
+    - multimedia_install_openh264 | bool
+    - multimedia_openh264_status.stdout is defined
+    - multimedia_openh264_status.stdout != "enabled"
+  become: true
+  changed_when: false
   tags:
     - multimedia
     - openh264

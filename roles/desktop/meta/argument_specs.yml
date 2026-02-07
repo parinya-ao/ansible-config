@@ -43,7 +43,7 @@ argument_specs:
         default: true
         required: false
         description: >-
-          Install flatpak applications (Discord, Postman, Signal,
+          Install flatpak applications (Discord, Bruno, Signal,
           OBS, Anki)
 
       desktop_flatpak_apps_list:
@@ -51,7 +51,7 @@ argument_specs:
         elements: str
         default:
           - com.discordapp.Discord
-          - com.getpostman.Postman
+          - com.usebruno.Bruno
           - org.signal.Signal
           - com.obsproject.Studio
           - net.ankiweb.Anki

@@ -1,19 +1,19 @@
-# SPDX-License-Identifier: MIT-0
 ---
-# defaults file for roles/font
+# SPDX-License-Identifier: MIT-0
+# Default variables for font role
 
-font_base_dir: /usr/share/fonts
+# Feature toggle
+font_install_enabled: true
 
-font_fonts:
-  - name: th-sarabun-new
-    dir: "{{ font_base_dir }}/th-sarabun-new"
-    url: https://www.f0nt.com/?dl_name=sipafonts/THSarabunNew.zip
-    zip: /tmp/THSarabunNew.zip
-  - name: Inter
-    dir: "{{ font_base_dir }}/Inter"
-    url: https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip
-    zip: /tmp/Inter-4.1.zip
-  - name: IntelOneMono
-    dir: "{{ font_base_dir }}/IntelOneMono"
-    url: https://github.com/intel/intel-one-mono/releases/download/V1.4.0/ttf.zip
-    zip: /tmp/IntelOneMono-1.4.0.zip
+# Font packages to install
+font_packages:
+  - jetbrains-mono-fonts
+  - fira-code-fonts
+  - inter-fonts
+  - google-arimo-fonts
+
+# COPR repository for JetBrains Mono fonts
+font_jetbrains_copr_repo: elxreno/jetbrains-mono-fonts
+
+# COPR repository for Inter fonts
+font_inter_copr_repo: burhanverse/inter-fonts

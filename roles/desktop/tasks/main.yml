@@ -45,3 +45,18 @@
     - desktop
     - ghostty
     - terminal
+
+- name: Configure GNOME default applications
+  ansible.builtin.import_tasks: gnome-defaults.yml
+  tags:
+    - desktop
+    - gnome
+    - defaults
+
+- name: Install Firefox ESR
+  ansible.builtin.import_tasks: firefox-esr.yml
+  when: desktop_install_firefox_esr
+  tags:
+    - desktop
+    - firefox
+    - browser

@@ -2,12 +2,24 @@
 # SPDX-License-Identifier: MIT-0
 # System optimization tasks
 
-- name: Enable nvidia-modeset for PRIME interoperability
-  ansible.builtin.command: grubby --update-kernel=ALL --args="nvidia-drm.modeset=1"
+- name: Check current kernel args for nvidia-modeset
+  ansible.builtin.command: grubby --info=DEFAULT
+  register: common_grubby_info
+  changed_when: false
+  failed_when: false
   when: common_install_nvidia_drivers | bool
   become: true
-  register: common_nvidia_modeset
-  changed_when: common_nvidia_modeset.rc == 0
+  tags:
+    - optimizations
+    - nvidia
+
+- name: Enable nvidia-modeset for PRIME interoperability
+  ansible.builtin.command: grubby --update-kernel=ALL --args="nvidia-drm.modeset=1"
+  when:
+    - common_install_nvidia_drivers | bool
+    - "'nvidia-drm.modeset=1' not in common_grubby_info.stdout"
+  become: true
+  changed_when: false
   tags:
     - optimizations
     - nvidia
@@ -43,12 +55,25 @@
     - optimizations
     - hostname
 
-- name: Set UTC time (for dual boot systems)
-  ansible.builtin.command: timedatectl set-local-rtc 0
+- name: Check current RTC status
+  ansible.builtin.command: timedatectl show --property=LocalRTC --value
+  register: common_rtc_status
+  changed_when: false
+  failed_when: false
   when: common_set_utc_time | bool
   become: true
-  register: common_utc_time
-  changed_when: common_utc_time.rc == 0
+  tags:
+    - optimizations
+    - time
+
+- name: Set UTC time (for dual boot systems)
+  ansible.builtin.command: timedatectl set-local-rtc 0
+  when:
+    - common_set_utc_time | bool
+    - common_rtc_status.stdout is defined
+    - common_rtc_status.stdout != "no"
+  become: true
+  changed_when: false
   failed_when: false
   tags:
     - optimizations

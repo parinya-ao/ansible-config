@@ -9,7 +9,7 @@ The desktop role automates the setup of a fully-functional desktop environment i
 - GNOME utilities and extensions
 - Visual Studio Code IDE with Microsoft repository
 - Starship prompt configuration
-- Essential flatpak applications (Discord, Postman, Signal, OBS, Anki)
+- Essential flatpak applications (Discord, Bruno, Signal, OBS, Anki)
 
 ## Requirements
 
@@ -44,7 +44,7 @@ The role is organized into the following task modules:
 
 - **flatpak-apps.yml**: Installs flatpak applications
   - Discord
-  - Postman
+  - Bruno
   - Signal
   - OBS Studio
   - Anki

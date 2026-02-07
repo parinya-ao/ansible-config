@@ -65,7 +65,12 @@
 
 - name: Test docker socket access
   ansible.builtin.shell:
-    cmd: test -r /var/run/docker.sock && test -w /var/run/docker.sock && echo "✓ Socket accessible" || echo "✗ Socket NOT accessible"
+    cmd: |
+      if test -r /var/run/docker.sock; and test -w /var/run/docker.sock
+        echo "✓ Socket accessible"
+      else
+        echo "✗ Socket NOT accessible"
+      end
   changed_when: false
   become: true
   become_user: "{{ docker_user }}"

@@ -28,7 +28,7 @@ desktop_vscode_repo_baseurl: "https://packages.microsoft.com/yumrepos/vscode"
 
 # Flatpak applications to install
 desktop_flatpak_apps_list:
-  - com.getpostman.Postman
+  - com.usebruno.Bruno
   - org.signal.Signal
   - com.obsproject.Studio
   - net.ankiweb.Anki
@@ -44,6 +44,7 @@ desktop_packages:
 # Starship configuration
 desktop_starship_install: true
 desktop_starship_config_path: /etc/bashrc
+desktop_starship_fish_config_path: /etc/fish/config.fish
 
 # Installation URLs
 desktop_flathub_repo_url: "https://dl.flathub.org/repo/flathub.flatpakrepo"
@@ -56,3 +57,6 @@ desktop_typst_version: "0.14.2"
 
 # Ghostty terminal configuration
 desktop_install_ghostty: true
+
+# Firefox ESR configuration
+desktop_install_firefox_esr: true

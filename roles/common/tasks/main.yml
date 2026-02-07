@@ -30,6 +30,15 @@
     - common
     - system-update
 
+# Fish Shell - Install early so it's available for the rest of the playbook
+- name: Install Fish shell
+  ansible.builtin.import_tasks: fish.yml
+  when: common_install_fish
+  tags:
+    - common
+    - fish
+    - shell
+
 # Base Packages Installation
 - name: Install base packages
   ansible.builtin.import_tasks: packages.yml
@@ -64,3 +73,11 @@
   tags:
     - common
     - maintenance
+
+# D2 Diagram Compiler
+- name: Install D2 diagram compiler
+  ansible.builtin.import_tasks: d2.yml
+  when: common_install_d2 | bool
+  tags:
+    - common
+    - d2

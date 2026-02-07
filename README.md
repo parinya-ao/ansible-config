@@ -16,7 +16,7 @@ Automated workstation onboarding for Fedora hosts so developers can get from zer
 ## What It Covers
 - **Common**: Optimize DNF, run system updates, install core packages (git, curl, python3, etc.), and configure maintenance timers.
 - **Docker**: Install Docker CE, Docker Compose, and manage the docker group for the host user.
-- **Desktop**: Deploy Brave, VSCode, Discord, Postman, Signal, Starship prompt, Flatpak apps, and GNOME defaults.
+- **Desktop**: Deploy Brave, VSCode, Discord, Bruno, Signal, Starship prompt, Flatpak apps, and GNOME defaults.
 - **Developer**: Provision language runtimes (Rust, Go, Node.js, Bun, Python tooling), compilers, shells, and editors.
 - **Security**: Harden SSH, firewalld, and custom port policies through dedicated security roles.
 
