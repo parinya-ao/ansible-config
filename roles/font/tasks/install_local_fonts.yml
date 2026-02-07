@@ -34,6 +34,7 @@
     force: false
   loop: "{{ font_files.files }}"
   when: font_files.files | length > 0
+  changed_when: false
 
 - name: Update font cache
   ansible.builtin.command:
