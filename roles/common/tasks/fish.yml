@@ -15,7 +15,7 @@
       mode: "0755"
 
 - name: Verify Fish installation
-  ansible.builtin.command: which fish
+  ansible.builtin.command: command -v fish
   register: common_fish_path
   changed_when: false
 
