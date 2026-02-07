@@ -7,11 +7,6 @@
     name: flatpak
     state: present
 
-- name: Add Flathub remote
-  ansible.builtin.command:
-    cmd: flatpak remote-add --if-not-exists flathub {{ desktop_flathub_repo_url_alt }}
-  changed_when: false
-
 - name: Install desktop packages
   ansible.builtin.dnf:
     name:
