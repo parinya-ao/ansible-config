@@ -13,7 +13,7 @@
   ansible.builtin.command: >
     gsettings set org.gnome.desktop.default-applications.terminal exec 'ghostty'
   when: "'ghostty' not in desktop_current_terminal.stdout"
-  changed_when: true
+  changed_when: false
 
 - name: Check current terminal exec-arg
   ansible.builtin.shell: |
@@ -26,4 +26,4 @@
   ansible.builtin.command: >
     gsettings set org.gnome.desktop.default-applications.terminal exec-arg ''
   when: desktop_current_exec_arg.stdout != "''"
-  changed_when: true
+  changed_when: false

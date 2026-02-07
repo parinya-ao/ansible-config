@@ -12,7 +12,7 @@
 - name: Unblock all rfkill devices
   ansible.builtin.command: rfkill unblock all
   when: "'Soft blocked: yes' in wifi_rfkill_status.stdout"
-  changed_when: true
+  changed_when: false
 
 - name: Ensure NetworkManager Wi-Fi is enabled
   ansible.builtin.command: nmcli radio wifi on

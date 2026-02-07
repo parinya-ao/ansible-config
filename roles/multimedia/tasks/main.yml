@@ -116,7 +116,7 @@
     - multimedia_openh264_status.stdout is defined
     - multimedia_openh264_status.stdout != "enabled"
   become: true
-  changed_when: true
+  changed_when: false
   tags:
     - multimedia
     - openh264

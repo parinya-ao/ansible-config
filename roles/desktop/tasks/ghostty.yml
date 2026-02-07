@@ -21,7 +21,7 @@
   when:
     - not desktop_ghostty_copr_repo.stat.exists
     - desktop_ghostty_binary.rc != 0
-  changed_when: true
+  changed_when: false
 
 - name: Install Ghostty terminal emulator
   ansible.builtin.dnf:

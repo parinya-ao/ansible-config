@@ -15,13 +15,13 @@
   ansible.builtin.command:
     cmd: "dnf copr enable {{ font_jetbrains_copr_repo }} -y"
   when: "font_jetbrains_copr_repo not in font_copr_list.stdout"
-  changed_when: true
+  changed_when: false
 
 - name: Enable Inter fonts COPR repository
   ansible.builtin.command:
     cmd: "dnf copr enable {{ font_inter_copr_repo }} -y"
   when: "font_inter_copr_repo not in font_copr_list.stdout"
-  changed_when: true
+  changed_when: false
 
 - name: Install programming fonts
   ansible.builtin.dnf:

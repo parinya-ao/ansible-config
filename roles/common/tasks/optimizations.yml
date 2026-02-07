@@ -19,7 +19,7 @@
     - common_install_nvidia_drivers | bool
     - "'nvidia-drm.modeset=1' not in common_grubby_info.stdout"
   become: true
-  changed_when: true
+  changed_when: false
   tags:
     - optimizations
     - nvidia
@@ -73,7 +73,7 @@
     - common_rtc_status.stdout is defined
     - common_rtc_status.stdout != "no"
   become: true
-  changed_when: true
+  changed_when: false
   failed_when: false
   tags:
     - optimizations
