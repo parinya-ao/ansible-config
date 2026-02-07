@@ -6,8 +6,6 @@
   ansible.builtin.command: dnf copr enable -y erizur/firefox-esr
   args:
     creates: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:erizur:firefox-esr.repo
-  register: desktop_copr_enable_result
-  changed_when: "'already enabled' not in desktop_copr_enable_result.stdout|lower"
 
 - name: Install Firefox ESR
   ansible.builtin.dnf:
