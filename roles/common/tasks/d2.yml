@@ -25,5 +25,6 @@
 - name: Install D2 compiler
   ansible.builtin.command:
     cmd: /tmp/d2-install.sh
-  changed_when: true
+  args:
+    creates: /usr/local/bin/d2
   when: common_d2_version_check.rc != 0

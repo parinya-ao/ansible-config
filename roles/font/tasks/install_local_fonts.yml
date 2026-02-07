@@ -37,5 +37,6 @@
 - name: Update font cache
   ansible.builtin.command:
     cmd: fc-cache -f -v
-  changed_when: true
+  register: font_cache_result
+  changed_when: font_cache_result.stdout | length > 0
   when: font_files.files | length > 0

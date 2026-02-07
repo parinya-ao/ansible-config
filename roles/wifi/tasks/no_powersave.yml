@@ -66,6 +66,19 @@
   register: wifi_current_power_save
   changed_when: false
 
+- name: Check if any interface has power save enabled
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      for iface in {{ wifi_ifaces.stdout_lines | join(' ') }}; do
+        iw dev "$iface" get power_save | grep -q "on" && echo "found"
+      done
+  args:
+    executable: /bin/bash
+  register: wifi_power_save_on
+  changed_when: false
+  failed_when: false
+
 - name: Force power_save off on all Wi-Fi interfaces
   ansible.builtin.shell:
     cmd: |
@@ -74,5 +87,5 @@
       done
   args:
     executable: /bin/bash
-  when: wifi_current_power_save.stdout | length > 0
+  when: wifi_power_save_on.stdout | length > 0
   changed_when: true
