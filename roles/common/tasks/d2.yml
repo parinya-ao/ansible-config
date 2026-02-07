@@ -1,0 +1,23 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Install D2 diagram scripting language compiler
+
+- name: Check if D2 is installed
+  ansible.builtin.command:
+    cmd: d2 version
+  changed_when: false
+  failed_when: false
+  register: common_d2_version_check
+
+- name: Download D2 install script
+  ansible.builtin.get_url:
+    url: https://d2lang.com/install.sh
+    dest: /tmp/d2-install.sh
+    mode: "0755"
+  when: common_d2_version_check.rc != 0
+
+- name: Install D2 compiler
+  ansible.builtin.command:
+    cmd: /tmp/d2-install.sh
+  changed_when: true
+  when: common_d2_version_check.rc != 0
