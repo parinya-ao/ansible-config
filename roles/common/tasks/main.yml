@@ -13,71 +13,71 @@
 - name: Configure repositories
   ansible.builtin.import_tasks: repositories.yml
   tags:
-      - common
-      - repositories
+    - common
+    - repositories
 
 # DNF Configuration
 - name: Configure DNF package manager
   ansible.builtin.import_tasks: dnf.yml
   tags:
-      - common
-      - dnf
+    - common
+    - dnf
 
 # System Update
 - name: Perform system update
   ansible.builtin.import_tasks: system-update.yml
   tags:
-      - common
-      - system-update
+    - common
+    - system-update
 
 # Fish Shell - Install early so it's available for the rest of the playbook
 - name: Install Fish shell
   ansible.builtin.import_tasks: fish.yml
   when: common_install_fish
   tags:
-      - common
-      - fish
-      - shell
+    - common
+    - fish
+    - shell
 
 # Base Packages Installation
 - name: Install base packages
   ansible.builtin.import_tasks: packages.yml
   tags:
-      - common
-      - packages
+    - common
+    - packages
 
 # NVIDIA Drivers
 - name: Install NVIDIA drivers
   ansible.builtin.import_tasks: nvidia.yml
   tags:
-      - common
-      - nvidia
+    - common
+    - nvidia
 
 # Firmware Updates
 - name: Update firmware
   ansible.builtin.import_tasks: firmware.yml
   tags:
-      - common
-      - firmware
+    - common
+    - firmware
 
 # System Optimizations
 - name: Apply system optimizations
   ansible.builtin.import_tasks: optimizations.yml
   tags:
-      - common
-      - optimizations
+    - common
+    - optimizations
 
 # System Maintenance
 - name: Configure system maintenance tasks
   ansible.builtin.import_tasks: maintenance.yml
   tags:
-      - common
-      - maintenance
+    - common
+    - maintenance
 
 # D2 Diagram Compiler
 - name: Install D2 diagram compiler
   ansible.builtin.import_tasks: d2.yml
   when: common_install_d2 | bool
   tags:
-      - common
-      - d2
+    - common
+    - d2
