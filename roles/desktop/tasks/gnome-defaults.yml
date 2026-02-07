@@ -4,26 +4,26 @@
 
 - name: Check current default terminal
   ansible.builtin.shell: |
-    gsettings get org.gnome.desktop.default-applications.terminal exec 2>/dev/null || echo "''"
+      gsettings get org.gnome.desktop.default-applications.terminal exec 2>/dev/null || echo "''"
   register: desktop_current_terminal
   changed_when: false
   failed_when: false
 
 - name: Set Ghostty as default terminal emulator
   ansible.builtin.command: >
-    gsettings set org.gnome.desktop.default-applications.terminal exec 'ghostty'
+      gsettings set org.gnome.desktop.default-applications.terminal exec 'ghostty'
   when: "'ghostty' not in desktop_current_terminal.stdout"
   changed_when: true
 
 - name: Check current terminal exec-arg
   ansible.builtin.shell: |
-    gsettings get org.gnome.desktop.default-applications.terminal exec-arg 2>/dev/null || echo "''"
+      gsettings get org.gnome.desktop.default-applications.terminal exec-arg 2>/dev/null || echo "''"
   register: desktop_current_exec_arg
   changed_when: false
   failed_when: false
 
 - name: Set Ghostty terminal exec-arg
   ansible.builtin.command: >
-    gsettings set org.gnome.desktop.default-applications.terminal exec-arg ''
-  when: "''''' not in desktop_current_exec_arg.stdout"
+      gsettings set org.gnome.desktop.default-applications.terminal exec-arg ''
+  when: desktop_current_exec_arg.stdout != "''"
   changed_when: true
