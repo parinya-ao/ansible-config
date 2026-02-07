@@ -29,7 +29,7 @@
       ansible.builtin.debug:
         msg:
           - "Roles to be applied:"
-          - "  1. common      - Base system configuration"
+          - "  1. common      - Base system configuration (Fish shell installed early)"
           - "  2. git        - Git configuration with SSH signing"
           - "  3. docker      - Docker CE installation"
           - "  4. desktop     - Desktop environment and applications"
@@ -38,7 +38,7 @@
           - "  7. wifi        - Wi-Fi configuration and optimization"
           - "  8. multimedia  - Multimedia codecs and video acceleration"
           - "=========================================="
-          - "Desktop applications include: VSCode, Zed, Ghostty, Starship, Typst"
+          - "Note: Fish shell will be installed first and used for all subsequent tasks"
 
     - name: Display Ansible version
       ansible.builtin.command: ansible --version
@@ -101,6 +101,7 @@
           - "Playbook Execution Completed"
           - "=========================================="
           - "Target Host: {{ inventory_hostname }}"
+          - "Shell Used: {{ ansible_shell_executable | default('/bin/bash') }}"
           - "Timestamp: {{ ansible_facts['date_time']['iso8601'] }}"
           - "=========================================="
 

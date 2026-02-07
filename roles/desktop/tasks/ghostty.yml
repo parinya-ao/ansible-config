@@ -85,14 +85,14 @@
 
 - name: Ensure Ghostty config directory exists
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/ghostty"
+    path: "{{ ansible_facts.env.HOME }}/.config/ghostty"
     state: directory
     mode: "0755"
 
 - name: Copy Ghostty configuration file
   ansible.builtin.copy:
     src: ghostty/config
-    dest: "{{ ansible_env.HOME }}/.config/ghostty/config"
+    dest: "{{ ansible_facts.env.HOME }}/.config/ghostty/config"
     mode: "0644"
     force: true
 

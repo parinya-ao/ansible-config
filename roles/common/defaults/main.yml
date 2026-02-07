@@ -14,6 +14,10 @@ common_configure_custom_dns: false
 common_firewalld_enabled: false
 common_install_d2: true
 
+# Fish shell configuration
+common_install_fish: true
+common_fish_set_default: true
+
 # System configuration
 common_hostname: "fedora-workstation"
 

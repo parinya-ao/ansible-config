@@ -37,19 +37,13 @@
 
 - name: Ensure user config directory exists
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config"
+    path: "{{ ansible_facts.env.HOME }}/.config"
     state: directory
     mode: "0755"
-
-- name: Touch starship.toml for user
-  ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/starship.toml"
-    state: touch
-    mode: "0644"
 
 - name: Copy starship.toml configuration for user
   ansible.builtin.copy:
     src: starship/starship.toml
-    dest: "{{ ansible_env.HOME }}/.config/starship.toml"
+    dest: "{{ ansible_facts.env.HOME }}/.config/starship.toml"
     mode: "0644"
     force: true
