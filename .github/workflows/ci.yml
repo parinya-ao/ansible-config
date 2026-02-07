@@ -86,7 +86,11 @@ jobs:
             - name: First Run (Execution)
               run: |
                   echo "=== FIRST RUN STARTED ==="
-                  ansible-playbook playbook.yaml -i inventory.ini
+                  # Disable RPM Fusion in CI (network restricted in GitHub Actions containers)
+                  ansible-playbook playbook.yaml -i inventory.ini \
+                    -e "common_enable_rpm_fusion=false" \
+                    -e "common_install_nvidia_drivers=false" \
+                    -e "common_configure_custom_dns=false"
               env:
                   ANSIBLE_FORCE_COLOR: "1"
                   CI: "true"
@@ -96,7 +100,10 @@ jobs:
               run: |
                   echo "=== IDEMPOTENCE CHECK STARTED ==="
 
-                  OUTPUT=$(ansible-playbook playbook.yaml -i inventory.ini)
+                  OUTPUT=$(ansible-playbook playbook.yaml -i inventory.ini \
+                    -e "common_enable_rpm_fusion=false" \
+                    -e "common_install_nvidia_drivers=false" \
+                    -e "common_configure_custom_dns=false")
                   echo "$OUTPUT"
 
                   # Check for idempotence: changed should be 0 and failed should be 0
