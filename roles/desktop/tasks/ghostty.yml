@@ -83,6 +83,19 @@
     - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
     - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
+- name: Ensure Ghostty config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/ghostty"
+    state: directory
+    mode: "0755"
+
+- name: Copy Ghostty configuration file
+  ansible.builtin.copy:
+    src: ghostty/config
+    dest: "{{ ansible_env.HOME }}/.config/ghostty/config"
+    mode: "0644"
+    force: true
+
 - name: Display Ghostty installation complete
   ansible.builtin.debug:
     msg: >-

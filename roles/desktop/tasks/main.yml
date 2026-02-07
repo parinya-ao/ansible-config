@@ -52,3 +52,10 @@
     - desktop
     - ghostty
     - terminal
+
+- name: Configure GNOME default applications
+  ansible.builtin.import_tasks: gnome-defaults.yml
+  tags:
+    - desktop
+    - gnome
+    - defaults
