@@ -9,6 +9,12 @@
   failed_when: false
   register: common_d2_version_check
 
+- name: Install make package
+  ansible.builtin.dnf:
+    name: make
+    state: present
+  when: common_d2_version_check.rc != 0
+
 - name: Download D2 install script
   ansible.builtin.get_url:
     url: https://d2lang.com/install.sh
