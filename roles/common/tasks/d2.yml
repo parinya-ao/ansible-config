@@ -4,27 +4,49 @@
 
 - name: Check if D2 is installed
   ansible.builtin.command:
-    cmd: d2 version
+      cmd: d2 version
   changed_when: false
   failed_when: false
   register: common_d2_version_check
+  when: common_install_d2 | default(true)
 
 - name: Install make package
   ansible.builtin.dnf:
-    name: make
-    state: present
-  when: common_d2_version_check.rc != 0
+      name: make
+      state: present
+  when:
+      - common_install_d2 | default(true)
+      - common_d2_version_check.rc != 0
 
 - name: Download D2 install script
   ansible.builtin.get_url:
-    url: https://d2lang.com/install.sh
-    dest: /tmp/d2-install.sh
-    mode: "0755"
-  when: common_d2_version_check.rc != 0
+      url: https://d2lang.com/install.sh
+      dest: /tmp/d2-install.sh
+      mode: "0755"
+  retries: 3
+  delay: 5
+  when:
+      - common_install_d2 | default(true)
+      - common_d2_version_check.rc != 0
 
 - name: Install D2 compiler
   ansible.builtin.command:
-    cmd: /tmp/d2-install.sh
+      cmd: /tmp/d2-install.sh
   args:
-    creates: /usr/local/bin/d2
-  when: common_d2_version_check.rc != 0
+      creates: /usr/local/bin/d2
+  when:
+      - common_install_d2 | default(true)
+      - common_d2_version_check.rc != 0
+  retries: 3
+  delay: 10
+  register: d2_install_result
+  ignore_errors: true
+
+- name: Warn if D2 installation failed
+  ansible.builtin.debug:
+      msg: "WARNING: D2 installation failed. This may be due to GitHub API rate limiting or network issues. D2 is optional and the playbook will continue."
+  when:
+      - common_install_d2 | default(true)
+      - common_d2_version_check.rc != 0
+      - d2_install_result is defined
+      - d2_install_result.failed | default(false)

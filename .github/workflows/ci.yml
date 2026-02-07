@@ -90,7 +90,8 @@ jobs:
                   ansible-playbook playbook.yaml -i inventory.ini \
                     -e "common_enable_rpm_fusion=false" \
                     -e "common_install_nvidia_drivers=false" \
-                    -e "common_configure_custom_dns=false"
+                    -e "common_configure_custom_dns=false" \
+                    -e "common_install_d2=false"
               env:
                   ANSIBLE_FORCE_COLOR: "1"
                   CI: "true"
@@ -103,7 +104,8 @@ jobs:
                   OUTPUT=$(ansible-playbook playbook.yaml -i inventory.ini \
                     -e "common_enable_rpm_fusion=false" \
                     -e "common_install_nvidia_drivers=false" \
-                    -e "common_configure_custom_dns=false")
+                    -e "common_configure_custom_dns=false" \
+                    -e "common_install_d2=false")
                   echo "$OUTPUT"
 
                   # Check for idempotence: changed should be 0 and failed should be 0
