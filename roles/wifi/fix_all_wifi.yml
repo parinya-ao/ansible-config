@@ -16,7 +16,7 @@
       ansible.builtin.command: nmcli radio wifi on
       register: wifi_radio_wake
       changed_when: "'disabled' in wifi_radio_wake.stderr or 'disabled' in wifi_radio_wake.stdout"
-      # Wait for hardware to initialize
+        # Wait for hardware to initialize
 
     - name: "Wait for WiFi device to become available"
       ansible.builtin.pause:
@@ -68,15 +68,18 @@
       changed_when: false
 
     - name: "4. Apply Stability Patch to ALL existing Wi-Fi profiles"
-      ansible.builtin.shell: |
-        nmcli connection modify "{{ item }}" ipv4.dhcp-timeout {{ dhcp_timeout }}
-        nmcli connection modify "{{ item }}" ipv4.may-fail {{ ipv4_may_fail }}
-        nmcli connection modify "{{ item }}" 802-11-wireless.cloned-mac-address permanent
-        nmcli connection modify "{{ item }}" wifi.powersave 2
+      ansible.builtin.shell:
+        cmd: |
+          nmcli connection modify "{{ item }}" ipv4.dhcp-timeout {{ dhcp_timeout }}
+          nmcli connection modify "{{ item }}" ipv4.may-fail {{ ipv4_may_fail }}
+          nmcli connection modify "{{ item }}" 802-11-wireless.cloned-mac-address permanent
+          nmcli connection modify "{{ item }}" wifi.powersave 2
+      args:
+        executable: /bin/bash
       loop: "{{ wifi_list.stdout_lines }}"
       when: wifi_list.stdout_lines | length > 0
       changed_when: false
-      # No need to notify restart because nmcli has immediate effect on profiles
+  # No need to notify restart because nmcli has immediate effect on profiles
 
   # -----------------------------------------------------------------
   # HANDLERS

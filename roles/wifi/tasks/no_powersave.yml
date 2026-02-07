@@ -1,8 +1,11 @@
 ---
 - name: Detect Wi-Fi interfaces
-  ansible.builtin.shell: |
-    set -o pipefail
-    iw dev | awk '/Interface/ {print $2}'
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      iw dev | awk '/Interface/ {print $2}'
+  args:
+    executable: /bin/bash
   register: wifi_ifaces
   changed_when: false
   failed_when: false
@@ -53,17 +56,23 @@
   changed_when: true
 
 - name: Check current power save status
-  ansible.builtin.shell: |
-    for iface in {{ wifi_ifaces.stdout_lines | join(' ') }}; do
-      iw dev $iface get power_save
-    done
+  ansible.builtin.shell:
+    cmd: |
+      for iface in {{ wifi_ifaces.stdout_lines | join(' ') }}; do
+        iw dev "$iface" get power_save
+      done
+  args:
+    executable: /bin/bash
   register: wifi_current_power_save
   changed_when: false
 
 - name: Force power_save off on all Wi-Fi interfaces
-  ansible.builtin.shell: |
-    for iface in {{ wifi_ifaces.stdout_lines | join(' ') }}; do
-      iw dev $iface set power_save off
-    done
+  ansible.builtin.shell:
+    cmd: |
+      for iface in {{ wifi_ifaces.stdout_lines | join(' ') }}; do
+        iw dev "$iface" set power_save off
+      done
+  args:
+    executable: /bin/bash
   when: wifi_current_power_save.stdout | length > 0
   changed_when: true

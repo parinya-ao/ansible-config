@@ -203,8 +203,8 @@
 - name: Accept Android SDK licenses
   ansible.builtin.shell:
     # noqa: risky-shell-pipe
-    # Removed set -o pipefail to allow yes to die without error (Fix RC 141 SIGPIPE)
-    cmd: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" --licenses
+    cmd: |
+      yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --licenses
   args:
     creates: "{{ developer_actual_user_home }}/Android/Sdk/licenses/android-sdk-license"
     executable: /bin/bash
@@ -219,9 +219,11 @@
 
 - name: Install Android SDK components
   ansible.builtin.shell:
-    cmd: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+    cmd: |
+      "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
   args:
     creates: "{{ developer_actual_user_home }}/Android/Sdk/platform-tools/adb"
+    executable: /bin/bash
   environment:
     ANDROID_HOME: "{{ developer_actual_user_home }}/Android/Sdk"
   become: true
