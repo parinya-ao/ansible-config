@@ -1,0 +1,171 @@
+// on file ~/.config/zed/settings.json
+
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+    "use_on_type_format": true,
+    "ensure_final_newline_on_save": true,
+    "remove_trailing_whitespace_on_save": true,
+    "format_on_save": "on",
+    "lsp": {
+        "vtsls": {
+            "settings": {
+                "typescript": {
+                    "updateImportsOnFileMove": {
+                        "enabled": "always",
+                    },
+                },
+                "javascript": {
+                    "updateImportsOnFileMove": {
+                        "enabled": "always",
+                    },
+                },
+            },
+            "enable_lsp_tasks": true,
+        },
+        "discord_presence": {
+            "initialization_options": {
+                "application_id": "1263505205522337886",
+                "base_icons_url": "https://raw.githubusercontent.com/xhyrom/zed-discord-presence/main/assets/icons/",
+                "state": "Working on {filename}",
+                "details": "In {workspace}",
+                "large_image": "{base_icons_url}/{language:lo}.png",
+                "large_text": "{language:u}",
+                "small_image": "{base_icons_url}/zed.png",
+                "small_text": "Zed",
+                "git_integration": true,
+                "idle": {
+                    "timeout": 300,
+                    "action": "change_activity",
+                    "state": "Idling",
+                },
+            },
+        },
+    },
+    "hard_tabs": false,
+    "tab_size": 4,
+    "agent": {
+        "tool_permissions": {
+            "tools": {
+                "create_directory": {
+                    "default_mode": "allow",
+                },
+                "delete_path": {
+                    "default_mode": "allow",
+                },
+                "move_path": {
+                    "default_mode": "allow",
+                },
+                "terminal": {
+                    "always_allow": [
+                        {
+                            "pattern": "^cat\\s",
+                        },
+                    ],
+                    "default_mode": "allow",
+                },
+            },
+        },
+        "default_profile": "agent",
+        "profiles": {
+            "agent": {
+                "default_model": {
+                    "provider": "GLM",
+                    "model": "GLM-4.7",
+                },
+                "name": "agent",
+                "tools": {
+                    "thinking": true,
+                    "copy_path": true,
+                    "create_directory": true,
+                    "delete_path": true,
+                    "diagnostics": true,
+                    "edit_file": true,
+                    "fetch": true,
+                    "find_path": true,
+                    "save_file": true,
+                    "terminal": true,
+                    "restore_file_from_disk": true,
+                    "read_file": true,
+                    "open": true,
+                    "now": true,
+                    "move_path": true,
+                    "list_directory": true,
+                    "grep": true,
+                },
+                "enable_all_context_servers": false,
+                "context_servers": {},
+            },
+        },
+        "default_model": {
+            "provider": "copilot_chat",
+            "model": "claude-sonnet-4.5",
+        },
+        "favorite_models": [],
+        "model_parameters": [],
+    },
+    "language_models": {
+        "openai_compatible": {
+            "GLM": {
+                "api_url": "https://api.z.ai/api/coding/paas/v4",
+                "available_models": [
+                    {
+                        "name": "GLM-4.7",
+                        "max_tokens": 200000,
+                        "max_output_tokens": 32000,
+                        "max_completion_tokens": 200000,
+                        "capabilities": {
+                            "tools": true,
+                            "images": false,
+                            "parallel_tool_calls": false,
+                            "prompt_cache_key": false,
+                            "chat_completions": true,
+                        },
+                    },
+                ],
+            },
+        },
+    },
+    "context_servers": {
+        "mcp-server-context7": {
+            "enabled": true,
+            "remote": false,
+            "settings": {},
+        },
+    },
+    "ui_font_family": "Inter",
+    "buffer_line_height": "comfortable",
+    "buffer_font_family": "Intel One Mono",
+    "audio": {
+        "experimental.auto_speaker_volume": false,
+    },
+    "auto_signature_help": false,
+    "autosave": "off",
+    "vim_mode": true,
+    "ui_font_size": 16,
+    "buffer_font_size": 15,
+    "theme": {
+        "mode": "system",
+        "light": "One Light",
+        "dark": "One Dark",
+    },
+    "show_completions_on_input": true,
+    "show_edit_predictions": false,
+    "agent_servers": {
+        "github-copilot": {
+            "type": "registry",
+        },
+        "Kimi Code CLI": {
+            "type": "custom",
+            "command": "kimi",
+            "args": ["acp"],
+            "env": {},
+        },
+    },
+}
