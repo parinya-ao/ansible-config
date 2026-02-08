@@ -7,7 +7,6 @@ This role configures a GNOME-based desktop environment on Fedora systems with es
 The desktop role automates the setup of a fully-functional desktop environment including:
 - Desktop package management (Flatpak)
 - GNOME utilities and extensions
-- Visual Studio Code IDE with Microsoft repository
 - Starship prompt configuration
 - Essential flatpak applications (Discord, Bruno, Signal, OBS, Anki)
 
@@ -32,11 +31,6 @@ The role is organized into the following task modules:
   - xclip
   - gnome-extensions-app
   - gnome-tweaks
-
-- **vscode.yml**: Installs Visual Studio Code
-  - Adds Microsoft GPG key
-  - Configures Microsoft yum repository
-  - Installs VS Code package
 
 - **starship.yml**: Installs and configures Starship prompt
   - Downloads and installs Starship

@@ -14,12 +14,6 @@
     - desktop
     - gnome
 
-- name: Install Visual Studio Code
-  ansible.builtin.import_tasks: vscode.yml
-  tags:
-    - desktop
-    - vscode
-
 - name: Install Starship prompt
   ansible.builtin.import_tasks: starship.yml
   tags:

@@ -3,9 +3,5 @@
 # vars file for roles/desktop
 # These are high-priority variables used internally by the role
 
-# Visual Studio Code repository configuration
-desktop_vscode_repo_name: code
-desktop_vscode_repo_description: Visual Studio Code
-
 # Starship binary path
 desktop_starship_bin_path: /usr/local/bin/starship

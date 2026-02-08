@@ -18,7 +18,6 @@ galaxy_info:
     - desktop
     - gnome
     - fedora
-    - vscode
     - flatpak
     - starship
 

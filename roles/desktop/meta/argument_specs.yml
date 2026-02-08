@@ -9,7 +9,7 @@ argument_specs:
         This role automates the setup of a fully-functional GNOME-based
         desktop environment
       - >-
-        Installs flatpak, VS Code, Starship prompt, and various desktop
+        Installs flatpak, Starship prompt, and various desktop
         applications
       - >-
         Requires the common role as a prerequisite for base system setup
@@ -23,14 +23,6 @@ argument_specs:
         description: >-
           Install base desktop packages (okular, xclip, gnome-tweaks,
           etc.)
-
-      desktop_install_vscode:
-        type: bool
-        default: true
-        required: false
-        description: >-
-          Install and configure Visual Studio Code from Microsoft
-          repository
 
       desktop_install_starship:
         type: bool
