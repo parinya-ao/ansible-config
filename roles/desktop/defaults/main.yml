@@ -15,27 +15,29 @@ desktop_install_zed: true
 
 # GNOME extensions
 desktop_gnome_extensions:
-  - gnome-shell-extension-pop-shell
-  - nautilus-python
+    - gnome-shell-extension-pop-shell
+    - nautilus-python
 
 # Zed editor download URL
 desktop_zed_download_url: "https://github.com/zed-industries/zed/releases/latest/download/zed-linux-x86_64.tar.gz"
 
 # Flatpak applications to install
 desktop_flatpak_apps_list:
-  - com.usebruno.Bruno
-  - org.signal.Signal
-  - com.obsproject.Studio
-  - net.ankiweb.Anki
-  - com.rustdesk.RustDesk
-  - io.dbeaver.DBeaverCommunity
+    - com.usebruno.Bruno
+    - org.signal.Signal
+    - com.obsproject.Studio
+    - net.ankiweb.Anki
+    - com.rustdesk.RustDesk
+    - io.dbeaver.DBeaverCommunity
+    - com.super_productivity.SuperProductivity
+    - net.blix.BlueMail
 
 # Desktop packages to install
 desktop_packages:
-  - okular
-  - xclip
-  - gnome-extensions-app
-  - gnome-tweaks
+    - okular
+    - xclip
+    - gnome-extensions-app
+    - gnome-tweaks
 
 # Starship configuration
 desktop_starship_install: true
