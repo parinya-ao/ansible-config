@@ -1,62 +1,246 @@
-# Ansible Workstation Setup
+# Ansible Fedora Workstation Configuration
 
-Automated workstation onboarding for Fedora hosts so developers can get from zero to a consistent desktop + tooling stack with one playbook run.
+> Automated Fedora Workstation provisioning using Ansible. Transform a fresh Fedora installation into a fully configured development environment with consistent tooling, desktop applications, and development runtimes.
+
+![Fedora](https://img.shields.io/badge/Fedora-Latest-blue?logo=fedora&logoColor=white)
+![Ansible](https://img.shields.io/badge/Ansible-2.13+-red?logo=ansible)
+![License](https://img.shields.io/badge/License-MIT--0-green)
 
 ## Table of Contents
+
+- [Overview](#overview)
 - [What It Covers](#what-it-covers)
-- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
 - [Customization](#customization)
+- [Development](#development)
 - [Testing & CI](#testing--ci)
-- [How to Use](#how-to-use)
-- [Project Status](#project-status)
-- [Contribution](#contribution)
+- [Contributing](#contributing)
 - [License](#license)
 
-## What It Covers
-- **Common**: Optimize DNF, run system updates, install core packages (git, curl, python3, etc.), and configure maintenance timers.
-- **Docker**: Install Docker CE, Docker Compose, and manage the docker group for the host user.
-- **Desktop**: Deploy Brave, Discord, Bruno, Signal, Starship prompt, Flatpak apps, and GNOME defaults.
-- **Developer**: Provision language runtimes (Rust, Go, Node.js, Bun, Python tooling), compilers, shells, and editors.
-- **Security**: Harden SSH, firewalld, and custom port policies through dedicated security roles.
+## Overview
 
-## Tech Stack
-- **Provisioning**: Ansible 2.13+ / ansible-core 2.14 (targeting Fedora).
-- **Collections**: `community.general` for Flatpak/dconf and `ansible.posix` through included roles.
-- **CI**: GitHub Actions workflow at `.github/workflows/ci.yml` performs ansible-lint, syntax checks, Fedora container tests, and a report job.
+This playbook automates the setup of a Fedora workstation for development work. It installs and configures:
+
+- System optimizations and core utilities
+- Development tools and runtimes
+- Desktop applications and GNOME settings
+- Fonts including Thai language support
+- Docker and container tools
+- Multimedia codecs and hardware acceleration
+
+**Target OS**: Fedora Linux (tested on Fedora 41+)
+**Execution**: Local provisioning via `ansible_connection=local`
+
+## What It Covers
+
+| Role | Description |
+|-------|-------------|
+| **common** | DNF optimization, RPM Fusion, system updates, firmware, core packages |
+| **desktop** | Flatpak apps, GNOME extensions, Starship prompt, Ghostty terminal, Flatpak font access |
+| **developer** | Compilers, Rust, Go, Node.js, Bun, Python (uv), Flutter, Android SDK |
+| **docker** | Docker CE, Docker Compose, user group management |
+| **git** | Git configuration with SSH key signing |
+| **font** | JetBrains Mono, Fira Code, Inter, Sarabun (Thai) |
+| **wifi** | Wi-Fi performance optimization |
+| **multimedia** | Codecs, FFmpeg, hardware video acceleration |
+
+## Prerequisites
+
+- Fedora Linux (40+ recommended)
+- `sudo` privileges for system-level changes
+- Ansible 2.13+ (or use `./init.sh` to bootstrap)
 
 ## Quick Start
+
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/ansible-config.git
+cd ansible-config
+
+# Run the complete playbook
 ansible-playbook playbook.yaml -i inventory.ini
+
+# Run specific roles only (by tag)
+ansible-playbook playbook.yaml -i inventory.ini --tags font,desktop
+
+# Use init script (installs Ansible if missing)
+./init.sh
 ```
-Add `-e ansible_user=...` or limit the run via `--tags common` to scope what executes on a host.
+
+### Bootstrap Script
+
+The `init.sh` script handles:
+1. Installing Ansible if not present
+2. Installing required collections
+3. Running the main playbook
+
+## Project Structure
+
+```
+ansible-config/
+├── playbook.yaml          # Main entry point - runs all roles
+├── inventory.ini          # Localhost inventory
+├── requirements.yml       # Ansible collection dependencies
+├── init.sh                # Bootstrap script
+├── roles/
+│   ├── common/           # Base system configuration
+│   ├── desktop/          # GUI apps and settings
+│   ├── developer/        # Development tools
+│   ├── docker/           # Docker CE
+│   ├── git/              # Git configuration
+│   ├── font/             # Programming fonts
+│   ├── wifi/             # Wi-Fi optimization
+│   └── multimedia/       # Codecs and video acceleration
+├── .github/workflows/    # CI/CD pipelines
+└── .ansible/lint         # Lint configuration
+```
 
 ## Customization
-- Role config files live under `roles/<role-name>/tasks/` and can be modified to adjust packages or services.
-- Override defaults via `roles/<role-name>/defaults/main.yml` and keep inventory groups in `inventory.ini` aligned with the target hosts.
-- Store sensitive variables outside the repo (e.g., Ansible Vault) and reference them when feeding `ansible-playbook`.
+
+### Role Variables
+
+Each role has configurable defaults in `roles/<name>/defaults/main.yml`:
+
+```yaml
+# Example: font role defaults
+font_sarabun_install_enabled: true    # Install Sarabun Thai font
+font_install_enabled: true               # Main font toggle
+
+# Example: desktop role defaults
+desktop_enable_flatpak_font_access: true  # Fix Flatpak font rendering
+desktop_install_ghostty: true             # Install Ghostty terminal
+```
+
+### Feature Toggles
+
+Override variables via command line:
+
+```bash
+# Disable specific feature
+ansible-playbook playbook.yaml -i inventory.ini -e "desktop_install_ghostty=false"
+```
+
+### Adding Custom Fonts
+
+1. Place font files in `roles/font/file/<YourFont>/`
+2. Run the font role: `ansible-playbook playbook.yaml -i inventory.ini --tags font`
+
+## Development
+
+### Code Standards
+
+- **Naming**: Registered variables MUST use role prefix (e.g., `font_*`, `desktop_*`)
+- **License**: Use `SPDX-License-Identifier: MIT-0` in all new files
+- **Structure**: Follow standard Ansible role layout (`tasks/`, `defaults/`, `handlers/`, etc.)
+
+### Linting
+
+```bash
+# Lint with auto-fix
+ansible-lint --profile production --fix roles/
+
+# Lint entire project
+ansible-lint --profile production
+```
+
+### Running Specific Roles
+
+```bash
+# Run only font configuration
+ansible-playbook playbook.yaml -i inventory.ini --tags font
+
+# Run desktop setup only
+ansible-playbook playbook.yaml -i inventory.ini --tags desktop
+```
 
 ## Testing & CI
-- Local linting: `ansible-lint playbook.yaml roles/`, `yamllint -d relaxed .`, `ansible-playbook --syntax-check playbook.yaml`.
-- GitHub workflow runs on `main`/`develop`, riffs through union of lint, Fedora tests (with Xvfb/DBus for GNOME), and a post-run report.
-- Container validation replicates real installs by installing Python 3.12, Ansible core, required collections, and executing tagged dry-runs.
 
-## How to Use
-1. Ensure `inventory.ini` points to your workstation targets.
-2. If needed, bootstrap dependencies with `./init.sh` (installs pip, etc.).
-3. Run the playbook: `ansible-playbook playbook.yaml -i inventory.ini`.
-4. To iteratively validate a role, run `ansible-playbook roles/<role-name>/tasks/main.yml --syntax-check`.
-5. When customizing GNOME settings, ensure Xvfb is available for GUI-linked tasks.
+### Local Testing
+
+```bash
+# Syntax check
+ansible-playbook playbook.yaml --syntax-check
+
+# Check mode (dry run)
+ansible-playbook playbook.yaml -i inventory.ini --check
+
+# List tags
+ansible-playbook playbook.yaml --list-tags
+```
+
+### CI/CD Pipeline
+
+The `.github/workflows/ci.yml` workflow runs on:
+- Push to `main`/`develop` branches
+- Pull requests
+
+It performs:
+1. `ansible-lint` with production profile
+2. YAML syntax validation
+3. Fedora container tests with idempotence checks
+
+## Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Follow code standards (see [Development](#development))
+4. Run linting: `ansible-lint --profile production --fix roles/`
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+### Testing Your Changes
+
+Before submitting a PR:
+- Run the full playbook or test your specific role
+- Ensure `ansible-lint` passes with production profile
+- Test on a fresh Fedora VM if possible
+
+## FAQ
+
+<details>
+<summary>How do I fix Flatpak font rendering (Discord, Obsidian)?</summary>
+
+The playbook automatically configures Flatpak to access system fonts. If you still have issues:
+
+```bash
+# Re-run the desktop role
+ansible-playbook playbook.yaml -i inventory.ini --tags desktop
+```
+</details>
+
+<details>
+<summary>Can I run this on other Linux distributions?</summary>
+
+This playbook is designed for **Fedora only**. It uses DNF, Fedora-specific COPR repositories, and assumes systemd. Adapting to other distros would require significant changes.
+</details>
+
+<details>
+<summary>How do I add a new role?</summary>
+
+1. Create directory: `mkdir -p roles/your-role/{tasks,defaults,handlers}`
+2. Add `tasks/main.yml` with your tasks
+3. Add `defaults/main.yml` with variables (use role prefix: `yourrole_*`)
+4. Import in `playbook.yaml`
+</details>
 
 ## Project Status
-- Active: Maintainers regularly update role defaults, packages, and desktop tweaks.
-- CI: `ci.yml` enforces syntax, lints, and Fedora validation; CI report job fails if any dependency job does not succeed.
 
-## Contribution
-1. Fork, branch from `develop`, and update relevant role/task files.
-2. Run local checks (lint, syntax, and optionally targeted role dry-runs).
-3. Push your changes with a descriptive PR that summarizes scope and tests performed.
-4. Preserve code style in Ansible/YAML and describe configuration expectations in role README files.
+- **Active**: Maintained regularly with updates for new Fedora releases
+- **CI**: Production lint profile enforced, all tests must pass
+- **Dependencies**: Uses official COPR repos and Flathub
 
 ## License
-MIT-0. See LICENSE for details.
+
+MIT-0. See [LICENSE](LICENSE) for details.
+
+## Acknowledgments
+
+- [Ansible](https://www.ansible.com/) - Configuration management
+- [Fedora](https://fedoraproject.org/) - The base distribution
+- [Flathub](https://flathub.org/) - Flatpak application repository
+- Font authors: JetBrains Mono, Fira Code, Inter, and Sarabun

@@ -17,3 +17,6 @@ font_jetbrains_copr_repo: elxreno/jetbrains-mono-fonts
 
 # COPR repository for Inter fonts
 font_inter_copr_repo: burhanverse/inter-fonts
+
+# Install Sarabun Thai font from GitHub
+font_sarabun_install_enabled: true

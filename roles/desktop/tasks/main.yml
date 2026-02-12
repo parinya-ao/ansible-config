@@ -26,6 +26,13 @@
     - desktop
     - flatpak
 
+- name: Configure Flatpak font access
+  ansible.builtin.import_tasks: flatpak-fonts.yml
+  tags:
+    - desktop
+    - flatpak
+    - fonts
+
 - name: Install Typst
   ansible.builtin.import_tasks: typst.yml
   tags:

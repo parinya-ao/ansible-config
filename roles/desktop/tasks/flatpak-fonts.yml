@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Configure Flatpak to access system fonts
+# This fixes font rendering issues in Flatpak apps like Discord and Obsidian
+
+- name: Enable Flatpak access to system fonts
+  ansible.builtin.command:
+    cmd: flatpak override --user --filesystem=/usr/share/fonts:ro --filesystem=/usr/local/share/fonts:ro
+  register: desktop_flatpak_font_override
+  changed_when: false
+  when: desktop_enable_flatpak_font_access | bool
+
+- name: Enable Flatpak access to fontconfig
+  ansible.builtin.command:
+    cmd: flatpak override --user --filesystem=xdg-config/fontconfig:ro
+  register: desktop_flatpak_fontconfig_override
+  changed_when: false
+  when: desktop_enable_flatpak_font_access | bool

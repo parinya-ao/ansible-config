@@ -1,0 +1,64 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Install Sarabun font from GitHub for all users
+# Thai font that works well with Flatpak apps
+
+- name: Check if Sarabun fonts already exist
+  ansible.builtin.find:
+    paths: /usr/local/share/fonts
+    patterns: "Sarabun-*.ttf"
+  register: font_sarabun_existing
+
+- name: Create temporary directory for Sarabun download
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: _sarabun
+  register: font_sarabun_temp_dir
+  when: font_sarabun_existing.matched == 0
+
+- name: Download Sarabun fonts from GitHub
+  ansible.builtin.get_url:
+    url: "https://github.com/google/fonts/raw/main/ofl/sarabun/{{ item }}"
+    dest: "{{ font_sarabun_temp_dir.path }}/{{ item }}"
+    mode: "0644"
+  loop:
+    - Sarabun-Regular.ttf
+    - Sarabun-Bold.ttf
+    - Sarabun-Italic.ttf
+    - Sarabun-BoldItalic.ttf
+    - Sarabun-Light.ttf
+    - Sarabun-LightItalic.ttf
+    - Sarabun-Medium.ttf
+    - Sarabun-MediumItalic.ttf
+    - Sarabun-SemiBold.ttf
+    - Sarabun-SemiBoldItalic.ttf
+  when: font_sarabun_existing.matched == 0
+
+- name: Copy Sarabun fonts to system directory
+  ansible.builtin.copy:
+    src: "{{ font_sarabun_temp_dir.path }}/{{ item }}"
+    dest: /usr/local/share/fonts/{{ item }}
+    mode: "0644"
+    owner: root
+    group: root
+    remote_src: true
+  loop:
+    - Sarabun-Regular.ttf
+    - Sarabun-Bold.ttf
+    - Sarabun-Italic.ttf
+    - Sarabun-BoldItalic.ttf
+    - Sarabun-Light.ttf
+    - Sarabun-LightItalic.ttf
+    - Sarabun-Medium.ttf
+    - Sarabun-MediumItalic.ttf
+    - Sarabun-SemiBold.ttf
+    - Sarabun-SemiBoldItalic.ttf
+  when: font_sarabun_existing.matched == 0
+  notify: Update font cache
+
+- name: Clean up temporary directory
+  ansible.builtin.file:
+    path: "{{ font_sarabun_temp_dir.path }}"
+    state: absent
+  when: font_sarabun_existing.matched == 0
+  changed_when: false
