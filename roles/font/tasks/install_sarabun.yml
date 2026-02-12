@@ -63,7 +63,7 @@
     - Sarabun-SemiBold.ttf
     - Sarabun-SemiBoldItalic.ttf
   when: font_sarabun_existing.matched == 0
-  notify: Update font cache
+  notify: Refresh font cache
 
 - name: Clean up temporary directory
   ansible.builtin.file:
