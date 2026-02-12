@@ -9,6 +9,15 @@
     patterns: "Sarabun-*.ttf"
   register: font_sarabun_existing
 
+- name: Ensure system fonts directory exists
+  ansible.builtin.file:
+    path: /usr/local/share/fonts
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+  when: font_sarabun_existing.matched == 0
+
 - name: Create temporary directory for Sarabun download
   ansible.builtin.tempfile:
     state: directory
