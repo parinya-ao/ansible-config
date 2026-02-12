@@ -11,6 +11,8 @@ font_packages:
   - fira-code-fonts
   - inter-fonts
   - google-arimo-fonts
+  - ibm-plex-sans-thai-fonts
+  - ibm-plex-sans-thai-looped-fonts
 
 # COPR repository for JetBrains Mono fonts
 font_jetbrains_copr_repo: elxreno/jetbrains-mono-fonts
