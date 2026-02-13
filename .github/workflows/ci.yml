@@ -1,195 +1,193 @@
 name: Ansible CI Pipeline
 
 on:
-    push:
-        branches: [main, develop]
-    pull_request:
-        branches: [main, develop]
-    workflow_dispatch:
-
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
 # Cancel in-progress runs on new push to save resources
 concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-    # ==============================================================================
-    # STAGE 1: STATIC ANALYSIS (Parallel Execution)
-    # ==============================================================================
+  # ==============================================================================
+  # STAGE 1: STATIC ANALYSIS (Parallel Execution)
+  # ==============================================================================
 
-    # Job 1.1: Security Scan
-    security-scan:
-        name: Security Scan
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
+  # Job 1.1: Security Scan
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-            # Secret detection
-            - name: TruffleHog OSS
-              uses: trufflesecurity/trufflehog@main
-              with:
-                  path: ./
-                  base: ${{ github.event.repository.default_branch }}
-                  head: HEAD
-                  extra_args: --debug --only-verified
+      # Secret detection
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
 
-            # KICS IaC Security
-            - name: KICS IaC Security
-              uses: checkmarx/kics-github-action@v1.7.0
-              with:
-                  path: "."
-                  output_path: "kics-results"
-                  ignore_on_exit: results
+      # KICS IaC Security
+      - name: KICS IaC Security
+        uses: checkmarx/kics-github-action@v1.7.0
+        with:
+          path: "."
+          output_path: "kics-results"
+          ignore_on_exit: results
 
-            # Upload Security Report as Artifact
-            - name: Upload Security Report
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: security-report
-                  path: kics-results/
-                  retention-days: 7
+      # Upload Security Report as Artifact
+      - name: Upload Security Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: kics-results/
+          retention-days: 7
 
-    # Job 1.2: Validation & Linting
-    validate:
-        name: Lint and Syntax Validation
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  # Job 1.2: Validation & Linting
+  validate:
+    name: Lint and Syntax Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-            # Setup Python with pip caching
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.12"
-                  cache: "pip"
+      # Setup Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-            - name: Install Linting Tools
-              run: pip install ansible-core ansible-lint yamllint
+      - name: Install Linting Tools
+        run: pip install ansible-core ansible-lint yamllint
 
-            - name: Run Ansible Lint
-              run: ansible-lint --profile production --strict playbook.yaml roles/
+      - name: Run Ansible Lint
+        run: ansible-lint --profile production --strict playbook.yaml roles/
 
     # ==============================================================================
     # STAGE 2: INTEGRATION TEST (Run after Stage 1 completes)
     # ==============================================================================
 
-    test-fedora:
-        name: Test on Fedora Latest
-        runs-on: ubuntu-latest
-        needs: [security-scan, validate]
-        container:
-            image: fedora:latest
-            options: --privileged
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+  test-fedora:
+    name: Test on Fedora Latest
+    runs-on: ubuntu-latest
+    needs: [security-scan, validate]
+    container:
+      image: fedora:latest
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            # Cache Ansible Collections
-            - name: Cache Ansible Collections
-              uses: actions/cache@v4
-              with:
-                  path: /root/.ansible/collections
-                  key: ansible-collections-${{ hashFiles('requirements.yml') }}
-                  restore-keys: |
-                      ansible-collections-
+      # Cache Ansible Collections
+      - name: Cache Ansible Collections
+        uses: actions/cache@v4
+        with:
+          path: /root/.ansible/collections
+          key: ansible-collections-${{ hashFiles('requirements.yml') }}
+          restore-keys: |
+            ansible-collections-
 
-            - name: Make init.sh executable
-              run: chmod +x init.sh
+      - name: Make init.sh executable
+        run: chmod +x init.sh
 
-            - name: Run init.sh - Install Ansible
-              run: |
-                  echo "=== STEP 1: Installing Ansible via init.sh ==="
-                  bash init.sh --help
-              env:
-                  CI: "true"
+      - name: Run init.sh - Install Ansible
+        run: |
+          echo "=== STEP 1: Installing Ansible via init.sh ==="
+          bash init.sh --help
+        env:
+          CI: "true"
 
-            - name: Install Collections
-              run: ansible-galaxy collection install -r requirements.yml
+      - name: Install Collections
+        run: ansible-galaxy collection install -r requirements.yml
 
-            - name: Create Local Inventory
-              run: |
-                  echo "[local]" > inventory.ini
-                  echo "localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3" >> inventory.ini
+      - name: Create Local Inventory
+        run: |
+          echo "[local]" > inventory.ini
+          echo "localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3" >> inventory.ini
 
-            # Run 1: First execution with logging
-            - name: First Run (Execution)
-              run: |
-                  echo "=== FIRST RUN STARTED ==="
-                  ansible-playbook playbook.yaml -i inventory.ini \
-                    -e "common_enable_rpm_fusion=false" \
-                    -e "common_install_nvidia_drivers=false" \
-                    -e "common_configure_custom_dns=false" \
-                    -e "common_install_d2=false" \
-                    | tee ansible_run.log
-              env:
-                  ANSIBLE_FORCE_COLOR: "1"
-                  CI: "true"
+      # Run 1: First execution with logging
+      - name: First Run (Execution)
+        run: |
+          echo "=== FIRST RUN STARTED ==="
+          ansible-playbook playbook.yaml -i inventory.ini \
+            -e "common_enable_rpm_fusion=false" \
+            -e "common_install_nvidia_drivers=false" \
+            -e "common_configure_custom_dns=false" \
+            -e "common_install_d2=false" \
+            | tee ansible_run.log
+        env:
+          ANSIBLE_FORCE_COLOR: "1"
+          CI: "true"
 
-            # Run 2: Idempotence check with logging
-            - name: Idempotence Check
-              run: |
-                  echo "=== IDEMPOTENCE CHECK STARTED ==="
+      # Run 2: Idempotence check with logging
+      - name: Idempotence Check
+        run: |
+          echo "=== IDEMPOTENCE CHECK STARTED ==="
 
-                  ansible-playbook playbook.yaml -i inventory.ini \
-                    -e "common_enable_rpm_fusion=false" \
-                    -e "common_install_nvidia_drivers=false" \
-                    -e "common_configure_custom_dns=false" \
-                    -e "common_install_d2=false" \
-                    | tee idempotence.log
+          ansible-playbook playbook.yaml -i inventory.ini \
+            -e "common_enable_rpm_fusion=false" \
+            -e "common_install_nvidia_drivers=false" \
+            -e "common_configure_custom_dns=false" \
+            -e "common_install_d2=false" \
+            | tee idempotence.log
 
-                  # Parse log for idempotence check
-                  CHANGED_COUNT=$(grep -oP 'changed=\K\d+' idempotence.log | tail -n1 || echo "0")
-                  FAILED_COUNT=$(grep -oP 'failed=\K\d+' idempotence.log | tail -n1 || echo "0")
+          # Parse log for idempotence check
+          CHANGED_COUNT=$(grep -oP 'changed=\K\d+' idempotence.log | tail -n1 || echo "0")
+          FAILED_COUNT=$(grep -oP 'failed=\K\d+' idempotence.log | tail -n1 || echo "0")
 
-                  echo "Idempotence Check Results: changed=$CHANGED_COUNT, failed=$FAILED_COUNT"
+          echo "Idempotence Check Results: changed=$CHANGED_COUNT, failed=$FAILED_COUNT"
 
-                  if [ "$CHANGED_COUNT" -eq 0 ] && [ "$FAILED_COUNT" -eq 0 ]; then
-                      echo "PASSED: Idempotence check successful"
-                      exit 0
-                  else
-                      echo "FAILED: Idempotence check failed"
-                      echo "  - Changed count: $CHANGED_COUNT (should be 0)"
-                      echo "  - Failed count: $FAILED_COUNT (should be 0)"
-                      exit 1
-                  fi
-              env:
-                  ANSIBLE_FORCE_COLOR: "1"
-                  CI: "true"
+          if [ "$CHANGED_COUNT" -eq 0 ] && [ "$FAILED_COUNT" -eq 0 ]; then
+              echo "PASSED: Idempotence check successful"
+              exit 0
+          else
+              echo "FAILED: Idempotence check failed"
+              echo "  - Changed count: $CHANGED_COUNT (should be 0)"
+              echo "  - Failed count: $FAILED_COUNT (should be 0)"
+              exit 1
+          fi
+        env:
+          ANSIBLE_FORCE_COLOR: "1"
+          CI: "true"
 
-            # Upload logs as artifacts
-            - name: Upload Ansible Logs
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: ansible-logs
-                  path: |
-                      ansible_run.log
-                      idempotence.log
-                  retention-days: 7
+      # Upload logs as artifacts
+      - name: Upload Ansible Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ansible-logs
+          path: |
+            ansible_run.log
+            idempotence.log
+          retention-days: 7
 
     # ==============================================================================
     # STAGE 3: FINAL REPORT
     # ==============================================================================
 
-    report:
-        name: Final Report
-        runs-on: ubuntu-latest
-        if: always()
-        needs: [test-fedora]
-        steps:
-            - name: Check Status
-              run: |-
-                  echo "=== CI Pipeline Results ==="
-                  echo "Security Scan: ${{ needs.security-scan.result }}"
-                  echo "Lint & Syntax: ${{ needs.validate.result }}"
-                  echo "Fedora Test:   ${{ needs.test-fedora.result }}"
-                  echo ""
-                  if [[ "${{ needs.test-fedora.result }}" == "success" ]]; then
-                      echo "PASSED: Fedora Latest is ready for production!"
-                  else
-                      echo "FAILED: Something went wrong."
-                      exit 1
-                  fi
+  report:
+    name: Final Report
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [test-fedora]
+    steps:
+      - name: Check Status
+        run: |-
+          echo "=== CI Pipeline Results ==="
+          echo "Security Scan: ${{ needs.security-scan.result }}"
+          echo "Lint & Syntax: ${{ needs.validate.result }}"
+          echo "Fedora Test:   ${{ needs.test-fedora.result }}"
+          echo ""
+          if [[ "${{ needs.test-fedora.result }}" == "success" ]]; then
+              echo "PASSED: Fedora Latest is ready for production!"
+          else
+              echo "FAILED: Something went wrong."
+              exit 1
+          fi
