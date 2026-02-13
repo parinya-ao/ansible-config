@@ -97,15 +97,16 @@ jobs:
       - name: Make init.sh executable
         run: chmod +x init.sh
 
-      - name: Run init.sh - Install Ansible
+      - name: Install Ansible and Collections
         run: |
-          echo "=== STEP 1: Installing Ansible via init.sh ==="
-          bash init.sh --help
+          echo "=== Installing Ansible via init.sh --skip-install ==="
+          bash init.sh --skip-install --skip-check || true
+
+          echo "=== Installing collections ==="
+          source .ansible-venv/bin/activate
+          ansible-galaxy collection install -r requirements.yml
         env:
           CI: "true"
-
-      - name: Install Collections
-        run: ansible-galaxy collection install -r requirements.yml
 
       - name: Create Local Inventory
         run: |
@@ -115,6 +116,7 @@ jobs:
       # Run 1: First execution with logging
       - name: First Run (Execution)
         run: |
+          source .ansible-venv/bin/activate
           echo "=== FIRST RUN STARTED ==="
           ansible-playbook playbook.yaml -i inventory.ini \
             -e "common_enable_rpm_fusion=false" \
@@ -129,6 +131,7 @@ jobs:
       # Run 2: Idempotence check with logging
       - name: Idempotence Check
         run: |
+          source .ansible-venv/bin/activate
           echo "=== IDEMPOTENCE CHECK STARTED ==="
 
           ansible-playbook playbook.yaml -i inventory.ini \
