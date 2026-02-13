@@ -28,5 +28,9 @@
     name: "{{ font_packages }}"
     state: present
 
+- name: Install Sarabun font (Thai)
+  ansible.builtin.import_tasks: install_sarabun.yml
+  when: font_sarabun_install_enabled | bool
+
 - name: Install local font files system-wide
   ansible.builtin.import_tasks: install_local_fonts.yml

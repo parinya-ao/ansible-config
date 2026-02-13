@@ -11,9 +11,14 @@ font_packages:
   - fira-code-fonts
   - inter-fonts
   - google-arimo-fonts
+  - ibm-plex-sans-thai-fonts
+  - ibm-plex-sans-thai-looped-fonts
 
 # COPR repository for JetBrains Mono fonts
 font_jetbrains_copr_repo: elxreno/jetbrains-mono-fonts
 
 # COPR repository for Inter fonts
 font_inter_copr_repo: burhanverse/inter-fonts
+
+# Install Sarabun Thai font from GitHub
+font_sarabun_install_enabled: true
