@@ -117,7 +117,7 @@ jobs:
 
       # Install Python in Fedora container (required for venv)
       - name: Install Python3
-        run: dnf install -y python3 python3-pip python3-venv
+        run: dnf install -y python3 python3-pip
 
       - name: Install Ansible and Collections
         run: |
