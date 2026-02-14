@@ -94,6 +94,24 @@ jobs:
           restore-keys: |
             ansible-collections-
 
+      # Cache DNF metadata to prevent redundant repository syncs
+      - name: Cache DNF Metadata
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/dnf
+          key: dnf-metadata-fedora-${{ github.run_number }}
+          restore-keys: |
+            dnf-metadata-fedora-
+
+      # Cache Python virtual environment
+      - name: Cache Python Venv
+        uses: actions/cache@v4
+        with:
+          path: .ansible-venv
+          key: python-venv-${{ hashFiles('requirements.yml') }}
+          restore-keys: |
+            python-venv-
+
       - name: Make init.sh executable
         run: chmod +x init.sh
 

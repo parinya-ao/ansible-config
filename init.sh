@@ -545,7 +545,10 @@ main() {
         fi
     fi
 
-    clear
+    # Only clear screen in interactive terminals (not in CI)
+    if [[ -t 1 ]] && command -v clear &>/dev/null; then
+        clear
+    fi
     print_header "ANSIBLE CONFIGURATION - INITIALIZATION SETUP"
 
     #################################################################################

@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: MIT-0
+# Git ignore patterns for Ansible project
+
+# --- Ansible Fact Caching ---
+.ansible/facts/
+.ansible/inventory_cache/
+.ansible/cp/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.ansible-venv/
+venv/
+ENV/
+
+# --- Ansible ---
+*.retry
+.ansible/
+collections/ansible_collections/
+
+# --- IDE ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+ansible_run.log
+idempotence.log
+
+# --- Security ---
+*.pem
+*.key
+.env
+.env.*
+
+# --- Build Artifacts ---
+kics-results/
