@@ -164,8 +164,8 @@ jobs:
             | tee idempotence.log
 
           # Parse log for idempotence check
-          CHANGED_COUNT=$(grep -oP 'changed=\K\d+' idempotence.log | tail -n1 || echo "0")
-          FAILED_COUNT=$(grep -oP 'failed=\K\d+' idempotence.log | tail -n1 || echo "0")
+          CHANGED_COUNT=$(grep -oE 'changed=[0-9]+' idempotence.log | tail -n1 | grep -oE '[0-9]+' || echo "0")
+          FAILED_COUNT=$(grep -oE 'failed=[0-9]+' idempotence.log | tail -n1 | grep -oE '[0-9]+' || echo "0")
 
           echo "Idempotence Check Results: changed=$CHANGED_COUNT, failed=$FAILED_COUNT"
 
