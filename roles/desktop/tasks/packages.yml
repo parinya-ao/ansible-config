@@ -1,17 +1,18 @@
 # SPDX-License-Identifier: MIT-0
 ---
 # Install desktop package management and applications
+# Optimized: Single DNF transaction for all packages
 
-- name: Install Flatpak
-  ansible.builtin.dnf:
-    name: flatpak
-    state: present
-
-- name: Install desktop packages
+- name: Install desktop packages (batched)
   ansible.builtin.dnf:
     name:
+      - flatpak
       - okular
       - xclip
       - gnome-extensions-app
       - gnome-tweaks
     state: present
+  become: true
+  tags:
+    - desktop
+    - packages

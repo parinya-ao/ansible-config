@@ -265,7 +265,7 @@ Ansible roles enable reusability and efficient code sharing while providing a we
 - Do your due diligence for Ansible Galaxy Roles: When downloading and using content and roles from Galaxy, do your due diligence, validate their content, and pick roles from trustworthy contributors.
 - Store Galaxy roles used locally: To avoid depending on Ansible Galaxy's upstream, you can store any roles from Galaxy in your code repositories and manage them as part of your project.
 
-💡 You might also like:
+You might also like:
 
 - 11 Ways to Improve Your Infrastructure Orchestration
 - How to Manage Ansible More Securely
