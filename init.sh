@@ -347,8 +347,8 @@ setup_venv() {
         return 1
     fi
 
-    # Install Ansible with pinned major version for stability
-    if ! pip install --quiet "ansible-core>=${ANSIBLE_VERSION}.0,<$((ANSIBLE_VERSION + 1)).0"; then
+    # Install Ansible
+    if ! pip install --quiet ansible-core; then
         print_error "Failed to install Ansible in venv"
         return 1
     fi
