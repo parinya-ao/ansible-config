@@ -37,40 +37,40 @@ palette = 'cyberpunk'
 # ==================== PROMPT FORMAT ====================
 # Main prompt structure
 format = """
-[╭─](bold blue)$username$hostname$localip$shlvl$kubernetes$directory$vcsh$fossil_branch$fossil_metrics$git_branch$git_commit$git_state$git_metrics$git_status$hg_branch$hg_state$pijul_channel$docker_context$package$c$cmake$cobol$daml$dart$deno$dotnet$elixir$elm$erlang$fennel$fortran$gleam$golang$guix_shell$haskell$haxe$helm$java$julia$kotlin$gradle$lua$nim$nodejs$ocaml$opa$perl$php$pulumi$purescript$python$quarto$raku$rlang$red$ruby$rust$scala$solidity$swift$terraform$typst$vlang$vagrant$zig$buf$nix_shell$conda$meson$spack$memory_usage$aws$gcloud$openstack$azure$nats$direnv$env_var$mise$crystal$custom$sudo$cmd_duration$line_break$jobs$battery$time$status$os$container$netns$shell$character
-[╰─](bold blue)$character"""
+[+](bold blue)$username$hostname$localip$shlvl$kubernetes$directory$vcsh$fossil_branch$fossil_metrics$git_branch$git_commit$git_state$git_metrics$git_status$hg_branch$hg_state$pijul_channel$docker_context$package$c$cmake$cobol$daml$dart$deno$dotnet$elixir$elm$erlang$fennel$fortran$gleam$golang$guix_shell$haskell$haxe$helm$java$julia$kotlin$gradle$lua$nim$nodejs$ocaml$opa$perl$php$pulumi$purescript$python$quarto$raku$rlang$red$ruby$rust$scala$solidity$swift$terraform$typst$vlang$vagrant$zig$buf$nix_shell$conda$meson$spack$memory_usage$aws$gcloud$openstack$azure$nats$direnv$env_var$mise$crystal$custom$sudo$cmd_duration$line_break$jobs$battery$time$status$os$container$netns$shell$character
+[-](bold blue)$character"""
 
 # Right prompt (shows time and supplementary info)
 right_format = """$time$battery"""
 
 # ==================== CHARACTER (PROMPT SYMBOL) ====================
 [character]
-success_symbol = '[❯](bold green)'
-error_symbol = '[❯](bold red)'
-vimcmd_symbol = '[❮](bold purple)'
-vimcmd_replace_one_symbol = '[❮](bold purple)'
-vimcmd_replace_symbol = '[❮](bold purple)'
-vimcmd_visual_symbol = '[❮](bold yellow)'
+success_symbol = '[>](bold green)'
+error_symbol = '[>](bold red)'
+vimcmd_symbol = '[<](bold purple)'
+vimcmd_replace_one_symbol = '[<](bold purple)'
+vimcmd_replace_symbol = '[<](bold purple)'
+vimcmd_visual_symbol = '[<](bold yellow)'
 
 # ==================== DIRECTORY ====================
 [directory]
 truncation_length = 3
 truncate_to_repo = true
-format = '[📁 $path]($style)[$read_only]($read_only_style) '
+format = '[$path]($style)[$read_only]($read_only_style) '
 style = 'bold cyan'
-read_only = ' 🔒'
+read_only = ' [RO]'
 read_only_style = 'red'
-truncation_symbol = '…/'
-home_symbol = '🏠 ~'
+truncation_symbol = '.../'
+home_symbol = '~'
 before_repo_root_style = 'dimmed cyan'
 repo_root_style = 'bold bright-cyan'
 
 # ==================== GIT MODULES ====================
 [git_branch]
-symbol = ' '
+symbol = ''
 format = 'on [$symbol$branch(:$remote_branch)]($style) '
 truncation_length = 20
-truncation_symbol = '…'
+truncation_symbol = '...'
 style = 'bold purple'
 ignore_branches = ['master', 'main']
 
@@ -81,18 +81,18 @@ style = 'bold green'
 only_detached = false
 tag_disabled = false
 tag_max_candidates = 3
-tag_symbol = ' 🏷 '
+tag_symbol = ' [tag] '
 
 [git_state]
 format = '\([$state( $progress_current/$progress_total)]($style)\) '
 style = 'bold yellow'
-rebase = '🔀 REBASING'
-merge = '🔀 MERGING'
-revert = '⏪ REVERTING'
-cherry_pick = '🍒 CHERRY-PICKING'
-bisect = '🔍 BISECTING'
-am = '📬 AM'
-am_or_rebase = '📬 AM/REBASE'
+rebase = 'REBASING'
+merge = 'MERGING'
+revert = 'REVERTING'
+cherry_pick = 'CHERRY-PICKING'
+bisect = 'BISECTING'
+am = 'AM'
+am_or_rebase = 'AM/REBASE'
 
 [git_metrics]
 format = '([+$added]($added_style) )([-$deleted]($deleted_style) )'
@@ -103,24 +103,24 @@ disabled = false
 
 [git_status]
 format = '([\[$all_status$ahead_behind\]]($style) )'
-conflicted = '💥='
-ahead = '⇡${count}'
-behind = '⇣${count}'
-diverged = '⇕⇡${ahead_count}⇣${behind_count}'
-up_to_date = '✓'
+conflicted = 'C='
+ahead = '^${count}'
+behind = 'v${count}'
+diverged = '^v^${ahead_count}v${behind_count}'
+up_to_date = 'OK'
 untracked = '?${count}'
-stashed = '📦\$count'
+stashed = 'S$count'
 modified = '!${count}'
 staged = '+${count}'
-renamed = '»${count}'
-deleted = '✘${count}'
-typechanged = '◈'
+renamed = '>>${count}'
+deleted = 'X${count}'
+typechanged = '*'
 style = 'bold red'
 ignore_submodules = false
 
 # ==================== PROGRAMMING LANGUAGES ====================
 [nodejs]
-symbol = ' '
+symbol = 'node '
 format = 'via [$symbol($version )]($style)'
 style = 'bold green'
 detect_extensions = ['js', 'mjs', 'cjs', 'ts', 'mts', 'cts']
@@ -128,7 +128,7 @@ detect_files = ['package.json', '.node-version', '.nvmrc']
 detect_folders = ['node_modules']
 
 [python]
-symbol = '🐍 '
+symbol = 'py '
 format = 'via [${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
 style = 'bold yellow'
 pyenv_version_name = true
@@ -137,35 +137,35 @@ detect_extensions = ['py', 'ipynb']
 detect_files = ['.python-version', 'Pipfile', '__init__.py', 'pyproject.toml', 'requirements.txt', 'setup.py', 'tox.ini']
 
 [rust]
-symbol = '🦀 '
+symbol = 'rs '
 format = 'via [$symbol($version )]($style)'
 style = 'bold red'
 detect_extensions = ['rs']
 detect_files = ['Cargo.toml']
 
 [golang]
-symbol = '🐹 '
+symbol = 'go '
 format = 'via [$symbol($version )]($style)'
 style = 'bold cyan'
 detect_extensions = ['go']
 detect_files = ['go.mod', 'go.sum', 'go.work']
 
 [java]
-symbol = '☕ '
+symbol = 'java '
 format = 'via [${symbol}(${version} )]($style)'
 style = 'bold red dimmed'
 detect_extensions = ['java', 'class', 'gradle', 'jar']
 detect_files = ['pom.xml', 'build.gradle.kts', 'build.sbt', '.java-version']
 
 [docker_context]
-symbol = '🐳 '
+symbol = 'docker '
 format = 'via [$symbol$context]($style) '
 style = 'bold blue'
 detect_files = ['compose.yml', 'compose.yaml', 'docker-compose.yml', 'docker-compose.yaml', 'Dockerfile']
 
 # ==================== CLOUD PLATFORMS ====================
 [aws]
-symbol = '☁️ '
+symbol = 'aws '
 format = 'on [$symbol($profile )(\($region\) )(\[$duration\] )]($style)'
 style = 'bold yellow'
 [aws.region_aliases]
@@ -176,7 +176,7 @@ us-west-2 = 'or'
 eu-west-1 = 'ie'
 
 [kubernetes]
-symbol = '☸ '
+symbol = 'k8s '
 format = '[$symbol$context( \($namespace\))]($style) in '
 style = 'cyan bold'
 disabled = false
@@ -184,11 +184,11 @@ detect_files = ['k8s', 'kubernetes']
 [[kubernetes.contexts]]
 context_pattern = "production"
 style = "bold red"
-symbol = "💔 "
+symbol = "prod "
 [[kubernetes.contexts]]
 context_pattern = "dev"
 style = "green"
-symbol = "🛠️ "
+symbol = "dev "
 
 # ==================== SYSTEM INFO ====================
 [username]
@@ -200,7 +200,7 @@ show_always = false
 
 [hostname]
 ssh_only = true
-ssh_symbol = '🌐 '
+ssh_symbol = 'ssh '
 format = 'on [$ssh_symbol$hostname]($style) '
 style = 'bold dimmed green'
 trim_at = '.local'
@@ -213,17 +213,17 @@ disabled = false
 
 [time]
 disabled = false
-format = '🕙 [\[$time\]]($style) '
+format = 'time [\[$time\]]($style) '
 time_format = '%T'
 style = 'bold yellow'
 utc_time_offset = 'local'
 
 [battery]
-full_symbol = '🔋 '
-charging_symbol = '⚡ '
-discharging_symbol = '💀 '
-unknown_symbol = '❓ '
-empty_symbol = '❌ '
+full_symbol = '[FULL] '
+charging_symbol = '[CHG] '
+discharging_symbol = '[BAT] '
+unknown_symbol = '[?] '
+empty_symbol = '[EMPTY] '
 format = '[$symbol$percentage]($style) '
 [[battery.display]]
 threshold = 20
@@ -239,7 +239,7 @@ style = 'bold green'
 disabled = false
 threshold = 75
 format = 'via $symbol [${ram}( | ${swap})]($style) '
-symbol = '🐏'
+symbol = 'mem'
 style = 'bold dimmed white'
 
 [cmd_duration]
@@ -255,23 +255,23 @@ min_time_to_notify = 60000
 disabled = false
 format = '[$indicator]($style) '
 style = 'white bold'
-bash_indicator = ' '
-fish_indicator = '󰈺 '
-zsh_indicator = '󰰷 '
-powershell_indicator = '󰨊 '
-pwsh_indicator = '󰨊 '
-nu_indicator = ' '
+bash_indicator = 'bash '
+fish_indicator = 'fish '
+zsh_indicator = 'zsh '
+powershell_indicator = 'pwsh '
+pwsh_indicator = 'pwsh '
+nu_indicator = 'nu '
 
 [shlvl]
 disabled = false
 threshold = 2
 format = '[$symbol$shlvl]($style) '
-symbol = '↕️ '
+symbol = 'lv'
 style = 'bold yellow'
 
 # ==================== CONTAINER ====================
 [container]
-symbol = '⬢'
+symbol = 'cnt'
 format = '[$symbol \[$name\]]($style) '
 style = 'bold red dimmed'
 
@@ -284,12 +284,12 @@ style = 'bold white'
 [status]
 disabled = false
 format = '[$symbol$status]($style) '
-symbol = '❌'
-success_symbol = '✅'
-not_executable_symbol = '🚫'
-not_found_symbol = '🔍'
-sigint_symbol = '🧱'
-signal_symbol = '⚡'
+symbol = 'X'
+success_symbol = 'OK'
+not_executable_symbol = 'NOEXEC'
+not_found_symbol = 'NF'
+sigint_symbol = 'SIG'
+signal_symbol = 'SIG'
 style = 'bold red'
 success_style = 'bold green'
 map_symbol = true
@@ -304,7 +304,7 @@ disabled = false
 
 # ==================== JOBS ====================
 [jobs]
-symbol = '✦'
+symbol = '*'
 format = '[$symbol$number]($style) '
 style = 'bold blue'
 number_threshold = 2
@@ -313,7 +313,7 @@ symbol_threshold = 1
 # ==================== SUDO ====================
 [sudo]
 format = '[as $symbol]($style)'
-symbol = '🧙 '
+symbol = 'root '
 style = 'bold blue'
 disabled = false
 
@@ -322,61 +322,61 @@ disabled = false
 [custom.date]
 command = 'date "+%a %d %b"'
 when = true
-format = '📅 [$output](bold cyan) '
+format = 'date [$output](bold cyan) '
 shell = ['bash', '-c']
 
 # Show detailed git status (optional)
 [custom.git-stats]
 command = 'git log --oneline -3 --pretty=format:"%h %s" 2>/dev/null || echo ""'
 when = 'git rev-parse --git-dir 2>/dev/null'
-format = '\n[├─ 📝 Recent:](bold dimmed) [$output](dimmed white)'
+format = '\n[| Recent:]($style) [$output](dimmed white)'
 shell = ['bash', '-c']
 ignore_timeout = false
 
 # ==================== OTHER LANGUAGES (OPTIMIZED) ====================
 [php]
-symbol = '🐘 '
+symbol = 'php '
 format = 'via [$symbol($version )]($style)'
 style = '147 bold'
 detect_extensions = ['php']
 detect_files = ['composer.json', '.php-version']
 
 [ruby]
-symbol = '💎 '
+symbol = 'rb '
 format = 'via [$symbol($version )]($style)'
 style = 'bold red'
 detect_extensions = ['rb']
 detect_files = ['Gemfile', '.ruby-version']
 
 [scala]
-symbol = '🆂 '
+symbol = 'scala '
 format = 'via [${symbol}(${version} )]($style)'
 style = 'red dimmed'
 detect_extensions = ['sbt', 'scala']
 detect_files = ['build.sbt']
 
 [kotlin]
-symbol = '🅺 '
+symbol = 'kt '
 format = 'via [$symbol($version )]($style)'
 style = 'bold blue'
 detect_extensions = ['kt', 'kts']
 
 [swift]
-symbol = '🐦 '
+symbol = 'swift '
 format = 'via [$symbol($version )]($style)'
 style = 'bold 202'
 detect_extensions = ['swift']
 detect_files = ['Package.swift']
 
 [terraform]
-symbol = '💠'
+symbol = 'tf'
 format = 'via [$symbol$workspace]($style) '
 style = 'bold 105'
 detect_extensions = ['tf', 'tfplan', 'tfstate']
 detect_folders = ['.terraform']
 
 [helm]
-symbol = '⎈ '
+symbol = 'helm '
 format = 'via [$symbol($version )]($style)'
 style = 'bold white'
 detect_files = ['helmfile.yaml', 'Chart.yaml']
