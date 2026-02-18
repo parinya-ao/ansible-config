@@ -31,7 +31,6 @@ desktop_flatpak_apps_list:
   - com.rustdesk.RustDesk
   - io.dbeaver.DBeaverCommunity
   - com.super_productivity.SuperProductivity
-  - net.blix.BlueMail
 
 # Desktop packages to install
 desktop_packages:
