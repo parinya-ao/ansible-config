@@ -4,8 +4,10 @@
 
 - name: Check if Zed is already installed
   ansible.builtin.stat:
-    path: "{{ ansible_facts['user_dir'] }}/.local/bin/zed"
+    path: "{{ desktop_target_home }}/.local/bin/zed"
   register: desktop_zed_binary
+  become: true
+  become_user: "{{ desktop_target_user }}"
 
 - name: Download Zed tarball
   ansible.builtin.get_url:
@@ -16,59 +18,65 @@
 
 - name: Ensure .local directory exists
   ansible.builtin.file:
-    path: "{{ ansible_facts['user_dir'] }}/.local"
+    path: "{{ desktop_target_home }}/.local"
     state: directory
     mode: "0755"
+    owner: "{{ desktop_target_user }}"
 
 - name: Extract Zed to .local
   ansible.builtin.unarchive:
     src: /tmp/zed-linux-x86_64.tar.gz
-    dest: "{{ ansible_facts['user_dir'] }}/.local"
+    dest: "{{ desktop_target_home }}/.local"
     mode: "0755"
     remote_src: true
+    owner: "{{ desktop_target_user }}"
   when: not desktop_zed_binary.stat.exists
 
 - name: Ensure .local/bin directory exists
   ansible.builtin.file:
-    path: "{{ ansible_facts['user_dir'] }}/.local/bin"
+    path: "{{ desktop_target_home }}/.local/bin"
     state: directory
     mode: "0755"
+    owner: "{{ desktop_target_user }}"
 
 - name: Create symlink for Zed binary
   ansible.builtin.file:
-    src: "{{ ansible_facts['user_dir'] }}/.local/zed.app/bin/zed"
-    dest: "{{ ansible_facts['user_dir'] }}/.local/bin/zed"
+    src: "{{ desktop_target_home }}/.local/zed.app/bin/zed"
+    dest: "{{ desktop_target_home }}/.local/bin/zed"
     state: link
+    owner: "{{ desktop_target_user }}"
   when: not desktop_zed_binary.stat.exists
 
 - name: Ensure .local/share/applications directory exists
   ansible.builtin.file:
-    path: "{{ ansible_facts['user_dir'] }}/.local/share/applications"
+    path: "{{ desktop_target_home }}/.local/share/applications"
     state: directory
     mode: "0755"
+    owner: "{{ desktop_target_user }}"
 
 - name: Install Zed desktop entry
   ansible.builtin.copy:
-    src: "{{ ansible_facts['user_dir'] }}/.local/zed.app/share/applications/zed.desktop"
-    dest: "{{ ansible_facts['user_dir'] }}/.local/share/applications/dev.zed.Zed.desktop"
+    src: "{{ desktop_target_home }}/.local/zed.app/share/applications/zed.desktop"
+    dest: "{{ desktop_target_home }}/.local/share/applications/dev.zed.Zed.desktop"
     mode: "0644"
     remote_src: true
+    owner: "{{ desktop_target_user }}"
   when: not desktop_zed_binary.stat.exists
 
 - name: Update desktop entry icon path
   ansible.builtin.lineinfile:
-    path: "{{ ansible_facts['user_dir'] }}/.local/share/applications/dev.zed.Zed.desktop"
+    path: "{{ desktop_target_home }}/.local/share/applications/dev.zed.Zed.desktop"
     regexp: "^Icon=zed$"
     line: >-
-      Icon={{ ansible_facts['user_dir'] }}/.local/zed.app/share/icons/hicolor/512x512/apps/zed.png
+      Icon={{ desktop_target_home }}/.local/zed.app/share/icons/hicolor/512x512/apps/zed.png
     backrefs: true
   when: not desktop_zed_binary.stat.exists
 
 - name: Update desktop entry exec path
   ansible.builtin.lineinfile:
-    path: "{{ ansible_facts['user_dir'] }}/.local/share/applications/dev.zed.Zed.desktop"
+    path: "{{ desktop_target_home }}/.local/share/applications/dev.zed.Zed.desktop"
     regexp: "^Exec=zed$"
-    line: "Exec={{ ansible_facts['user_dir'] }}/.local/zed.app/libexec/zed-editor"
+    line: "Exec={{ desktop_target_home }}/.local/zed.app/libexec/zed-editor"
     backrefs: true
   when: not desktop_zed_binary.stat.exists
 

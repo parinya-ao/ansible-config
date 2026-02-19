@@ -13,6 +13,7 @@ ansible-config/
 ├── init.sh                # Bootstrap script (installs Ansible + runs playbook)
 ├── roles/                 # All Ansible roles
 │   ├── common/           # Base system: DNF, RPM Fusion, updates, firmware
+│   ├── locale/           # English-only environment enforcement (system locale, XDG dirs, input methods)
 │   ├── desktop/          # GUI apps: GNOME, Flatpak, Ghostty, Starship
 │   ├── developer/        # Dev tools: compilers, Bun, Python (uv), Flutter, Android SDK
 │   ├── docker/           # Docker CE installation and configuration
@@ -63,6 +64,31 @@ ansible-lint --profile production
 - Uses `ansible_connection=local` (no remote hosts)
 - Feature toggles exist in role defaults (e.g., `font_sarabun_install_enabled`, `desktop_enable_flatpak_font_access`)
 - All roles are idempotent - safe to run multiple times
+
+## Role Overview
+
+### locale - English-Only Environment Enforcement
+
+The `locale` role enforces a strict English-only environment on Fedora Workstation through state-driven Ansible tasks:
+
+| Task File | Purpose |
+|-----------|---------|
+| `system_locale.yml` | Configures `/etc/locale.conf`, `/etc/environment` |
+| `xdg_dirs.yml` | Migrates localized XDG directories to English |
+| `input_method.yml` | Configures ibus/fcitx5 for English input |
+| `cli_language.yml` | Enforces locale in shell profiles |
+
+**Key Variables** (with `locale_` prefix):
+- `locale_lang`: Target locale (default: `en_US.UTF-8`)
+- `locale_input_method`: Input framework (`ibus` or `fcitx5`)
+- `locale_remove_secondary_layouts`: Remove non-English keyboard layouts
+- `locale_secondary_layouts`: List of secondary layouts to keep (e.g., `["th"]`)
+
+**Feature Toggles**:
+- `locale_configure_system_locale: true`
+- `locale_configure_xdg_dirs: true`
+- `locale_configure_input_method: true`
+- `locale_enforce_cli_language: true`
 
 ## Documentation References
 

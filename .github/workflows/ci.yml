@@ -1,3 +1,4 @@
+---
 name: Ansible CI Pipeline
 
 on:
@@ -30,7 +31,8 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event_name == 'push' && github.ref_name == github.event.repository.default_branch && 'HEAD~1' || github.event.repository.default_branch }}
+          base: ${{ github.event_name == 'push' && github.ref_name == github.event.repository.default_branch && 'HEAD~1' ||
+            github.event.repository.default_branch }}
           head: HEAD
           extra_args: --debug --only-verified
 
@@ -132,15 +134,16 @@ jobs:
 
       - name: Create Local Inventory
         run: |
-          echo "[local]" > inventory.ini
-          echo "localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3" >> inventory.ini
+          mkdir -p inventory
+          echo "[local]" > inventory/hosts
+          echo "localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3" >> inventory/hosts
 
       # Run 1: First execution with logging
       - name: First Run (Execution)
         run: |
           source .ansible-venv/bin/activate
           echo "=== FIRST RUN STARTED ==="
-          ansible-playbook playbook.yaml -i inventory.ini \
+          ansible-playbook playbook.yaml -i inventory \
             -e "common_enable_rpm_fusion=false" \
             -e "common_install_nvidia_drivers=false" \
             -e "common_configure_custom_dns=false" \
@@ -156,7 +159,7 @@ jobs:
           source .ansible-venv/bin/activate
           echo "=== IDEMPOTENCE CHECK STARTED ==="
 
-          ansible-playbook playbook.yaml -i inventory.ini \
+          ansible-playbook playbook.yaml -i inventory \
             -e "common_enable_rpm_fusion=false" \
             -e "common_install_nvidia_drivers=false" \
             -e "common_configure_custom_dns=false" \

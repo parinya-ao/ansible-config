@@ -44,7 +44,7 @@ developer_use_uv_latest: true
 
 # Flutter configuration
 developer_flutter_version: "3.24.3"
-developer_flutter_install_dir: "{{ ansible_facts['user_dir'] }}/develop"
+developer_flutter_install_dir: "{{ developer_target_home }}/develop"
 
 # Installation script URLs
 developer_rustup_install_url: "https://sh.rustup.rs"

@@ -1,0 +1,20 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Handlers for Locale Role
+# =============================================================================
+
+- name: Regenerate locales
+  ansible.builtin.command: locale-gen
+  register: locale_gen_result
+  changed_when: true
+  failed_when:
+    - locale_gen_result is failed
+    - "'command not found' not in locale_gen_result.stderr | default('')"
+
+- name: Restart systemd-localed
+  ansible.builtin.systemd:
+    name: systemd-localed.service
+    state: restarted
+  register: locale_localed_restart
+  failed_when: false

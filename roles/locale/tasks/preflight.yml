@@ -1,0 +1,55 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Pre-flight Validation Tasks for Locale Role
+# =============================================================================
+# Validates system requirements before locale configuration
+# =============================================================================
+
+- name: "PRE-FLIGHT: Locale Role Validation"
+  tags:
+    - locale
+    - preflight
+  block:
+    - name: Ensure target OS is Fedora
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Fedora"
+        fail_msg: |
+          This role only supports Fedora!
+          Detected: {{ ansible_distribution }}
+        success_msg: "OS validated: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: Validate locale_lang format
+      ansible.builtin.assert:
+        that:
+          - locale_lang is match('^[a-z]{2}_[A-Z]{2}\.UTF-8$')
+        fail_msg: |
+          Invalid locale format: {{ locale_lang }}
+          Expected format: ll_CC.UTF-8 (e.g., en_US.UTF-8)
+        success_msg: "Locale format validated: {{ locale_lang }}"
+
+    - name: Check if target locale is available
+      ansible.builtin.command: locale -a
+      register: locale_available_locales
+      changed_when: false
+
+    - name: Validate target locale is installed
+      ansible.builtin.assert:
+        that:
+          - locale_lang in locale_available_locales.stdout
+        fail_msg: |
+          Target locale {{ locale_lang }} is not installed.
+          Available locales: {{ locale_available_locales.stdout_lines | join(', ') }}
+        success_msg: "Target locale {{ locale_lang }} is available"
+
+    - name: Pre-flight validation complete
+      ansible.builtin.debug:
+        msg:
+          - "=========================================="
+          - "Locale Role Pre-flight Checks PASSED"
+          - "=========================================="
+          - "Target Locale: {{ locale_lang }}"
+          - "Input Method: {{ locale_input_method }}"
+          - "Primary Layout: {{ locale_primary_keyboard_layout }}"
+          - "=========================================="

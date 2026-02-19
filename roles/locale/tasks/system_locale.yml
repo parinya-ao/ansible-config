@@ -1,0 +1,53 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# System Locale Configuration
+# =============================================================================
+# STATE: System locale must be configured to English (en_US.UTF-8)
+# This ensures all system-level output is in English for debugging consistency.
+# =============================================================================
+
+- name: "STATE: System locale configuration file must exist"
+  ansible.builtin.copy:
+    dest: /etc/locale.conf
+    content: |
+      LANG="{{ locale_lang }}"
+      LC_COLLATE="{{ locale_lc_collate }}"
+      {% if locale_lc_all %}
+      LC_ALL="{{ locale_lc_all }}"
+      {% endif %}
+    mode: "0644"
+    owner: root
+    group: root
+    backup: true
+  register: locale_system_locale_config
+  notify: Regenerate locales
+
+- name: "STATE: System environment file must enforce locale"
+  ansible.builtin.copy:
+    dest: /etc/environment
+    content: |
+      LANG={{ locale_lang }}
+      {% if locale_lc_all %}
+      LC_ALL={{ locale_lc_all }}
+      {% endif %}
+    mode: "0644"
+    owner: root
+    group: root
+    backup: true
+  register: locale_environment_config
+
+- name: "STATE: Localed configuration must match target locale"
+  ansible.builtin.command: localectl set-locale LANG={{ locale_lang }}
+  when: locale_system_locale_config.changed or locale_environment_config.changed
+  changed_when: true
+  notify: Regenerate locales
+
+- name: "VERIFY: Current locale configuration"
+  ansible.builtin.command: localectl status
+  register: locale_current_status
+  changed_when: false
+
+- name: "VERIFY: Display current locale status"
+  ansible.builtin.debug:
+    msg: "{{ locale_current_status.stdout_lines }}"

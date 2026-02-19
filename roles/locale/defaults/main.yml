@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Default variables for locale role
+# These variables enforce English-only environment on Fedora Workstation
+
+# =============================================================================
+# Feature Toggles
+# =============================================================================
+locale_enforce_enabled: true
+locale_configure_system_locale: true
+locale_configure_xdg_dirs: true
+locale_configure_input_method: true
+locale_enforce_cli_language: true
+
+# =============================================================================
+# System Locale Configuration
+# =============================================================================
+locale_lang: "en_US.UTF-8"
+locale_lc_collate: "C"
+locale_lc_all: "" # Set to en_US.UTF-8 to force all categories
+
+# =============================================================================
+# XDG User Directories
+# =============================================================================
+# Force XDG directories to English names
+locale_force_xdg_english: true
+
+# List of known localized directory names to migrate (Thai examples)
+locale_localized_dirs:
+  - name: "ดาวน์โหลด"
+    target: "Downloads"
+  - name: "เอกสาร"
+    target: "Documents"
+  - name: "ภาพ"
+    target: "Pictures"
+  - name: "เพลง"
+    target: "Music"
+  - name: "วิดีโอ"
+    target: "Videos"
+  - name: "เดสก์ท็อป"
+    target: "Desktop"
+  - name: "แม่แบบ"
+    target: "Templates"
+  - name: "สาธารณะ"
+    target: "Public"
+
+# =============================================================================
+# Input Method Configuration
+# =============================================================================
+locale_input_method: "ibus" # Options: ibus, fcitx5
+locale_primary_keyboard_layout: "us"
+locale_remove_secondary_layouts: false
+locale_secondary_layouts: [] # e.g., ["th"] to keep Thai as secondary
+
+# =============================================================================
+# CLI/TTY Language Enforcement
+# =============================================================================
+locale_enforce_tty_locale: true
+locale_shell_profile_enforcement: true
+
+# Shell configuration files to add locale exports
+locale_shell_configs:
+  - /etc/profile.d/locale.sh

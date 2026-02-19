@@ -1,0 +1,43 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Global Variables - Centralized Configuration
+# =============================================================================
+# All playbooks and roles can access these variables.
+# Role-specific defaults should remain in roles/<name>/defaults/main.yml
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# System Configuration
+# -----------------------------------------------------------------------------
+system_target_os: Fedora
+system_min_ram_mb: 2048
+system_min_disk_mb: 1000
+
+# -----------------------------------------------------------------------------
+# Package Management
+# -----------------------------------------------------------------------------
+# DNF configuration
+dnf_max_retries: 3
+dnf_retry_delay: 5
+dnf_timeout_seconds: 300
+
+# -----------------------------------------------------------------------------
+# Ansible Bootstrap Configuration
+# -----------------------------------------------------------------------------
+bootstrap_ansible_version: "2.18"
+galaxy_timeout_seconds: 180
+
+# -----------------------------------------------------------------------------
+# User Configuration
+# -----------------------------------------------------------------------------
+# Default shell (can be overridden)
+user_shell: /usr/bin/fish
+
+# -----------------------------------------------------------------------------
+# Feature Flags (Global Defaults)
+# -----------------------------------------------------------------------------
+# These can be overridden at role level or via extra vars
+enable_rpm_fusion: true
+enable_nvidia_drivers: false
+enable_custom_dns: false
