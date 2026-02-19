@@ -2,6 +2,29 @@
 ---
 # tasks file for roles/desktop
 
+# Resolve the real (non-root) user and home directory.
+# When the playbook runs with become: true, ansible_facts['user_dir'] and
+# ansible_facts['user_id'] resolve to root. We need the actual invoking user
+# so that per-user tools (Zed, etc.) are installed into the correct home directory.
+- name: Determine the real (non-root) target user
+  ansible.builtin.set_fact:
+    desktop_target_user: "{{ ansible_env.SUDO_USER | default(ansible_facts['user_id']) }}"
+  tags:
+    - always
+
+- name: Look up target user passwd entry
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ desktop_target_user }}"
+  tags:
+    - always
+
+- name: Set target user home directory
+  ansible.builtin.set_fact:
+    desktop_target_home: "{{ ansible_facts.getent_passwd[desktop_target_user][4] }}"
+  tags:
+    - always
+
 - name: Install desktop packages
   ansible.builtin.import_tasks: packages.yml
   tags:

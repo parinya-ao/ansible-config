@@ -2,18 +2,9 @@
 # SPDX-License-Identifier: MIT-0
 # Android SDK command-line tools installation
 
-- name: Get actual user info
-  ansible.builtin.set_fact:
-    # Use ansible_facts syntax as recommended by Ansible
-    developer_actual_user_home: "{{ ansible_facts['user_dir'] }}"
-    developer_actual_user_name: "{{ ansible_facts['user_id'] }}"
-  tags:
-    - android
-    - mobile
-
 - name: Check if Android SDK is already installed
   ansible.builtin.stat:
-    path: "{{ developer_actual_user_home }}/Android/Sdk/cmdline-tools/latest/bin/sdkmanager"
+    path: "{{ developer_target_home }}/Android/Sdk/cmdline-tools/latest/bin/sdkmanager"
   register: developer_android_sdk_check
   tags:
     - android
@@ -22,8 +13,8 @@
 - name: Debug Android SDK variables
   ansible.builtin.debug:
     msg:
-      - "User Home: {{ developer_actual_user_home }}"
-      - "Android SDK Path: {{ developer_actual_user_home }}/Android/Sdk"
+      - "User Home: {{ developer_target_home }}"
+      - "Android SDK Path: {{ developer_target_home }}/Android/Sdk"
       - "SDK Manager exists: {{ developer_android_sdk_check.stat.exists }}"
   tags:
     - android
@@ -120,10 +111,10 @@
 
 - name: Create Android SDK directory structure
   ansible.builtin.file:
-    path: "{{ developer_actual_user_home }}/Android/Sdk/cmdline-tools/latest"
+    path: "{{ developer_target_home }}/Android/Sdk/cmdline-tools/latest"
     state: directory
     mode: "0755"
-    owner: "{{ developer_actual_user_name }}"
+    owner: "{{ developer_target_user }}"
   when: not developer_android_sdk_check.stat.exists
   tags:
     - android
@@ -142,7 +133,7 @@
 - name: Move command-line tools to final location
   ansible.builtin.copy:
     src: /tmp/cmdline-tools/
-    dest: "{{ developer_actual_user_home }}/Android/Sdk/cmdline-tools/latest/"
+    dest: "{{ developer_target_home }}/Android/Sdk/cmdline-tools/latest/"
     remote_src: true
     mode: preserve
   become: true
@@ -153,10 +144,10 @@
 
 - name: Set ownership of Android SDK directory
   ansible.builtin.file:
-    path: "{{ developer_actual_user_home }}/Android/Sdk"
+    path: "{{ developer_target_home }}/Android/Sdk"
     state: directory
     recurse: true
-    owner: "{{ developer_actual_user_name }}"
+    owner: "{{ developer_target_user }}"
   when: not developer_android_sdk_check.stat.exists
   tags:
     - android
@@ -176,12 +167,12 @@
 
 - name: Add ANDROID_HOME to .bashrc
   ansible.builtin.lineinfile:
-    path: "{{ developer_actual_user_home }}/.bashrc"
+    path: "{{ developer_target_home }}/.bashrc"
     line: "export ANDROID_HOME=$HOME/Android/Sdk"
     regexp: "^export ANDROID_HOME="
     state: present
     create: true
-    owner: "{{ developer_actual_user_name }}"
+    owner: "{{ developer_target_user }}"
     mode: "0644"
   tags:
     - android
@@ -189,12 +180,12 @@
 
 - name: Add Android SDK to PATH in .bashrc
   ansible.builtin.lineinfile:
-    path: "{{ developer_actual_user_home }}/.bashrc"
+    path: "{{ developer_target_home }}/.bashrc"
     line: "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
     regexp: ".*ANDROID_HOME/cmdline-tools.*"
     state: present
     create: true
-    owner: "{{ developer_actual_user_name }}"
+    owner: "{{ developer_target_user }}"
     mode: "0644"
   tags:
     - android
@@ -206,12 +197,12 @@
     cmd: |
       yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" --licenses
   args:
-    creates: "{{ developer_actual_user_home }}/Android/Sdk/licenses/android-sdk-license"
+    creates: "{{ developer_target_home }}/Android/Sdk/licenses/android-sdk-license"
     executable: /bin/bash
   environment:
-    ANDROID_HOME: "{{ developer_actual_user_home }}/Android/Sdk"
+    ANDROID_HOME: "{{ developer_target_home }}/Android/Sdk"
   become: true
-  become_user: "{{ developer_actual_user_name }}"
+  become_user: "{{ developer_target_user }}"
   when: not developer_android_sdk_check.stat.exists
   tags:
     - android
@@ -222,12 +213,12 @@
     cmd: |
       "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
   args:
-    creates: "{{ developer_actual_user_home }}/Android/Sdk/platform-tools/adb"
+    creates: "{{ developer_target_home }}/Android/Sdk/platform-tools/adb"
     executable: /bin/bash
   environment:
-    ANDROID_HOME: "{{ developer_actual_user_home }}/Android/Sdk"
+    ANDROID_HOME: "{{ developer_target_home }}/Android/Sdk"
   become: true
-  become_user: "{{ developer_actual_user_name }}"
+  become_user: "{{ developer_target_user }}"
   when: not developer_android_sdk_check.stat.exists
   tags:
     - android
