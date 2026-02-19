@@ -1,0 +1,47 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Locale role - Main entry point
+# This role enforces English-only environment on Fedora Workstation through:
+# - System locale configuration
+# - XDG directory management
+# - Input method configuration
+# - CLI/TTY language enforcement
+
+# Pre-flight Validation
+- name: Run pre-flight validation
+  ansible.builtin.import_tasks: preflight.yml
+  tags:
+    - locale
+    - preflight
+
+# System Locale Configuration
+- name: Configure system locale
+  ansible.builtin.import_tasks: system_locale.yml
+  when: locale_configure_system_locale
+  tags:
+    - locale
+    - system-locale
+
+# XDG User Directories
+- name: Configure XDG user directories
+  ansible.builtin.import_tasks: xdg_dirs.yml
+  when: locale_configure_xdg_dirs
+  tags:
+    - locale
+    - xdg-dirs
+
+# Input Method Configuration
+- name: Configure input method
+  ansible.builtin.import_tasks: input_method.yml
+  when: locale_configure_input_method
+  tags:
+    - locale
+    - input-method
+
+# CLI/TTY Language Enforcement
+- name: Enforce CLI language
+  ansible.builtin.import_tasks: cli_language.yml
+  when: locale_enforce_cli_language
+  tags:
+    - locale
+    - cli-language

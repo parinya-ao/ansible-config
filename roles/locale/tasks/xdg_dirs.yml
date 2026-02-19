@@ -1,0 +1,85 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# XDG User Directories Configuration
+# =============================================================================
+# STATE: XDG user directories must be in English
+# Migrates localized directories (e.g., Thai "ดาวน์โหลด") to English equivalents
+# =============================================================================
+
+- name: "STATE: xdg-user-dirs-update must be installed"
+  ansible.builtin.package:
+    name: xdg-user-dirs
+    state: present
+
+- name: "GATHER: Check current XDG directories configuration"
+  ansible.builtin.command: xdg-user-dirs-update --dump
+  register: locale_xdg_current_dirs
+  changed_when: false
+  become: false
+
+- name: "GATHER: Display current XDG directories"
+  ansible.builtin.debug:
+    msg: "{{ locale_xdg_current_dirs.stdout_lines }}"
+
+- name: "STATE: Check for localized directories in home"
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/{{ item.name }}"
+  register: locale_localized_dir_checks
+  loop: "{{ locale_localized_dirs }}"
+  become: false
+
+- name: "STATE: Create target English directories if they do not exist"
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/{{ item.target }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ locale_localized_dirs }}"
+  become: false
+
+- name: "STATE: Move content from localized directories to English directories"
+  ansible.builtin.command:
+    cmd: >
+      mv {{ ansible_env.HOME }}/{{ item.item.name }}/* {{ ansible_env.HOME }}/{{ item.item.target }}/
+  loop: "{{ locale_localized_dir_checks.results }}"
+  when: item.stat.exists
+  register: locale_move_result
+  failed_when:
+    - locale_move_result.rc != 0
+    - "'No such file or directory' not in locale_move_result.stderr"
+  changed_when: locale_move_result.rc == 0
+  become: false
+
+- name: "STATE: Remove empty localized directories"
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/{{ item.item.name }}"
+    state: absent
+  loop: "{{ locale_localized_dir_checks.results }}"
+  when: item.stat.exists
+  become: false
+
+- name: "STATE: Force XDG directories to English names"
+  ansible.builtin.command: xdg-user-dirs-update --force
+  environment:
+    LANG: "{{ locale_lang }}"
+  register: locale_xdg_update_result
+  changed_when: "'Moving' in locale_xdg_update_result.stderr or 'Creating' in locale_xdg_update_result.stderr"
+  become: false
+
+- name: "STATE: Update XDG user-dirs.locale configuration"
+  ansible.builtin.copy:
+    dest: "{{ ansible_env.HOME }}/.config/user-dirs.locale"
+    content: "{{ locale_lang }}"
+    mode: "0644"
+    backup: true
+  become: false
+
+- name: "VERIFY: Display updated XDG directories"
+  ansible.builtin.command: xdg-user-dirs-update --dump
+  register: locale_xdg_updated_dirs
+  changed_when: false
+  become: false
+
+- name: "VERIFY: Show updated XDG configuration"
+  ansible.builtin.debug:
+    msg: "{{ locale_xdg_updated_dirs.stdout_lines }}"

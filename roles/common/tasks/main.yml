@@ -9,6 +9,13 @@
 # - NVIDIA drivers (optional)
 # - System optimizations
 
+# Pre-flight Validation (replaces shell-based checks)
+- name: Run pre-flight validation
+  ansible.builtin.import_tasks: preflight.yml
+  tags:
+    - common
+    - preflight
+
 # Repository Configuration
 - name: Configure repositories
   ansible.builtin.import_tasks: repositories.yml
