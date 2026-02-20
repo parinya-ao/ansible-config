@@ -2,13 +2,28 @@
 # SPDX-License-Identifier: MIT-0
 # Firmware update tasks
 
-- name: Refresh firmware metadata
-  ansible.builtin.command: fwupdmgr refresh --force
-  register: common_fwupdmgr_refresh
-  changed_when: common_fwupdmgr_refresh.rc == 0
+- name: Check network connectivity for firmware updates
+  ansible.builtin.uri:
+    url: https://cdn.fwupd.org
+    timeout: 10
+    status_code: 200
+  register: common_firmware_network_check
+  ignore_errors: true
+  changed_when: false
   when:
     - common_install_firmware_updates | bool
     - lookup('env', 'CI') != 'true'
+  tags:
+    - firmware
+
+- name: Refresh firmware metadata
+  ansible.builtin.command: fwupdmgr refresh --force
+  register: common_fwupdmgr_refresh
+  changed_when: "'Successfully' in common_fwupdmgr_refresh.stdout or 'Updated' in common_fwupdmgr_refresh.stdout"
+  when:
+    - common_install_firmware_updates | bool
+    - lookup('env', 'CI') != 'true'
+    - common_firmware_network_check is succeeded
   become: true
   tags:
     - firmware
@@ -21,17 +36,19 @@
   when:
     - common_install_firmware_updates | bool
     - lookup('env', 'CI') != 'true'
+    - common_firmware_network_check is succeeded
   tags:
     - firmware
 
 - name: Update firmware
-  ansible.builtin.command: fwupdmgr update
+  ansible.builtin.command: fwupdmgr update -y
   register: common_fwupdmgr_update
-  changed_when: common_fwupdmgr_update.rc == 0
+  changed_when: "'Installed' in common_fwupdmgr_update.stdout or 'Updated' in common_fwupdmgr_update.stdout"
   when:
     - common_install_firmware_updates | bool
     - common_firmware_updates.stdout | default('') | length > 0
     - lookup('env', 'CI') != 'true'
+    - common_firmware_network_check is succeeded
   become: true
   tags:
     - firmware
