@@ -43,9 +43,14 @@ print_error() {
 setup_venv() {
     print_step "Phase 1: Bootstrapping Python Environment"
 
-    if [[ -d "$VENV_DIR" ]]; then
+    # Check if venv exists and is valid (has activate script)
+    if [[ -f "${VENV_DIR}/bin/activate" ]]; then
         echo "Virtual environment exists at ${VENV_DIR}"
     else
+        if [[ -d "$VENV_DIR" ]]; then
+            echo "Corrupted virtual environment detected, removing..."
+            rm -rf "$VENV_DIR"
+        fi
         echo "Creating virtual environment..."
         python3 -m venv "$VENV_DIR"
     fi

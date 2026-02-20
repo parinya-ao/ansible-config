@@ -19,7 +19,7 @@
   register: locale_engine_install
   failed_when:
     - locale_engine_install is failed
-    - "'No package' not in locale_engine_install.msg | default('')"
+    - "'No package' not in (locale_engine_install.msg | default('') ~ ' ' ~ (locale_engine_install.failures | default([]) | join(' ')))"
   when: locale_input_method == "ibus"
 
 - name: "GATHER: Check current keyboard layouts"
@@ -62,6 +62,8 @@
         {% endfor %}
         sources="$sources]"
         gsettings set org.gnome.desktop.input-sources sources "$sources"
+      args:
+        executable: /bin/bash
       when:
         - not locale_remove_secondary_layouts
         - locale_secondary_layouts | length > 0
@@ -69,26 +71,44 @@
       changed_when: true
       become: false
 
+    - name: "STATE: Configure CapsLock as keyboard layout toggle"
+      ansible.builtin.command: >
+        gsettings set org.gnome.desktop.input-sources xkb-options
+        "['grp:caps_toggle', 'grp_led:caps']"
+      when:
+        - not locale_remove_secondary_layouts
+        - locale_secondary_layouts | length > 0
+        - locale_keyboard_toggle_key == "caps"
+        - locale_gnome_input_sources.rc == 0
+      changed_when: true
+      become: false
+
+- name: "GATHER: Get actual user home directory"
+  ansible.builtin.command: "echo ~{{ ansible_user | default(lookup('env', 'USER')) }}"
+  register: locale_user_home
+  changed_when: false
+  become: false
+
 - name: "STATE: Configure ibus for English input"
   when: locale_input_method == "ibus"
   block:
     - name: "STATE: Create ibus configuration directory"
       ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/.config/ibus"
+        path: "{{ locale_user_home.stdout }}/.config/ibus"
         state: directory
         mode: "0755"
       become: false
 
     - name: "STATE: Create ibus bus directory"
       ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/.config/ibus/bus"
+        path: "{{ locale_user_home.stdout }}/.config/ibus/bus"
         state: directory
         mode: "0755"
       become: false
 
     - name: "STATE: Create ibus registry file"
       ansible.builtin.copy:
-        dest: "{{ ansible_env.HOME }}/.config/ibus/bus/registry"
+        dest: "{{ locale_user_home.stdout }}/.config/ibus/bus/registry"
         content: ""
         mode: "0644"
         force: false

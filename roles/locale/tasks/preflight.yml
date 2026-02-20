@@ -33,11 +33,12 @@
       ansible.builtin.command: locale -a
       register: locale_available_locales
       changed_when: false
+      become: false
 
     - name: Validate target locale is installed
       ansible.builtin.assert:
         that:
-          - locale_lang in locale_available_locales.stdout
+          - locale_lang | regex_replace("(?i)\\.UTF-?8", "") in locale_available_locales.stdout | regex_replace("(?i)\\.UTF-?8", "")
         fail_msg: |
           Target locale {{ locale_lang }} is not installed.
           Available locales: {{ locale_available_locales.stdout_lines | join(', ') }}

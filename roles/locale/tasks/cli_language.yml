@@ -76,9 +76,15 @@
   register: locale_fish_config
   failed_when: false
 
+- name: "GATHER: Get actual user home directory"
+  ansible.builtin.command: "echo ~{{ ansible_user | default(lookup('env', 'USER')) }}"
+  register: locale_user_home
+  changed_when: false
+  become: false
+
 - name: "STATE: Configure systemd user environment"
   ansible.builtin.copy:
-    dest: "{{ ansible_env.HOME }}/.config/environment.d/locale.conf"
+    dest: "{{ locale_user_home.stdout }}/.config/environment.d/locale.conf"
     content: |
       LANG={{ locale_lang }}
       {% if locale_lc_all %}
@@ -90,7 +96,7 @@
 
 - name: "STATE: Ensure systemd user environment directory exists"
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/environment.d"
+    path: "{{ locale_user_home.stdout }}/.config/environment.d"
     state: directory
     mode: "0755"
   become: false

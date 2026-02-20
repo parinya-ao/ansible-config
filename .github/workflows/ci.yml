@@ -144,6 +144,7 @@ jobs:
           source .ansible-venv/bin/activate
           echo "=== FIRST RUN STARTED ==="
           ansible-playbook playbook.yaml -i inventory \
+            --become-method=su \
             -e "common_enable_rpm_fusion=false" \
             -e "common_install_nvidia_drivers=false" \
             -e "common_configure_custom_dns=false" \
@@ -160,6 +161,7 @@ jobs:
           echo "=== IDEMPOTENCE CHECK STARTED ==="
 
           ansible-playbook playbook.yaml -i inventory \
+            --become-method=su \
             -e "common_enable_rpm_fusion=false" \
             -e "common_install_nvidia_drivers=false" \
             -e "common_configure_custom_dns=false" \

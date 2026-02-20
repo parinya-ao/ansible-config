@@ -50,7 +50,8 @@ locale_localized_dirs:
 locale_input_method: "ibus" # Options: ibus, fcitx5
 locale_primary_keyboard_layout: "us"
 locale_remove_secondary_layouts: false
-locale_secondary_layouts: [] # e.g., ["th"] to keep Thai as secondary
+locale_secondary_layouts: ["th"] # Thai as secondary layout
+locale_keyboard_toggle_key: "caps" # Options: caps, alt_shift, ctrl_shift, etc.
 
 # =============================================================================
 # CLI/TTY Language Enforcement
