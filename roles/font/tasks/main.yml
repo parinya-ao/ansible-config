@@ -5,23 +5,30 @@
 # and local font files system-wide for all users
 
 - name: Check if JetBrains Mono fonts COPR is enabled
-  ansible.builtin.command:
-    cmd: "dnf copr list --enabled"
-  register: font_copr_list
+  ansible.builtin.stat:
+    path: "/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:{{ font_jetbrains_copr_repo | replace('/', ':') }}.repo"
+  register: font_jetbrains_copr_stat
   changed_when: false
-  failed_when: false
+
+- name: Check if Inter fonts COPR is enabled
+  ansible.builtin.stat:
+    path: "/etc/yum.repos.d/_copr:copr.fedorainfracloud.org:{{ font_inter_copr_repo | replace('/', ':') }}.repo"
+  register: font_inter_copr_stat
+  changed_when: false
 
 - name: Enable JetBrains Mono fonts COPR repository
   ansible.builtin.command:
     cmd: "dnf copr enable {{ font_jetbrains_copr_repo }} -y"
-  when: "font_jetbrains_copr_repo not in font_copr_list.stdout"
-  changed_when: false
+  when: not font_jetbrains_copr_stat.stat.exists
+  register: font_enable_jetbrains_copr
+  changed_when: font_enable_jetbrains_copr.rc == 0
 
 - name: Enable Inter fonts COPR repository
   ansible.builtin.command:
     cmd: "dnf copr enable {{ font_inter_copr_repo }} -y"
-  when: "font_inter_copr_repo not in font_copr_list.stdout"
-  changed_when: false
+  when: not font_inter_copr_stat.stat.exists
+  register: font_enable_inter_copr
+  changed_when: font_enable_inter_copr.rc == 0
 
 - name: Install programming fonts
   ansible.builtin.dnf:

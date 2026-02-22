@@ -67,11 +67,21 @@
   become: false
 
 - name: "STATE: Force XDG directories to English names"
-  ansible.builtin.command: xdg-user-dirs-update --force
+  ansible.builtin.shell: |
+    output=$(xdg-user-dirs-update --force 2>&1)
+    echo "$output"
+    if echo "$output" | grep -qE '(Moving|Creating)'; then
+      exit 0  # Changed
+    else
+      exit 2  # Not changed - use special exit code
+    fi
+  args:
+    executable: /bin/bash
   environment:
     LANG: "{{ locale_lang }}"
   register: locale_xdg_update_result
-  changed_when: "'Moving' in locale_xdg_update_result.stderr or 'Creating' in locale_xdg_update_result.stderr"
+  changed_when: locale_xdg_update_result.rc == 0
+  failed_when: locale_xdg_update_result.rc not in [0, 2]
   become: false
 
 - name: "STATE: Update XDG user-dirs.locale configuration"

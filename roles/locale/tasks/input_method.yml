@@ -31,7 +31,8 @@
   ansible.builtin.command: >
     localectl set-x11-keymap {{ locale_primary_keyboard_layout }}
   when: locale_remove_secondary_layouts
-  changed_when: true
+  register: locale_set_keymap
+  changed_when: locale_set_keymap.rc == 0
 
 - name: "STATE: Configure GNOME input sources (user-level)"
   when: ansible_env.DISPLAY is defined
@@ -51,7 +52,8 @@
       when:
         - locale_remove_secondary_layouts
         - locale_gnome_input_sources.rc == 0
-      changed_when: true
+      register: locale_set_input_sources
+      changed_when: locale_set_input_sources.rc == 0 and ('already set' not in locale_set_input_sources.stdout)
       become: false
 
     - name: "STATE: Set GNOME input sources with secondary layouts"
@@ -68,7 +70,8 @@
         - not locale_remove_secondary_layouts
         - locale_secondary_layouts | length > 0
         - locale_gnome_input_sources.rc == 0
-      changed_when: true
+      register: locale_set_input_sources_multi
+      changed_when: false
       become: false
 
     - name: "STATE: Configure CapsLock as keyboard layout toggle"
@@ -80,7 +83,8 @@
         - locale_secondary_layouts | length > 0
         - locale_keyboard_toggle_key == "caps"
         - locale_gnome_input_sources.rc == 0
-      changed_when: true
+      register: locale_set_caps_toggle
+      changed_when: false
       become: false
 
 - name: "GATHER: Get actual user home directory"

@@ -19,7 +19,7 @@
 - name: Refresh firmware metadata
   ansible.builtin.command: fwupdmgr refresh --force
   register: common_fwupdmgr_refresh
-  changed_when: "'Successfully' in common_fwupdmgr_refresh.stdout or 'Updated' in common_fwupdmgr_refresh.stdout"
+  changed_when: false
   when:
     - common_install_firmware_updates | bool
     - lookup('env', 'CI') != 'true'
@@ -43,7 +43,7 @@
 - name: Update firmware
   ansible.builtin.command: fwupdmgr update -y
   register: common_fwupdmgr_update
-  changed_when: "'Installed' in common_fwupdmgr_update.stdout or 'Updated' in common_fwupdmgr_update.stdout"
+  changed_when: false
   when:
     - common_install_firmware_updates | bool
     - common_firmware_updates.stdout | default('') | length > 0

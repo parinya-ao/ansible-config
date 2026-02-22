@@ -109,6 +109,7 @@
     daemon_reload: false
   become: false
   register: locale_systemd_reload
+  changed_when: false
   failed_when: false
   when: ansible_env.XDG_RUNTIME_DIR is defined
 
