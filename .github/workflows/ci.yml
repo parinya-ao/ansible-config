@@ -215,8 +215,8 @@ jobs:
             > idempotence.log 2>&1 || true
 
           # Parse results using JSON for reliable state detection
-          CHANGED_COUNT=$(grep -oP 'changed=\K\d+(?=?!changed=)' idempotence.log | tail -1 || echo "0")
-          FAILED_COUNT=$(grep -oP 'failed=\K\d+(?=?!failed=)' idempotence.log | tail -1 || echo "0")
+          CHANGED_COUNT=$(grep -oE 'changed=[0-9]+' idempotence.log | tail -1 | cut -d= -f2 || echo "0")
+          FAILED_COUNT=$(grep -oE 'failed=[0-9]+' idempotence.log | tail -1 | cut -d= -f2 || echo "0")
 
           echo "Idempotence Check Results:"
           echo "  - Changed count: $CHANGED_COUNT (expected: 0)"
