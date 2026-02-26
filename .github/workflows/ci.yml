@@ -86,9 +86,7 @@ jobs:
 
       # Validate GitHub Actions workflow YAML
       - name: Actionlint (Workflow Validation)
-        uses: rhysd/actionlint@v1
-        with:
-          extra_args: -shellcheck
+        uses: rhysd/actionlint@v1.7.11
 
       # Setup Python for Ansible linting tools
       - name: Set up Python
