@@ -23,6 +23,9 @@ common_configure_custom_dns: false
 # Disable D2 tool installation
 common_install_d2: false
 
+# Skip disk space check in CI (containers have limited disk)
+common_skip_disk_check: true
+
 # =============================================================================
 # Desktop Role Variables
 # =============================================================================
