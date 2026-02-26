@@ -183,6 +183,13 @@
     # =========================================================================
     # COMPLETE: Pre-flight Success
     # =========================================================================
+    - name: Determine package strategy for display
+      ansible.builtin.set_fact:
+        locale_strategy_display: >-
+          {{ 'CI (all-langpacks)' if locale_ci_packages is skipped
+             or (locale_ci_packages is defined and locale_ci_packages is changed)
+             else 'Production (selective)' }}
+
     - name: Pre-flight validation complete
       ansible.builtin.debug:
         msg:
@@ -194,8 +201,7 @@
           - "Input Method: {{ locale_input_method }}"
           - "Primary Layout: {{ locale_primary_keyboard_layout }}"
           - "Status: {{ 'Generated' if not locale_exists else 'Pre-existing' }}"
-          - "Strategy: >- {{ 'CI (all-langpacks)' if locale_ci_packages is skipped or (locale_ci_packages is defined and locale_ci_packages is changed) else 'Production
-            (selective)' }}"
+          - "Strategy: {{ locale_strategy_display }}"
           - "=========================================="
 
   # ===========================================================================
