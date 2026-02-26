@@ -1,4 +1,5 @@
 ---
+# SPDX-License-Identifier: MIT-0
 # Default variables for Wi-Fi role
 
 # Which Wi-Fi task to run
@@ -7,3 +8,60 @@
 #   - disable_powersave: Disable Wi-Fi power save (Intel only)
 #   - no_powersave: Disable ALL Wi-Fi power saving for maximum stability
 wifi_task: "no_powersave"
+
+# =============================================================================
+# Intel iwlwifi Driver Options (for no_powersave mode)
+# =============================================================================
+# Disable U-APSD (Unscheduled Automatic Power Save Delivery)
+# Prevents "Connected, No Internet" issues and connection drops
+wifi_iwlwifi_uapsd_disable: true
+
+# Disable D0i3 (Intel Wi-Fi deep sleep state)
+# Prevents network "stalls" where connection stays active but no data flows
+wifi_iwlwifi_d0i3_disable: true
+
+# Disable 802.11n (HT mode) for maximum stability in crowded areas
+# Trade-off: Reduces max speed but significantly improves connection stability
+# Recommended for: Condos, offices, areas with many nearby Wi-Fi networks
+# Set to true only if you still experience drops after other optimizations
+wifi_iwlwifi_11n_disable: false
+
+# 11n_disable value (if enabled): 1=disable all HT, 8=disable aggressive TX aggregation only
+wifi_iwlwifi_11n_disable_value: "8"
+
+# =============================================================================
+# Bluetooth Coexistence Options
+# =============================================================================
+# Enable Bluetooth/Wi-Fi coexistence
+# Set to true if using Bluetooth mouse/keyboard/headphones with Wi-Fi
+# Set to false to prioritize Wi-Fi stability over Bluetooth
+wifi_iwlwifi_bt_coex_active: true
+
+# Reduce scanning frequency to prevent Bluetooth audio stuttering
+wifi_iwlwifi_scan_ant_prio_enable: true
+
+# =============================================================================
+# CPU Optimization Options
+# =============================================================================
+# Use hardware encryption (0=hardware, 1=software)
+# Hardware (0) = lower CPU usage, Software (1) = more stable if firmware has bugs
+wifi_iwlwifi_swcrypto: "0"
+
+# =============================================================================
+# Network Stack Optimization (Kernel Parameters)
+# =============================================================================
+# Enable network stack tuning for reduced CPU overhead
+wifi_enable_network_tuning: true
+
+# =============================================================================
+# Bluetooth Latency Optimization
+# =============================================================================
+# Enable Bluetooth latency optimization for multiple BT devices
+# Increases netdev_max_backlog to reduce Bluetooth input queue delay
+wifi_enable_bluetooth_optimization: true
+
+# =============================================================================
+# USB Tethering Optimization
+# =============================================================================
+# Disable USB autosuspend for stable USB tethering
+wifi_disable_usb_autosuspend: true

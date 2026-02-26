@@ -70,6 +70,10 @@ locale_configure_xdg_dirs: false
 # Skip WiFi configuration in CI (no wireless hardware)
 wifi_install_iw: false
 wifi_configure_regulatory_domain: false
+wifi_task: ""  # Empty to skip all WiFi tasks in CI
+wifi_enable_network_tuning: false  # Skip network tuning in CI
+wifi_enable_bluetooth_optimization: false  # Skip Bluetooth optimization in CI
+wifi_disable_usb_autosuspend: false  # Skip USB config in CI
 
 # =============================================================================
 # Logging Configuration

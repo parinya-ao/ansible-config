@@ -1,4 +1,8 @@
 ---
+- name: Skip Wi-Fi configuration in CI environment
+  ansible.builtin.meta: end_host
+  when: ansible_env.CI is defined and ansible_env.CI | bool
+
 - name: Detect Wi-Fi interfaces
   ansible.builtin.shell:
     cmd: |
@@ -35,14 +39,31 @@
       wifi.cloned-mac-address=permanent
   notify: Restart NetworkManager
 
+- name: Build iwlwifi modprobe configuration
+  ansible.builtin.set_fact:
+    wifi_iwlwifi_config: |
+      # Power management - disable all for maximum stability
+      options iwlwifi power_level=0
+      options iwlwifi power_save=0
+      {% if wifi_iwlwifi_uapsd_disable %}options iwlwifi uapsd_disable=1{% endif %}
+      {% if wifi_iwlwifi_d0i3_disable %}options iwlwifi d0i3_disable=1{% endif %}
+
+      # Bluetooth coexistence - enable for BT devices, disable for Wi-Fi only
+      {% if wifi_iwlwifi_bt_coex_active %}options iwlwifi bt_coex_active=1{% else %}options iwlwifi bt_coex_active=0{% endif %}
+      {% if wifi_iwlwifi_scan_ant_prio_enable %}options iwlwifi scan_ant_prio=1{% endif %}
+
+      # CPU optimization - use hardware encryption
+      options iwlwifi swcrypto={{ wifi_iwlwifi_swcrypto }}
+
+      # Stability options
+      {% if wifi_iwlwifi_11n_disable %}options iwlwifi 11n_disable={{ wifi_iwlwifi_11n_disable_value }}{% endif %}
+      options iwlwifi disable_11ax=1
+
 - name: Disable iwlwifi firmware power saving
   ansible.builtin.copy:
     dest: /etc/modprobe.d/iwlwifi-stability.conf
     mode: "0644"
-    content: |
-      options iwlwifi power_level=0
-      options iwlwifi power_save=0
-      options iwlwifi disable_11ax=1
+    content: "{{ wifi_iwlwifi_config | trim }}"
 
 - name: Check current kernel args
   ansible.builtin.command: grubby --info=DEFAULT
@@ -89,3 +110,55 @@
     executable: /bin/bash
   when: wifi_power_save_on.stdout | length > 0
   changed_when: false
+
+- name: Configure network stack for reduced CPU overhead
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/99-network-stability.conf
+    mode: "0644"
+    content: |
+      # SPDX-License-Identifier: MIT-0
+      # Network stack tuning for reduced CPU overhead and improved stability
+      # Increase buffer sizes to reduce interrupt frequency
+      net.core.rmem_max = 16777216
+      net.core.wmem_max = 16777216
+      net.ipv4.tcp_rmem = 4096 87380 16777216
+      net.ipv4.tcp_wmem = 4096 65536 16777216
+  when: wifi_enable_network_tuning
+  notify: Apply sysctl settings
+
+- name: Configure Bluetooth latency optimization
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/98-bluetooth-latency.conf
+    mode: "0644"
+    content: |
+      # SPDX-License-Identifier: MIT-0
+      # Bluetooth latency optimization for multiple BT devices
+      # Increases netdev_max_backlog to reduce Bluetooth input queue delay
+      # Helps prevent mouse/keyboard/audio stuttering when used with Wi-Fi
+      net.core.netdev_max_backlog = 5000
+  when: wifi_enable_bluetooth_optimization
+  notify: Apply sysctl settings
+
+- name: Disable USB autosuspend for stable USB tethering
+  ansible.builtin.copy:
+    dest: /etc/tmpfiles.d/usb-autosuspend.conf
+    mode: "0644"
+    content: |
+      # SPDX-License-Identifier: MIT-0
+      # Disable USB autosuspend for stable tethering
+      # Write to /sys/module/usbcore/parameters/autosuspend
+      w /sys/module/usbcore/parameters/autosuspend - - - - -1
+  when: wifi_disable_usb_autosuspend
+
+- name: Ensure irqbalance is installed for interrupt distribution
+  ansible.builtin.package:
+    name: irqbalance
+    state: present
+  when: wifi_enable_network_tuning
+
+- name: Enable and start irqbalance service
+  ansible.builtin.service:
+    name: irqbalance
+    state: started
+    enabled: true
+  when: wifi_enable_network_tuning

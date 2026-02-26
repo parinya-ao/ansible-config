@@ -29,6 +29,108 @@ Specifies which Wi-Fi configuration task to run.
   - `disable_powersave` - Disable Wi-Fi power save (Intel only)
   - `no_powersave` - Disable ALL Wi-Fi power saving for maximum stability
 
+### Intel iwlwifi Driver Options (for `no_powersave` mode)
+
+These options control Intel Wi-Fi driver power management and coexistence features:
+
+#### `wifi_iwlwifi_uapsd_disable`
+
+Disable U-APSD (Unscheduled Automatic Power Save Delivery).
+
+- **Default:** `true`
+- **Effect:** Prevents "Connected, No Internet" issues and connection drops with older routers
+- **Trade-off:** None (no practical downside)
+
+#### `wifi_iwlwifi_d0i3_disable`
+
+Disable D0i3 (Intel Wi-Fi deep sleep state).
+
+- **Default:** `true`
+- **Effect:** Prevents network "stalls" where connection stays active but no data flows
+- **Trade-off:** None (recommended for AC-connected laptops)
+
+#### `wifi_iwlwifi_11n_disable`
+
+Disable 802.11n (HT mode) for maximum stability in crowded areas.
+
+- **Default:** `false`
+- **Effect:** Significantly improves connection stability in areas with many nearby Wi-Fi networks
+- **Trade-off:** Reduces maximum speed (802.11ac/ax still available)
+- **Recommended for:** Condos, offices, crowded areas
+
+#### `wifi_iwlwifi_11n_disable_value`
+
+11n_disable value when enabled.
+
+- **Default:** `"8"` (disable aggressive TX aggregation only)
+- **Options:** `"1"` = disable all HT, `"8"` = disable TX aggregation only
+
+### Bluetooth Coexistence Options
+
+#### `wifi_iwlwifi_bt_coex_active`
+
+Enable Bluetooth/Wi-Fi coexistence at driver level.
+
+- **Default:** `true`
+- **Effect:** When `true`, allows Bluetooth and Wi-Fi to share 2.4GHz band intelligently
+- **Usage:** Set to `true` if using Bluetooth mouse/keyboard/headphones with Wi-Fi
+- **Note:** For best results, force Wi-Fi to 5GHz when using Bluetooth devices
+
+#### `wifi_iwlwifi_scan_ant_prio_enable`
+
+Reduce scanning frequency to prevent Bluetooth audio stuttering.
+
+- **Default:** `true`
+- **Effect:** Prevents Bluetooth audio glitches during Wi-Fi scanning
+- **Trade-off:** May slightly slow down network discovery
+
+### CPU Optimization Options
+
+#### `wifi_iwlwifi_swcrypto`
+
+Use hardware (0) or software (1) encryption.
+
+- **Default:** `"0"` (hardware)
+- **Hardware (0):** Lower CPU usage, Wi-Fi chip handles encryption
+- **Software (1):** Higher CPU usage, more stable if firmware has bugs
+- **Recommendation:** Use `0` for AC-connected laptops, `1` only if experiencing encryption-related issues
+
+### Network Stack Optimization
+
+#### `wifi_enable_network_tuning`
+
+Enable kernel network stack tuning for reduced CPU overhead.
+
+- **Default:** `true`
+- **Effects:**
+  - Increases buffer sizes to reduce interrupt frequency
+  - Installs and enables `irqbalance` for interrupt distribution
+- **Trade-off:** Uses slightly more RAM (negligible on modern systems)
+
+### Bluetooth Latency Optimization
+
+#### `wifi_enable_bluetooth_optimization`
+
+Enable Bluetooth-specific kernel tuning for multiple BT devices.
+
+- **Default:** `true`
+- **Effects:**
+  - Increases `net.core.netdev_max_backlog` to 5000
+  - Reduces Bluetooth input queue delay
+  - Helps prevent mouse/keyboard/audio stuttering when used with Wi-Fi
+- **Recommended for:** Systems using Bluetooth mouse, keyboard, and/or headphones simultaneously
+- **Trade-off:** Slightly increases network buffer memory usage
+
+### USB Tethering Optimization
+
+#### `wifi_disable_usb_autosuspend`
+
+Disable USB autosuspend for stable USB tethering.
+
+- **Default:** `true`
+- **Effect:** Prevents USB internet disconnects and Error -71 in dmesg
+- **Recommendation:** Enable when using USB tethering as failover
+
 ## Dependencies
 
 None.
@@ -71,6 +173,91 @@ None.
         wifi_task: "no_powersave"
 ```
 
+### Maximum Stability in Crowded Areas (Disable 11n)
+
+For condos, offices, or areas with many nearby Wi-Fi networks:
+
+```yaml
+---
+- hosts: all
+  become: true
+  roles:
+    - role: wifi
+      vars:
+        wifi_task: "no_powersave"
+        wifi_iwlwifi_11n_disable: true
+```
+
+### Wi-Fi with Bluetooth Devices (Mouse, Keyboard, Headphones)
+
+Optimized for using Bluetooth peripherals with Wi-Fi:
+
+```yaml
+---
+- hosts: all
+  become: true
+  roles:
+    - role: wifi
+      vars:
+        wifi_task: "no_powersave"
+        # Enable Bluetooth coexistence
+        wifi_iwlwifi_bt_coex_active: true
+        wifi_iwlwifi_scan_ant_prio_enable: true
+```
+
+**Important:** For best results, force Wi-Fi to use 5GHz band in NetworkManager to avoid 2.4GHz interference with Bluetooth.
+
+### Wi-Fi Only (No Bluetooth - Maximum Performance)
+
+Disable Bluetooth coexistence for pure Wi-Fi performance:
+
+```yaml
+---
+- hosts: all
+  become: true
+  roles:
+    - role: wifi
+      vars:
+        wifi_task: "no_powersave"
+        wifi_iwlwifi_bt_coex_active: false
+```
+
+### USB Tethering Failover Setup
+
+Optimized for systems using USB tethering as backup:
+
+```yaml
+---
+- hosts: all
+  become: true
+  roles:
+    - role: wifi
+      vars:
+        wifi_task: "no_powersave"
+        # Disable USB autosuspend for stable tethering
+        wifi_disable_usb_autosuspend: true
+        # Enable network tuning
+        wifi_enable_network_tuning: true
+```
+
+### CPU-Optimized Configuration (AC Connected)
+
+For laptops always plugged in, minimizing CPU usage:
+
+```yaml
+---
+- hosts: all
+  become: true
+  roles:
+    - role: wifi
+      vars:
+        wifi_task: "no_powersave"
+        # Use hardware encryption (lowest CPU)
+        wifi_iwlwifi_swcrypto: "0"
+        # Enable network stack tuning
+        wifi_enable_network_tuning: true
+```
+
 ### Run on Localhost
 
 ```yaml
@@ -107,9 +294,17 @@ This task (maximum stability):
 - Auto-detects all Wi-Fi interfaces
 - Disables NetworkManager Wi-Fi power save
 - Disables MAC randomization for DHCP stability
-- Disables iwlwifi firmware power management (power_level=0, power_save=0, disable_11ax=1)
+- Disables iwlwifi firmware power management (power_level=0, power_save=0, uapsd_disable=1, d0i3_disable=1, disable_11ax=1)
+- Optionally disables 802.11n for crowded areas (controlled by `wifi_iwlwifi_11n_disable`)
+- Configures Bluetooth coexistence (bt_coex_active=1 by default)
+- Uses hardware encryption for reduced CPU usage (swcrypto=0)
+- Configures network stack buffers for reduced interrupt frequency
+- Configures Bluetooth latency optimization (netdev_max_backlog=5000)
+- Disables USB autosuspend for stable USB tethering
+- Installs and enables irqbalance for interrupt distribution across CPU cores
 - Sets kernel parameter `iwlwifi.power_save=0`
 - Forces power_save off on all Wi-Fi interfaces at runtime
+- **Skips automatically in CI environments** (detected via `CI` environment variable)
 
 **Note:** Requires reboot for kernel parameters and module options to take full effect.
 

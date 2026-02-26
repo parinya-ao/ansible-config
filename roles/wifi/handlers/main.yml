@@ -1,4 +1,5 @@
 ---
+# SPDX-License-Identifier: MIT-0
 # Handlers for Wi-Fi configuration role
 
 - name: Restart NetworkManager
@@ -6,7 +7,11 @@
     name: NetworkManager
     state: restarted
 
-- name: Reboot_if_needed
+- name: Apply sysctl settings
+  ansible.builtin.command: sysctl --system
+  changed_when: false
+
+- name: Reboot if needed
   ansible.builtin.reboot:
     msg: "Rebooting to apply Wi-Fi configuration"
     reboot_timeout: 600
