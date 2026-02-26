@@ -41,6 +41,13 @@
       ansible.builtin.set_fact:
         locale_lang_code: "{{ locale_lang.split('.')[0].split('_')[0] }}"
 
+    - name: Ensure glibc-locale-source is installed (required for localedef in containers)
+      ansible.builtin.dnf:
+        name: glibc-locale-source
+        state: present
+      when: ansible_os_family == "RedHat"
+      register: locale_locale_source_install
+
     - name: Ensure glibc-langpack for target locale is installed
       ansible.builtin.dnf:
         name: "glibc-langpack-{{ locale_lang_code }}"
@@ -64,11 +71,21 @@
       register: locale_available_locales
       changed_when: false
 
-    # Note: locale -a may return lowercase (en_US.utf8) or mixed case
+    # Note: locale -a may return lowercase (en_US.utf8) or mixed case (en_US.UTF-8)
     # We normalize both to lowercase for comparison
     - name: Check if locale exists (case-insensitive)
       ansible.builtin.set_fact:
         locale_exists: "{{ locale_lang.lower() in locale_available_locales.stdout.lower() }}"
+
+    # Normalize locale name to what the system actually has
+    # If system has en_US.utf8, we should use that for verification
+    - name: Determine actual locale name on system
+      ansible.builtin.set_fact:
+        locale_normalized: >-
+          {{ (locale_available_locales.stdout.splitlines() |
+             select('search', locale_lang.split('.')[0]) |
+             first | default(locale_lang)).strip() }}
+      when: locale_exists
 
     # =============================================================================
     # GENERATE: Create Missing Locale (Instead of Failing)
@@ -82,14 +99,14 @@
     # may still work if the langpack was installed successfully
     - name: Generate locale if missing using localedef
       ansible.builtin.command:
-        cmd: localedef -i {{ locale_lang.split('.')[0] }} -f UTF-8 {{ locale_lang }}
+        cmd: localedef -c -i {{ locale_lang.split('.')[0] }} -f UTF-8 {{ locale_lang }}
       register: locale_generation
       when:
         - not locale_exists
       failed_when: false
       changed_when:
         - locale_generation is succeeded
-        - "'already exists' not in locale_generation.stderr | default('')"
+        - locale_generation.rc == 0
 
     # Warn if locale generation failed (non-critical)
     - name: Warn if locale generation encountered issues
@@ -107,6 +124,14 @@
       register: locale_available_locales_final
       changed_when: false
 
+    # Use normalized locale name for verification if it exists
+    - name: Set final verification locale name
+      ansible.builtin.set_fact:
+        locale_verify_name: >-
+          {{ ((locale_available_locales_final.stdout.splitlines() |
+             select('search', locale_lang.split('.')[0]) |
+             first | default(locale_lang)).strip()).lower() }}
+
     # Final verification that locale is available
     - name: Verify target locale is available
       ansible.builtin.assert:
@@ -114,8 +139,12 @@
           - locale_lang.lower() in locale_available_locales_final.stdout.lower()
         fail_msg: |
           Target locale {{ locale_lang }} is not available.
+          Available locales with similar pattern:
+          {{ locale_available_locales_final.stdout.splitlines() |
+             select('search', locale_lang.split('.')[0]) |
+             list | default(['None']) }}
           Please install glibc-langpack-{{ locale_lang_code }} manually.
-        success_msg: "Locale {{ locale_lang }} is available"
+        success_msg: "Locale {{ locale_lang }} is available (system reports: {{ locale_verify_name }})"
 
     # =============================================================================
     # PRE-FLIGHT COMPLETE
