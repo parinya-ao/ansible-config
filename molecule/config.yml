@@ -1,0 +1,41 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Molecule base configuration for Fedora Workstation testing
+# This config is inherited by all scenarios
+
+ansible:
+  executor:
+    backend: ansible-playbook
+    args:
+      ansible_playbook:
+        - --inventory=${MOLECULE_SCENARIO_DIRECTORY}/inventory/
+  env:
+    ANSIBLE_FORCE_COLOR: true
+    PY_COLORS: true
+    CI: "true"
+  cfg:
+    defaults:
+      interpreter_python: auto_silent
+      host_key_checking: false
+      fact_caching: memory
+      gathering: smart
+      stdout_callback: yaml
+      # Add collections path for containers.podman connection plugin
+      collections_path: /home/parinya/personal/ansible-config/collections:~/.ansible/collections:/usr/share/ansible/collections
+    ssh_connection:
+      pipelining: true
+
+# Enable shared state for multi-scenario testing
+# Default scenario manages infrastructure, component scenarios test against it
+shared_state: false
+
+# Default verifier is ansible (native integration)
+verifier:
+  name: ansible
+  enabled: true
+
+# Dependency management
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml

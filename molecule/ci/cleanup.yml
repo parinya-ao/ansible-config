@@ -1,0 +1,29 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Cleanup playbook for CI scenario
+# Removes temporary test artifacts
+
+- name: Cleanup test artifacts
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Remove test directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/molecule-test
+        - /opt/molecule-test
+      failed_when: false
+
+    - name: Clear temporary caches
+      ansible.builtin.command:
+        cmd: "{{ item }}"
+      loop:
+        - dnf clean all
+      changed_when: false
+      failed_when: false
+
+    - name: Display cleanup complete
+      ansible.builtin.debug:
+        msg: "Cleanup complete for {{ inventory_hostname }}"

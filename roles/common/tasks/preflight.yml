@@ -8,6 +8,7 @@
 # =============================================================================
 
 - name: "PRE-FLIGHT: System Validation"
+  when: not common_skip_preflight | default(false)
   tags:
     - common
     - preflight
