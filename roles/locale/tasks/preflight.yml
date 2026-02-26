@@ -99,7 +99,7 @@
     - name: Check if locale exists (normalized comparison)
       ansible.builtin.set_fact:
         locale_exists: >-
-          {{ locale_available_locales.stdout_lines
+          {{ locale_available_locales.stdout_lines | default([])
              | map('lower')
              | map('regex_replace', '[^a-z0-9]', '')
              | select('equalto', locale_normalized)
@@ -109,7 +109,7 @@
     - name: Get actual system locale name
       ansible.builtin.set_fact:
         locale_system_name: >-
-          {{ (locale_available_locales.stdout_lines
+          {{ (locale_available_locales.stdout_lines | default([])
              | select('search', locale_lang.split('.')[0].lower())
              | first | default(locale_lang)).strip() }}
       when: locale_exists
@@ -164,7 +164,7 @@
       ansible.builtin.set_fact:
         locale_verify_normalized: "{{ locale_lang | lower | regex_replace('[^a-z0-9]', '') }}"
         locale_available_normalized: >-
-          {{ locale_available_locales_final.stdout_lines
+          {{ locale_available_locales_final.stdout_lines | default([])
              | map('lower')
              | map('regex_replace', '[^a-z0-9]', '')
              | list }}

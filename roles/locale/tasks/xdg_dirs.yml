@@ -21,7 +21,7 @@
 
 - name: "GATHER: Display current XDG directories"
   ansible.builtin.debug:
-    msg: "{{ locale_xdg_current_dirs.stdout_lines }}"
+    msg: "{{ locale_xdg_current_dirs.stdout_lines | default(['Failed: Unable to retrieve XDG directories']) }}"
 
 - name: "STATE: Check for localized directories in home"
   ansible.builtin.stat:
@@ -85,4 +85,4 @@
 
 - name: "VERIFY: Show updated XDG configuration"
   ansible.builtin.debug:
-    msg: "{{ locale_xdg_updated_dirs.stdout_lines }}"
+    msg: "{{ locale_xdg_updated_dirs.stdout_lines | default(['Failed: Unable to retrieve updated XDG configuration']) }}"

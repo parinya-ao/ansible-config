@@ -117,7 +117,7 @@
 
 - name: "VERIFY: Show current locale environment"
   ansible.builtin.debug:
-    msg: "{{ locale_current_env.stdout_lines }}"
+    msg: "{{ locale_current_env.stdout_lines | default(['Failed: Unable to retrieve current locale environment']) }}"
 
 - name: "INFO: CLI language enforcement complete"
   ansible.builtin.debug:
