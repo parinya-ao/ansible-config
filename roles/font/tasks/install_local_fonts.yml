@@ -12,7 +12,7 @@
 
 - name: Find all font files in role
   ansible.builtin.find:
-    paths: "{{ role_path }}/file"
+    paths: "{{ role_path }}/files"
     recurse: true
     patterns:
       - "*.ttf"
