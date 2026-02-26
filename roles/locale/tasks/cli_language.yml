@@ -76,6 +76,15 @@
   register: locale_fish_config
   failed_when: false
 
+- name: "STATE: Ensure systemd user environment directory exists"
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/environment.d"
+    state: directory
+    mode: "0755"
+    recurse: true
+  become: false
+  failed_when: false
+
 - name: "STATE: Configure systemd user environment"
   ansible.builtin.copy:
     dest: "{{ ansible_env.HOME }}/.config/environment.d/locale.conf"
@@ -87,14 +96,9 @@
     mode: "0644"
     backup: true
   become: false
-
-- name: "STATE: Ensure systemd user environment directory exists"
-  ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/environment.d"
-    state: directory
-    mode: "0755"
-  become: false
-  when: ansible_env.XDG_RUNTIME_DIR is defined
+  when:
+    - ansible_env.HOME is defined
+    - ansible_env.HOME | length > 0
 
 - name: "STATE: Update systemd user environment for current session"
   ansible.builtin.systemd:

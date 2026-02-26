@@ -1,102 +1,185 @@
-import subprocess
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Fully Autonomous Ansible Molecule Testing Agent
+# =============================================================================
+# DDD Lite + Hexagonal Architecture Implementation
+#
+# Layers:
+#   - Domain: Core business logic (models, exceptions)
+#   - Application: Use cases + Ports (interfaces)
+#   - Infrastructure: Adapters (Molecule, Claude, Console)
+#   - Interfaces: CLI entry point
+#
+# Usage:
+#   python main.py                    # Full autonomous run
+#   python main.py --scenario ci      # Run specific scenario
+#   python main.py --skip-final       # Skip final clean-room validation
+# =============================================================================
+
+import argparse
+import json
 import sys
-import logging
-import os
+from pathlib import Path
 
-# 0. init
-MAX_RETRIES = 3
-# 1. Initialize Robust Logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[logging.StreamHandler(sys.stdout)]
+# Import from clean architecture layers
+from src.domain import AgentConfig
+from src.application import AutonomousAgentUseCase
+from src.infrastructure import (
+    MoleculeExecutorAdapter,
+    ClaudeHealerAdapter,
+    ConsoleObserverAdapter,
+    Settings,
 )
-logger = logging.getLogger(__name__)
 
-def run_claude_fix(error_log):
-    logger.info("🛠️ Claude is taking full control to fix the infrastructure...")
 
-    # ปรับ Instruction ให้ Claude รู้ว่าเขามีอำนาจเต็ม
-    instruction = (
-        "You are a Principal Software Architect with full write access. "
-        "Analyze the Ansible/Molecule error. Fix the root cause directly in the files. "
-        "Ensure idempotency. If a file (like .vault-pass) is missing, create it or bypass it in config. "
-        "Do not explain, just apply the fixes and exit."
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Fully Autonomous Ansible Molecule Testing Agent",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python main.py                      # Run with defaults
+  python main.py --scenario ci        # Test CI scenario
+  python main.py --max-retries 20     # More retries for complex issues
+  python main.py --skip-final         # Skip clean-room validation
+  python main.py --verbose            # Enable verbose logging
+        """
     )
 
-    recent_log = "\n".join(error_log.splitlines()[-150:]) # เพิ่มบริบทให้ยาวขึ้น
-    full_prompt = f"{instruction}\n\nERROR LOG:\n{recent_log}"
+    parser.add_argument(
+        "--scenario", "-s",
+        default=AgentConfig.DEFAULT_SCENARIO,
+        help=f"Molecule scenario to test (default: {AgentConfig.DEFAULT_SCENARIO})"
+    )
+
+    parser.add_argument(
+        "--max-retries", "-r",
+        type=int,
+        default=AgentConfig.DEFAULT_MAX_RETRIES,
+        help=f"Maximum retry attempts (default: {AgentConfig.DEFAULT_MAX_RETRIES})"
+    )
+
+    parser.add_argument(
+        "--skip-final",
+        action="store_true",
+        help="Skip final clean-room validation"
+    )
+
+    parser.add_argument(
+        "--verbose", "-v",
+        action="store_true",
+        help="Enable verbose logging"
+    )
+
+    parser.add_argument(
+        "--project-root",
+        type=Path,
+        default=None,
+        help="Project root directory (default: current directory)"
+    )
+
+    return parser.parse_args()
+
+
+def create_adapters(config: AgentConfig):
+    """Create infrastructure adapters.
+
+    This is where we wire up the concrete implementations.
+
+    Args:
+        config: Agent configuration
+
+    Returns:
+        Tuple of (executor, healer, observer) adapters
+    """
+    # Setup environment
+    env = Settings.get_ansible_env()
+    Settings.set_project_root(config.project_root)
+
+    # Create executor adapter
+    executor = MoleculeExecutorAdapter(
+        scenario=config.scenario,
+        env=env,
+        project_root=config.project_root,
+    )
+
+    # Create healer adapter
+    healer = ClaudeHealerAdapter(
+        project_root=config.project_root,
+    )
+
+    # Create observer adapter
+    observer = ConsoleObserverAdapter(verbose=config.verbose)
+
+    return executor, healer, observer
+
+
+def save_summary(summary: dict, project_root: Path):
+    """Save agent run summary to file.
+
+    Args:
+        summary: Summary dictionary
+        project_root: Project root directory
+    """
+    summary_file = project_root / ".agent-summary.json"
+    with open(summary_file, "w") as f:
+        json.dump(summary, f, indent=2)
+    print(f"\nSummary saved to: {summary_file}")
+
+
+def main():
+    """Main entry point."""
+    args = parse_args()
+
+    # Determine project root
+    project_root = args.project_root or Path.cwd()
+
+    # Create configuration
+    config = AgentConfig.create(
+        scenario=args.scenario,
+        max_retries=args.max_retries,
+        skip_final=args.skip_final,
+        project_root=project_root,
+        verbose=args.verbose,
+    )
+
+    # Create adapters
+    executor, healer, observer = create_adapters(config)
+
+    # Create and run use case
+    use_case = AutonomousAgentUseCase(
+        config=config,
+        executor=executor,
+        healer=healer,
+        observer=observer,
+    )
 
     try:
-        # ใช้ --non-interactive เพื่อให้ Claude แก้ไฟล์ได้ทันที
-        result = subprocess.run(
-            ["claude", "-y", full_prompt],
-            text=True,
-            capture_output=True 
+        success = use_case.run()
+
+        # Save summary
+        summary = use_case.state.get_summary()
+        save_summary(summary, project_root)
+
+        sys.exit(0 if success else 1)
+
+    except KeyboardInterrupt:
+        observer.log(
+            LogLevel.INFO,
+            "Agent stopped by user"
         )
-        
-        # แสดงผลลัพธ์ที่ Claude แก้ไข (เอาเฉพาะส่วนที่สำคัญ)
-        if result.stdout:
-            summary = "\n".join(result.stdout.splitlines()[-3:])
-            logger.info(f"📝 Claude Action Summary: {summary}")
-            
-    except Exception:
-        logger.exception("❌ Claude Agent failed to execute.")
-
-def run_molecule_streaming(command, env):
-    process = subprocess.Popen(
-        command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        env=env
-    )
-
-    full_output = []
-    for line in process.stdout:
-        clean_line = line.strip()
-        if clean_line:
-            print(f"  [Molecule] {clean_line}") 
-            full_output.append(clean_line)
-
-    process.wait()
-    return process.returncode, "\n".join(full_output)
-
-
-def agent_loop():
-    # Sanitize Environment
-    current_env = os.environ.copy()
-    # Remove conflicting Vault variables that lead to the directory-as-file error
-    for var in ["ANSIBLE_VAULT_PASSWORD_FILE", "VAULT_PASSWORD_FILE"]:
-        current_env.pop(var, None)
-
-    for iteration in range(1, MAX_RETRIES + 1):
-        logger.info(f"--- 🚀 Iteration {iteration}/{MAX_RETRIES} ---")
-        
-        # Ensure the ephemeral directory isn't being confused for a password file
-        # Force Ansible to ignore vault if not explicitly required for the test
-        current_env["ANSIBLE_VERBOSITY"] = "1"
-
-        rc, output = run_molecule_streaming(["molecule", "test"], current_env)
-
-        if rc == 0:
-            logger.info("✅ Converge successful.")
-            return # Exit successfully
-
-        logger.error(f"❌ Failure detected. Invoking repair agent...")
-        
-        # Only attempt fix if we haven't exhausted retries
-        if iteration < MAX_RETRIES:
-            run_claude_fix(output)
-        else:
-            logger.critical("Maximum retries reached. Manual intervention required.")
-            sys.exit(1)
+        sys.exit(130)
+    except Exception as e:
+        observer.log(
+            LogLevel.CRITICAL,
+            f"Unexpected error: {e}"
+        )
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    try:
-        agent_loop()
-    except KeyboardInterrupt:
-        logger.warning("⚠️ Agent stopped by user.")
-        sys.exit(130)
+    # Import LogLevel for main
+    from src.application.ports import LogLevel
+    main()
