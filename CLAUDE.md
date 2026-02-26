@@ -90,6 +90,45 @@ The `locale` role enforces a strict English-only environment on Fedora Workstati
 - `locale_configure_input_method: true`
 - `locale_enforce_cli_language: true`
 
+<<<<<<< Updated upstream
+=======
+### font - Font Installation
+
+The `font` role installs programming fonts from both COPR repositories and local files:
+
+**COPR Fonts** (installed via DNF):
+- JetBrains Mono
+- Fira Code
+- Inter
+- Arimo
+- IBM Plex Sans Thai
+
+**Local Font Files**:
+- Arial (4 variants: regular, bold, italic, bold italic)
+- Courier (regular)
+- THSarabunNew (4 variants)
+- Verdana (4 variants)
+
+> **Note**: The local font files in `roles/font/files/` are binary assets that bloat the Git repository. Consider using Git LFS to manage these files:
+
+```bash
+# Install Git LFS
+git lfs install
+
+# Track font files
+git lfs track "roles/font/files/*.ttf"
+git lfs track "roles/font/files/*.otf"
+
+# Commit the .gitattributes changes
+git add .gitattributes
+git commit -m "chore: track font files with Git LFS"
+```
+
+**Key Variables** (with `font_` prefix):
+- `font_install_enabled`: Toggle font role (default: `true`)
+- `font_sarabun_install_enabled`: Install Sarabun Thai font (default: `true`)
+
+>>>>>>> Stashed changes
 ## Documentation References
 
 - Role-specific details: See each role's `README.md` or `defaults/main.yml`

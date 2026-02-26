@@ -1,0 +1,41 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Ansible Lint Configuration - Production Profile
+# Enforces production-grade Ansible coding standards
+
+# Use the production profile for strictest rules
+profile: production
+
+# Exclude paths from linting
+exclude_paths:
+  - .cache/
+  - .github/
+  - collections/
+  - .ansible-venv/
+  - venv/
+  - "*.tar.gz"
+  - ci_vars.yml
+
+# Enable specific rules
+enable_list:
+  - args
+  - empty-string-compare
+  - no-log-password
+  - no-same-owner
+  - ignore-errors
+  - jinja
+  - key-order
+  - name
+  - yaml
+
+# Warn about these rules but don't fail
+warn_list:
+  - experimental
+  - ignore-errors
+
+# Skip specific rules (only when necessary)
+skip_list:
+  - role-name
+
+# Display options
+display_relative_path: true
