@@ -1,12 +1,16 @@
 ---
 # SPDX-License-Identifier: MIT-0
 # =============================================================================
-# Pre-flight Validation Tasks for Locale Role
+# Pre-flight Validation & Locale Provisioning (Ensure Pattern)
 # =============================================================================
-# Validates system requirements before locale configuration
+# This task file implements the "Ensure" pattern:
+# 1. Validates OS and format
+# 2. ENSURES locale packages are installed
+# 3. GENERATES locale if missing (instead of failing)
+# 4. VALIDATES only after all above is done
 # =============================================================================
 
-- name: "PRE-FLIGHT: Locale Role Validation"
+- name: "PRE-FLIGHT: Locale Role Validation & Provisioning"
   tags:
     - locale
     - preflight
@@ -29,20 +33,82 @@
           Expected format: ll_CC.UTF-8 (e.g., en_US.UTF-8)
         success_msg: "Locale format validated: {{ locale_lang }}"
 
+    # =============================================================================
+    # ENSURE: Locale Package Installation
+    # =============================================================================
+    # Extract language code from locale_lang (e.g., "en_US.UTF-8" -> "en")
+    - name: Extract language code from locale
+      ansible.builtin.set_fact:
+        locale_lang_code: "{{ locale_lang.split('.')[0].split('_')[0] }}"
+
+    - name: Ensure glibc-langpack for target locale is installed
+      ansible.builtin.dnf:
+        name: "glibc-langpack-{{ locale_lang_code }}"
+        state: present
+      when: ansible_os_family == "RedHat"
+      register: locale_langpack_install
+
+    - name: Ensure all English locale packs are available (fallback)
+      ansible.builtin.dnf:
+        name: glibc-langpack-en
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - locale_langpack_install is failed
+
+    # =============================================================================
+    # CHECK: Locale Availability (Case-Insensitive)
+    # =============================================================================
     - name: Check if target locale is available
       ansible.builtin.command: locale -a
       register: locale_available_locales
       changed_when: false
 
-    - name: Validate target locale is installed
+    # Note: locale -a may return lowercase (en_US.utf8) or mixed case
+    # We normalize both to lowercase for comparison
+    - name: Check if locale exists (case-insensitive)
+      ansible.builtin.set_fact:
+        locale_exists: "{{ locale_lang.lower() in locale_available_locales.stdout.lower() }}"
+
+    # =============================================================================
+    # GENERATE: Create Missing Locale (Instead of Failing)
+    # =============================================================================
+    - name: Display locale availability status
+      ansible.builtin.debug:
+        msg: "Locale {{ locale_lang }} exists: {{ locale_exists }}"
+
+    - name: Generate locale if missing using localedef
+      ansible.builtin.command:
+        cmd: localedef -i {{ locale_lang.split('.')[0] }} -f UTF-8 {{ locale_lang }}
+      register: locale_generation
+      when:
+        - not locale_exists
+      failed_when:
+        - locale_generation is failed
+        - "'already exists' not in locale_generation.stderr | default('')"
+      changed_when:
+        - locale_generation is succeeded
+        - "'already exists' not in locale_generation.stderr | default('')"
+
+    - name: Refresh available locales after generation
+      ansible.builtin.command: locale -a
+      register: locale_available_locales_after
+      changed_when: false
+      when: locale_generation is changed
+
+    - name: Verify locale was generated successfully
       ansible.builtin.assert:
         that:
-          - locale_lang in locale_available_locales.stdout
+          - locale_lang.lower() in locale_available_locales_after.stdout.lower()
         fail_msg: |
-          Target locale {{ locale_lang }} is not installed.
-          Available locales: {{ locale_available_locales.stdout_lines | join(', ') }}
-        success_msg: "Target locale {{ locale_lang }} is available"
+          Failed to generate locale {{ locale_lang }}.
+          Please install glibc-langpack-{{ locale_lang_code }} manually.
+        success_msg: "Locale {{ locale_lang }} is now available"
+      when: locale_generation is changed
 
+    # =============================================================================
+    # PRE-FLIGHT COMPLETE
+    # =============================================================================
     - name: Pre-flight validation complete
       ansible.builtin.debug:
         msg:
@@ -52,4 +118,5 @@
           - "Target Locale: {{ locale_lang }}"
           - "Input Method: {{ locale_input_method }}"
           - "Primary Layout: {{ locale_primary_keyboard_layout }}"
+          - "Status: {{ 'Generated' if locale_generation.changed else 'Pre-existing' }}"
           - "=========================================="

@@ -3,18 +3,17 @@
 # =============================================================================
 # Handlers for Locale Role
 # =============================================================================
-
-- name: Regenerate locales
-  ansible.builtin.command: locale-gen
-  register: locale_gen_result
-  changed_when: true
-  failed_when:
-    - locale_gen_result is failed
-    - "'command not found' not in locale_gen_result.stderr | default('')"
+# Fedora uses systemd-localed for locale management
+# =============================================================================
 
 - name: Restart systemd-localed
   ansible.builtin.systemd:
     name: systemd-localed.service
     state: restarted
   register: locale_localed_restart
+
+- name: Reload locale configuration
+  ansible.builtin.command: localectl reload
+  register: locale_reload
+  changed_when: true
   failed_when: false
