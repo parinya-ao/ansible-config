@@ -43,29 +43,27 @@ print_error() {
 setup_venv() {
     print_step "Phase 1: Bootstrapping Python Environment"
 
-    if [[ -d "$VENV_DIR" ]]; then
-        echo "Virtual environment exists at ${VENV_DIR}"
-    else
-        echo "Creating virtual environment..."
+    # Verify venv integrity, not just directory existence
+    if [[ ! -f "${VENV_DIR}/bin/activate" ]]; then
+        echo "Virtual environment missing or invalid. Recreating..."
+        rm -rf "$VENV_DIR"
         python3 -m venv "$VENV_DIR"
+    else
+        echo "Virtual environment exists at ${VENV_DIR}"
     fi
 
     # shellcheck source=/dev/null
     source "${VENV_DIR}/bin/activate"
 
-    echo "Upgrading pip..."
-    pip install --upgrade pip --quiet
-
-    # Check if Ansible is already installed with correct version
-    if command -v ansible &>/dev/null; then
-        local current_version
-        current_version=$(ansible --version 2>/dev/null | head -n1 | grep -oP '\d+\.\d+' | head -1)
-        echo "Ansible ${current_version:-unknown} found in venv"
-    else
-        echo "Installing ansible-core ${ANSIBLE_VERSION}.x..."
-        pip install --quiet "ansible-core>=${ANSIBLE_VERSION},<$(echo "${ANSIBLE_VERSION}" | awk -F. '{print $1"."$2+1}')"
-        echo "Ansible installed successfully"
+    # Ensure we are actually in the venv before proceeding
+    if [[ "$VIRTUAL_ENV" != "$VENV_DIR" ]]; then
+        print_error "Failed to activate virtual environment."
+        exit 1
     fi
+
+    echo "Upgrading pip and installing ansible-core..."
+    # Combine installations to reduce round-trips
+    pip install --quiet --upgrade pip "ansible-core>=${ANSIBLE_VERSION},<2.19"
 }
 
 # Step 2: Install Ansible Galaxy collections
