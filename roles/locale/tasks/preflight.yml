@@ -77,18 +77,29 @@
       ansible.builtin.debug:
         msg: "Locale {{ locale_lang }} exists: {{ locale_exists }}"
 
+    # Note: In minimal containers, localedef may fail due to missing charmap files
+    # We use ignore_errors to continue if generation fails, since the locale
+    # may still work if the langpack was installed successfully
     - name: Generate locale if missing using localedef
       ansible.builtin.command:
         cmd: localedef -i {{ locale_lang.split('.')[0] }} -f UTF-8 {{ locale_lang }}
       register: locale_generation
       when:
         - not locale_exists
-      failed_when:
-        - locale_generation is failed
-        - "'already exists' not in locale_generation.stderr | default('')"
+      failed_when: false
       changed_when:
         - locale_generation is succeeded
         - "'already exists' not in locale_generation.stderr | default('')"
+
+    # Warn if locale generation failed (non-critical)
+    - name: Warn if locale generation encountered issues
+      ansible.builtin.debug:
+        msg: |
+          Warning: Locale generation encountered issues: {{ locale_generation.stderr | default('Unknown error') }}
+          The locale may still work if glibc-langpack was installed.
+      when:
+        - not locale_exists
+        - locale_generation is failed
 
     # Refresh locale list after generation attempt (for verification)
     - name: Refresh available locales after generation attempt
@@ -120,3 +131,28 @@
           - "Primary Layout: {{ locale_primary_keyboard_layout }}"
           - "Status: {{ 'Generated' if not locale_exists else 'Pre-existing' }}"
           - "=========================================="
+
+  rescue:
+    - name: Pre-flight validation failed
+      ansible.builtin.debug:
+        msg:
+          - "=========================================="
+          - "Locale Role Pre-flight Checks FAILED"
+          - "=========================================="
+          - "Error: {{ ansible_failed_result.msg | default('Unknown error') }}"
+          - "=========================================="
+
+    - name: Fail the play with diagnostic information
+      ansible.builtin.fail:
+        msg: |
+          Locale pre-flight validation failed. Please review the error above.
+          Common issues:
+          - Unsupported OS distribution (Fedora required)
+          - Invalid locale format (expected: ll_CC.UTF-8)
+          - Unable to install locale packages
+          - Locale generation failed
+
+  always:
+    - name: Pre-flight cleanup
+      ansible.builtin.debug:
+        msg: "Locale pre-flight checks completed"
