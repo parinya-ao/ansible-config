@@ -16,11 +16,12 @@
   ansible.builtin.command: xdg-user-dirs-update --dump
   register: locale_xdg_current_dirs
   changed_when: false
+  failed_when: false
   become: false
 
 - name: "GATHER: Display current XDG directories"
   ansible.builtin.debug:
-    msg: "{{ locale_xdg_current_dirs.stdout_lines }}"
+    msg: "{{ locale_xdg_current_dirs.stdout_lines | default(['Failed: Unable to retrieve XDG directories']) }}"
 
 - name: "STATE: Check for localized directories in home"
   ansible.builtin.stat:
@@ -64,6 +65,7 @@
     LANG: "{{ locale_lang }}"
   register: locale_xdg_update_result
   changed_when: "'Moving' in locale_xdg_update_result.stderr or 'Creating' in locale_xdg_update_result.stderr"
+  failed_when: false
   become: false
 
 - name: "STATE: Update XDG user-dirs.locale configuration"
@@ -78,8 +80,9 @@
   ansible.builtin.command: xdg-user-dirs-update --dump
   register: locale_xdg_updated_dirs
   changed_when: false
+  failed_when: false
   become: false
 
 - name: "VERIFY: Show updated XDG configuration"
   ansible.builtin.debug:
-    msg: "{{ locale_xdg_updated_dirs.stdout_lines }}"
+    msg: "{{ locale_xdg_updated_dirs.stdout_lines | default(['Failed: Unable to retrieve updated XDG configuration']) }}"

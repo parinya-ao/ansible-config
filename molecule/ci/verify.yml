@@ -1,0 +1,89 @@
+# SPDX-License-Identifier: MIT-0
+# Verify playbook for CI scenario
+# Validates that the configuration achieved the desired state
+
+- name: Verify - Validate Fedora Workstation Configuration
+  hosts: all
+  gather_facts: true
+
+  tasks:
+    # =============================================================================
+    # SYSTEM VERIFICATION
+    # =============================================================================
+
+    - name: "CHECK 1: Python is available"
+      ansible.builtin.command:
+        cmd: python3 --version
+      register: python_version
+      changed_when: false
+
+    - name: "ASSERT 1: Python version is valid"
+      ansible.builtin.assert:
+        that:
+          - python_version.rc == 0
+          - python_version.stdout is search('Python 3')
+        fail_msg: "Python 3 is not available"
+        success_msg: "✓ Python {{ python_version.stdout }} is available"
+
+    # =============================================================================
+    # DNF VERIFICATION
+    # =============================================================================
+
+    - name: "CHECK 2: DNF5 is available (Fedora 41+)"
+      ansible.builtin.command:
+        cmd: dnf5 --version
+      register: dnf5_version
+      changed_when: false
+      failed_when: false
+
+    - name: Display DNF5 status
+      ansible.builtin.debug:
+        msg: "{{ dnf5_version.stdout | default('DNF5 not available - using legacy DNF') }}"
+
+    # =============================================================================
+    # PACKAGE VERIFICATION (from common role)
+    # =============================================================================
+
+    - name: "CHECK 3: Base packages are installed"
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: "ASSERT 3: Critical packages are present"
+      ansible.builtin.assert:
+        that:
+          - "'python3' in ansible_facts.packages"
+          - "'git' in ansible_facts.packages"
+        fail_msg: "Required base packages missing"
+        success_msg: "✓ Base packages are installed"
+      when: ansible_facts.packages is defined
+
+    # =============================================================================
+    # LOCALE VERIFICATION
+    # =============================================================================
+
+    - name: "CHECK 4: English locale is configured"
+      ansible.builtin.stat:
+        path: /etc/locale.conf
+      register: locale_conf
+
+    - name: "ASSERT 4: English locale configuration file exists"
+      ansible.builtin.assert:
+        that:
+          - locale_conf.stat.exists
+        fail_msg: "Locale configuration file not found"
+        success_msg: "✓ English locale is configured"
+
+    # =============================================================================
+    # FINAL SUMMARY
+    # =============================================================================
+
+    - name: "✓ ALL VERIFICATIONS PASSED"
+      ansible.builtin.debug:
+        msg:
+          - "=========================================="
+          - "MOLECULE VERIFICATION SUCCESSFUL"
+          - "=========================================="
+          - "Host: {{ inventory_hostname }}"
+          - "Fedora: {{ ansible_distribution_version }}"
+          - "Python: {{ python_version.stdout }}"
+          - "=========================================="

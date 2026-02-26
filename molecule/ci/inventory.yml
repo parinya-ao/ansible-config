@@ -1,0 +1,16 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Molecule inventory for CI scenario
+# This inventory is dynamically merged with platform hosts by Molecule
+
+all:
+  vars:
+    # CI environment variables - MUST match ci.yml
+    molecule_test: true
+    ci_env: true
+    CI: "true"
+    container: docker
+    # Container-aware defaults
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_become: true
+    ansible_become_method: sudo

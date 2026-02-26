@@ -1,0 +1,70 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Prepare playbook for default scenario
+# Configures containers with prerequisites before testing
+
+- name: Prepare Fedora test containers
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Clean stale DNF metadata (fixes zchunk checksum errors)
+      ansible.builtin.command:
+        cmd: podman exec {{ inventory_hostname }} dnf clean all
+      delegate_to: localhost
+      register: dnf_clean
+      changed_when: dnf_clean.rc == 0
+
+    - name: Install Python (required for Ansible) via podman exec
+      ansible.builtin.command:
+        cmd: podman exec {{ inventory_hostname }} dnf install -y --refresh python3 python3-dnf
+      delegate_to: localhost
+      register: python_install
+      changed_when: python_install.rc == 0
+
+    - name: Gather facts
+      ansible.builtin.setup:
+
+    - name: Display container information
+      ansible.builtin.debug:
+        msg:
+          - "Container: {{ inventory_hostname }}"
+          - "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+          - "Python: {{ ansible_python.version }}"
+
+    - name: Install English locale (required for locale role)
+      ansible.builtin.dnf:
+        name:
+          - glibc-langpack-en
+          - langpacks-en
+        state: present
+        update_cache: true
+
+    - name: Set English locale for testing (non-systemd)
+      ansible.builtin.lineinfile:
+        path: /etc/locale.conf
+        regexp: '^LANG='
+        line: 'LANG=en_US.UTF-8'
+        create: true
+
+    - name: Verify locale is set
+      ansible.builtin.command:
+        cmd: locale
+      register: locale_result
+      changed_when: false
+
+    - name: Display current locale
+      ansible.builtin.debug:
+        msg: "{{ locale_result.stdout }}"
+
+    - name: Create test directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - /tmp/molecule-test
+        - /opt/molecule-test
+
+    - name: Display preparation complete
+      ansible.builtin.debug:
+        msg: "Container {{ inventory_hostname }} is prepared for testing"

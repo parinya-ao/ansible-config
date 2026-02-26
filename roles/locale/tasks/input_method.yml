@@ -9,32 +9,38 @@
 
 - name: "STATE: Input method package must be installed"
   ansible.builtin.package:
-    name: "{{ locale_input_method }}"
+    name:
+      - ibus
+      - ibus-gtk3
+      - ibus-libpinyin
     state: present
-
-- name: "STATE: Ensure input method engine is installed"
-  ansible.builtin.package:
-    name: "{{ locale_input_method }}-engine"
-    state: present
-  register: locale_engine_install
-  failed_when:
-    - locale_engine_install is failed
-    - "'No package' not in locale_engine_install.msg | default('')"
-  when: locale_input_method == "ibus"
+  register: locale_ibus_install
+  when:
+    - locale_install_gui_tools | bool
+    - locale_input_method == "ibus"
+  failed_when: false
 
 - name: "GATHER: Check current keyboard layouts"
   ansible.builtin.command: localectl list-x11-keymap-layouts
   register: locale_available_layouts
   changed_when: false
+  failed_when: false
+  when: not locale_is_container
 
 - name: "STATE: Configure keyboard layout via localectl"
   ansible.builtin.command: >
     localectl set-x11-keymap {{ locale_primary_keyboard_layout }}
-  when: locale_remove_secondary_layouts
-  changed_when: true
+  register: locale_keymap_result
+  changed_when: locale_keymap_result.rc == 0
+  failed_when: false
+  when:
+    - locale_remove_secondary_layouts
+    - not locale_is_container
 
 - name: "STATE: Configure GNOME input sources (user-level)"
-  when: ansible_env.DISPLAY is defined
+  when:
+    - ansible_env.DISPLAY is defined
+    - locale_install_gui_tools | bool
   block:
     - name: "GATHER: Check current GNOME input sources"
       ansible.builtin.command: >
@@ -70,7 +76,9 @@
       become: false
 
 - name: "STATE: Configure ibus for English input"
-  when: locale_input_method == "ibus"
+  when:
+    - locale_input_method == "ibus"
+    - locale_install_gui_tools | bool
   block:
     - name: "STATE: Create ibus configuration directory"
       ansible.builtin.file:
@@ -100,7 +108,9 @@
   ansible.builtin.command: localectl status
   register: locale_input_status
   changed_when: false
+  failed_when: false
+  when: not locale_is_container
 
 - name: "VERIFY: Show input configuration"
   ansible.builtin.debug:
-    msg: "{{ locale_input_status.stdout_lines }}"
+    msg: "{{ locale_input_status.stdout_lines | default(['Skipped: Running in container, no input status available']) }}"

@@ -1,16 +1,26 @@
 ---
 # SPDX-License-Identifier: MIT-0
 # =============================================================================
-# Pre-flight Validation Tasks for Locale Role
+# Pre-flight Validation & Locale Provisioning (Ensure Pattern)
 # =============================================================================
-# Validates system requirements before locale configuration
+# This task file implements the "Ensure" pattern following Postel's Law:
+# "Be conservative in what you send, liberal in what you accept"
+#
+# 1. Validates OS and format
+# 2. ENSURES locale packages are installed (using all-langpacks for CI)
+# 3. NORMALIZES locale comparison (handles UTF-8 vs utf8 paradox)
+# 4. GENERATES locale if missing (instead of failing)
+# 5. VALIDATES only after all above is done
 # =============================================================================
 
-- name: "PRE-FLIGHT: Locale Role Validation"
+- name: "PRE-FLIGHT: Locale Role Validation & Provisioning"
   tags:
     - locale
     - preflight
   block:
+    # =========================================================================
+    # VALIDATION: OS and Format
+    # =========================================================================
     - name: Ensure target OS is Fedora
       ansible.builtin.assert:
         that:
@@ -29,19 +39,156 @@
           Expected format: ll_CC.UTF-8 (e.g., en_US.UTF-8)
         success_msg: "Locale format validated: {{ locale_lang }}"
 
-    - name: Check if target locale is available
+    # =========================================================================
+    # ENSURE: Locale Package Installation (CI-Optimized)
+    # =========================================================================
+    # Extract language code from locale_lang (e.g., "en_US.UTF-8" -> "en")
+    - name: Extract language code from locale
+      ansible.builtin.set_fact:
+        locale_lang_code: "{{ locale_lang.split('.')[0].split('_')[0] }}"
+
+    # CI Strategy: Install glibc-all-langpacks for maximum compatibility
+    # This ensures ALL locales are available, avoiding case-mismatch issues
+    - name: Ensure glibc-all-langpacks and locale-source are installed (CI-friendly)
+      ansible.builtin.dnf:
+        name:
+          - glibc-all-langpacks
+          - glibc-locale-source
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_env.CI is defined or ansible_env.GITHUB_ACTIONS is defined
+      register: locale_ci_packages
+
+    # Production Strategy: Install only required langpack to save space
+    - name: Ensure glibc-langpack for target locale is installed (Production)
+      ansible.builtin.dnf:
+        name:
+          - "glibc-langpack-{{ locale_lang_code }}"
+          - glibc-locale-source
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_env.CI is not defined
+        - ansible_env.GITHUB_ACTIONS is not defined
+      register: locale_prod_packages
+
+    # Fallback: If production install failed, try all-langpacks
+    - name: Install glibc-all-langpacks as fallback
+      ansible.builtin.dnf:
+        name: glibc-all-langpacks
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - locale_prod_packages is failed
+
+    # =========================================================================
+    # NORMALIZE: Locale Availability Check (Postel's Law)
+    # =========================================================================
+    - name: Get available locales from system
       ansible.builtin.command: locale -a
       register: locale_available_locales
       changed_when: false
 
-    - name: Validate target locale is installed
+    # Normalize both target and available locales for comparison
+    # en_US.UTF-8 -> enusutf8 (removes special chars for matching)
+    - name: Normalize target locale name
+      ansible.builtin.set_fact:
+        locale_normalized: "{{ locale_lang | lower | regex_replace('[^a-z0-9]', '') }}"
+
+    - name: Check if locale exists (normalized comparison)
+      ansible.builtin.set_fact:
+        locale_exists: >-
+          {{ locale_available_locales.stdout_lines | default([])
+             | map('lower')
+             | map('regex_replace', '[^a-z0-9]', '')
+             | select('equalto', locale_normalized)
+             | list | length > 0 }}
+
+    # Find the actual system locale name for later use
+    - name: Get actual system locale name
+      ansible.builtin.set_fact:
+        locale_system_name: >-
+          {{ (locale_available_locales.stdout_lines | default([])
+             | select('search', locale_lang.split('.')[0].lower())
+             | first | default(locale_lang)).strip() }}
+      when: locale_exists
+
+    # =========================================================================
+    # DIAGNOSTIC: Display Locale Status
+    # =========================================================================
+    - name: Display locale availability status
+      ansible.builtin.debug:
+        msg:
+          - "Target locale: {{ locale_lang }}"
+          - "Normalized form: {{ locale_normalized }}"
+          - "System reports: {{ locale_system_name | default('Not found') }}"
+          - "Exists: {{ locale_exists }}"
+
+    # =========================================================================
+    # GENERATE: Create Missing Locale (Graceful Degradation)
+    # =========================================================================
+    # Note: With glibc-all-langpacks installed, this should rarely be needed
+    - name: Generate locale if missing using localedef
+      ansible.builtin.command:
+        cmd: >-
+          localedef -c -i {{ locale_lang.split('.')[0] }}
+          -f UTF-8 {{ locale_lang }}
+      register: locale_generation
+      when:
+        - not locale_exists
+      failed_when: false
+      changed_when:
+        - locale_generation is succeeded
+        - locale_generation.rc == 0
+
+    # Warn if locale generation had issues (non-critical)
+    - name: Display locale generation status
+      ansible.builtin.debug:
+        msg: >-
+          Locale generation {{ 'succeeded' if locale_generation.rc == 0 else 'failed' }}
+          {{ ': ' + locale_generation.stderr if locale_generation.stderr else '' }}
+      when:
+        - not locale_exists
+
+    # Refresh locale list after any changes
+    - name: Refresh available locales
+      ansible.builtin.command: locale -a
+      register: locale_available_locales_final
+      changed_when: false
+
+    # =========================================================================
+    # VERIFY: Final Locale Validation (Robust)
+    # =========================================================================
+    - name: Set final verification facts
+      ansible.builtin.set_fact:
+        locale_verify_normalized: "{{ locale_lang | lower | regex_replace('[^a-z0-9]', '') }}"
+        locale_available_normalized: >-
+          {{ locale_available_locales_final.stdout_lines | default([])
+             | map('lower')
+             | map('regex_replace', '[^a-z0-9]', '')
+             | list }}
+
+    - name: Verify target locale is available (Postel's Law compliant)
       ansible.builtin.assert:
         that:
-          - locale_lang in locale_available_locales.stdout
+          - locale_verify_normalized in locale_available_normalized
         fail_msg: |
-          Target locale {{ locale_lang }} is not installed.
-          Available locales: {{ locale_available_locales.stdout_lines | join(', ') }}
-        success_msg: "Target locale {{ locale_lang }} is available"
+          Target locale {{ locale_lang }} is not available.
+          Normalized form: {{ locale_verify_normalized }}
+          Available normalized locales:
+          {{ locale_available_normalized | join(', ') }}
+        success_msg: "Locale {{ locale_lang }} is available (Postel's Law: liberal acceptance)"
+
+    # =========================================================================
+    # COMPLETE: Pre-flight Success
+    # =========================================================================
+    - name: Determine package strategy for display
+      ansible.builtin.set_fact:
+        locale_strategy_display: >-
+          {{ 'CI (all-langpacks)' if locale_ci_packages is skipped
+             or (locale_ci_packages is defined and locale_ci_packages is changed)
+             else 'Production (selective)' }}
 
     - name: Pre-flight validation complete
       ansible.builtin.debug:
@@ -50,6 +197,42 @@
           - "Locale Role Pre-flight Checks PASSED"
           - "=========================================="
           - "Target Locale: {{ locale_lang }}"
+          - "System Reports: {{ locale_system_name | default('N/A') }}"
           - "Input Method: {{ locale_input_method }}"
           - "Primary Layout: {{ locale_primary_keyboard_layout }}"
+          - "Status: {{ 'Generated' if not locale_exists else 'Pre-existing' }}"
+          - "Strategy: {{ locale_strategy_display }}"
           - "=========================================="
+
+  # ===========================================================================
+  # RESCUE: Error Handling (Checkov CKV2_ANSIBLE_3 compliant)
+  # ===========================================================================
+  rescue:
+    - name: Pre-flight validation failed
+      ansible.builtin.debug:
+        msg:
+          - "=========================================="
+          - "Locale Role Pre-flight Checks FAILED"
+          - "=========================================="
+          - "Error: {{ ansible_failed_result.msg | default('Unknown error') }}"
+          - "Task: {{ ansible_failed_result.task_name | default('Unknown task') }}"
+          - "=========================================="
+
+    - name: Fail with diagnostic information
+      ansible.builtin.fail:
+        msg: |
+          Locale pre-flight validation failed on {{ inventory_hostname }}.
+          Common issues:
+          - Unsupported OS distribution (Fedora required)
+          - Invalid locale format (expected: ll_CC.UTF-8)
+          - DNF lock detected (close Software Center)
+          - Network issues preventing package installation
+          - Insufficient disk space
+
+  # ===========================================================================
+  # ALWAYS: Cleanup (Checkov CKV2_ANSIBLE_3 compliant)
+  # ===========================================================================
+  always:
+    - name: Pre-flight execution cleanup
+      ansible.builtin.debug:
+        msg: "Locale pre-flight checks completed ({{ 'Success' if ansible_failed_result is not defined else 'Failed' }})"

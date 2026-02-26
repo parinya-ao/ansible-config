@@ -76,6 +76,15 @@
   register: locale_fish_config
   failed_when: false
 
+- name: "STATE: Ensure systemd user environment directory exists"
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/environment.d"
+    state: directory
+    mode: "0755"
+    recurse: true
+  become: false
+  failed_when: false
+
 - name: "STATE: Configure systemd user environment"
   ansible.builtin.copy:
     dest: "{{ ansible_env.HOME }}/.config/environment.d/locale.conf"
@@ -87,14 +96,9 @@
     mode: "0644"
     backup: true
   become: false
-
-- name: "STATE: Ensure systemd user environment directory exists"
-  ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/environment.d"
-    state: directory
-    mode: "0755"
-  become: false
-  when: ansible_env.XDG_RUNTIME_DIR is defined
+  when:
+    - ansible_env.HOME is defined
+    - ansible_env.HOME | length > 0
 
 - name: "STATE: Update systemd user environment for current session"
   ansible.builtin.systemd:
@@ -103,17 +107,21 @@
   become: false
   register: locale_systemd_reload
   failed_when: false
-  when: ansible_env.XDG_RUNTIME_DIR is defined
+  changed_when: false
+  when:
+    - ansible_env.XDG_RUNTIME_DIR is defined
+    - not (ansible_env.CI is defined or ansible_env.GITHUB_ACTIONS is defined)
 
 - name: "VERIFY: Display current locale environment"
   ansible.builtin.command: locale
   register: locale_current_env
   changed_when: false
+  failed_when: false
   become: false
 
 - name: "VERIFY: Show current locale environment"
   ansible.builtin.debug:
-    msg: "{{ locale_current_env.stdout_lines }}"
+    msg: "{{ locale_current_env.stdout_lines | default(['Failed: Unable to retrieve current locale environment']) }}"
 
 - name: "INFO: CLI language enforcement complete"
   ansible.builtin.debug:

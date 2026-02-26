@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: MIT-0
+# Python dependencies for Ansible CI/CD pipeline
+# Used by GitHub Actions workflow (.github/workflows/ci.yml)
+
+ansible-core>=2.18
+ansible-lint
+yamllint

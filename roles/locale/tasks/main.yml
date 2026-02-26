@@ -7,6 +7,20 @@
 # - Input method configuration
 # - CLI/TTY language enforcement
 
+# =============================================================================
+# ENVIRONMENT DETECTION (Container-Aware Design)
+# =============================================================================
+# Detect if running in a container to skip systemd-dependent commands
+# In containers (CI): systemd is not PID 1, localectl/systemd commands fail
+# On bare metal/workstation: systemd is available, full configuration applies
+
+- name: "GATHER: Detect if running in a container"
+  ansible.builtin.set_fact:
+    locale_is_container: >-
+      {{ ansible_virtualization_type in ['docker', 'container', 'podman', 'lxc', 'openvz']
+      or ansible_env.CI is defined
+      or ansible_env.GITHUB_ACTIONS is defined }}
+
 # Pre-flight Validation
 - name: Run pre-flight validation
   ansible.builtin.import_tasks: preflight.yml

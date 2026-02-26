@@ -1,0 +1,38 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Converge playbook for default scenario
+# Applies the main playbook to the test container
+
+- name: Converge - Apply Fedora Workstation Configuration
+  hosts: all
+  gather_facts: true
+
+  vars:
+    # CI-safe defaults - override in molecule.yml or CLI
+    common_enable_rpm_fusion: false
+    common_install_nvidia_drivers: false
+    common_configure_custom_dns: false
+    common_install_d2: false
+    locale_install_gui_tools: false
+
+  pre_tasks:
+    - name: Display test environment information
+      ansible.builtin.debug:
+        msg:
+          - "Testing: {{ inventory_hostname }}"
+          - "Fedora Version: {{ ansible_distribution_version }}"
+          - "Python: {{ ansible_python.version }}"
+
+  roles:
+    # Add roles to test here
+    - role: common
+      when: common_system_update_enabled | default(true)
+
+    # Add more roles as needed
+    # - role: locale
+    # - role: desktop
+
+  post_tasks:
+    - name: Display convergence complete
+      ansible.builtin.debug:
+        msg: "Convergence complete for {{ inventory_hostname }}"

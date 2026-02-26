@@ -32,10 +32,10 @@
 
 # System Update
 - name: Perform system update
-  ansible.builtin.import_tasks: system-update.yml
+  ansible.builtin.import_tasks: system_update.yml
   tags:
     - common
-    - system-update
+    - system_update
 
 # Fish Shell - Install early so it's available for the rest of the playbook
 - name: Install Fish shell

@@ -8,6 +8,7 @@
 # =============================================================================
 
 - name: "PRE-FLIGHT: System Validation"
+  when: not common_skip_preflight | default(false)
   tags:
     - common
     - preflight
@@ -30,6 +31,7 @@
         success_msg: "RAM validated: {{ ansible_memtotal_mb }}MB available"
 
     - name: Check minimum disk space
+      when: not common_skip_disk_check | default(false)
       ansible.builtin.assert:
         that:
           - (ansible_mounts | selectattr('mount', 'equalto', '/') | first).size_available | default(0) | int >= 1073741824

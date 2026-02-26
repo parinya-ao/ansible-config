@@ -87,8 +87,6 @@
         - fonts
 
     - role: wifi
-      vars:
-        wifi_task: "no_powersave"
       tags:
         - wifi
         - network

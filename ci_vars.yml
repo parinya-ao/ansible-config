@@ -1,0 +1,82 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# CI-Specific Ansible Variables
+# =============================================================================
+# These variables override defaults for CI/CD pipeline execution
+# Disables features that require physical hardware, user interaction,
+# or services that don't work in containerized environments
+# =============================================================================
+
+# =============================================================================
+# Common Role Variables
+# =============================================================================
+# Disable RPM Fusion (third-party repos) for CI
+common_enable_rpm_fusion: false
+
+# Disable NVIDIA driver installation (no GPU in containers)
+common_install_nvidia_drivers: false
+
+# Disable custom DNS configuration
+common_configure_custom_dns: false
+
+# Disable D2 tool installation
+common_install_d2: false
+
+# Skip disk space check in CI (containers have limited disk)
+common_skip_disk_check: true
+
+# =============================================================================
+# Desktop Role Variables
+# =============================================================================
+# Disable Flatpak font access (no GUI in CI)
+desktop_enable_flatpak_font_access: false
+
+# Reduce installed Flatpak apps in CI
+desktop_flatpak_apps:
+  - com.github.MarkText
+  - org.gnome.gitlab.somas.Amateus
+
+# =============================================================================
+# Developer Role Variables
+# =============================================================================
+# Skip Android SDK in CI (large download)
+developer_install_android_sdk: false
+
+# Skip Flutter in CI (large download)
+developer_install_flutter: false
+
+# =============================================================================
+# Docker Role Variables
+# =============================================================================
+# Use Docker CE from official repos in CI
+docker_use_fedora_native: false
+
+# =============================================================================
+# Multimedia Role Variables
+# =============================================================================
+# Enable codecs but skip hardware acceleration in CI
+multimedia_enable_hardware_acceleration: false
+
+# =============================================================================
+# Locale Role Variables
+# =============================================================================
+# Keep English-only, but skip user directory migrations in CI
+locale_configure_xdg_dirs: false
+
+# =============================================================================
+# WiFi Role Variables
+# =============================================================================
+# Skip WiFi configuration in CI (no wireless hardware)
+wifi_install_iw: false
+wifi_configure_regulatory_domain: false
+
+# =============================================================================
+# Logging Configuration
+# =============================================================================
+# Enable verbose logging for CI debugging
+ansible_verbosity: 1
+ansible_callback_whitelist:
+  - profile_tasks
+  - timer
+  - yaml

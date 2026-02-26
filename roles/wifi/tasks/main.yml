@@ -1,6 +1,7 @@
 ---
-# Wi-Fi configuration role
-# Choose which task to run by importing the appropriate task file
+# SPDX-License-Identifier: MIT-0
+# Wi-Fi configuration role main entry point
+# This role configures Wi-Fi power management settings for optimal performance
 
 - name: Include unblock tasks
   ansible.builtin.include_tasks: unblock.yml
@@ -9,16 +10,7 @@
     - wifi
     - unblock
 
-- name: Include disable powersave tasks
-  ansible.builtin.include_tasks: disable_powersave.yml
-  when: wifi_task == "disable_powersave"
+- name: Disable Wi-Fi power save
+  ansible.builtin.import_tasks: no_powersave.yml
   tags:
     - wifi
-    - disable_powersave
-
-- name: Include no powersave tasks
-  ansible.builtin.include_tasks: no_powersave.yml
-  when: wifi_task == "no_powersave"
-  tags:
-    - wifi
-    - no_powersave
