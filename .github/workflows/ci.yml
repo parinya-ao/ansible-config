@@ -196,6 +196,7 @@ jobs:
             -e "common_install_nvidia_drivers=false" \
             -e "common_configure_custom_dns=false" \
             -e "common_install_d2=false" \
+            -e "locale_install_gui_tools=false" \
             --extra-vars "@ci_vars.yml" 2>/dev/null || true
         env:
           ANSIBLE_FORCE_COLOR: "1"
@@ -214,6 +215,7 @@ jobs:
             -e "common_install_nvidia_drivers=false" \
             -e "common_configure_custom_dns=false" \
             -e "common_install_d2=false" \
+            -e "locale_install_gui_tools=false" \
             --extra-vars "@ci_vars.yml" \
             > idempotence.log 2>&1 || true
 

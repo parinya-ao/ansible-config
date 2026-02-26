@@ -12,6 +12,9 @@ locale_configure_xdg_dirs: true
 locale_configure_input_method: true
 locale_enforce_cli_language: true
 
+# GUI tools installation (skip in CI/headless environments)
+locale_install_gui_tools: true
+
 # =============================================================================
 # System Locale Configuration
 # =============================================================================
