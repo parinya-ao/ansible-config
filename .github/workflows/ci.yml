@@ -2,8 +2,8 @@
 # =============================================================================
 # Production-Grade Ansible CI/CD Pipeline for Fedora Workstation
 # =============================================================================
-# Implements FAANG-level automation best practices including:
-# - Immutable action versioning (SHA-pinned)
+# Implements automation best practices including:
+# - Semantic versioning for GitHub Actions (maintainability focus)
 # - DNF5 compatibility for Fedora 41+
 # - Defense-in-depth security scanning
 # - Stateful idempotency verification via JSON parsing
@@ -40,13 +40,13 @@ jobs:
       security-events: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       # Secret detection with TruffleHog
       - name: TruffleHog Secret Scan
-        uses: trufflesecurity/trufflehog@f334008511dc9eab916aa80b5c82c9ffcf162656 # v3.105.1
+        uses: trufflesecurity/trufflehog@v3
         with:
           path: ./
           base: ${{ github.event_name == 'push' && github.ref_name == github.event.repository.default_branch && 'HEAD~1' ||
@@ -56,7 +56,7 @@ jobs:
 
       # IaC Security with Checkov (Ansible-specific policies)
       - name: Checkov IaC Security Scan
-        uses: bridgecrewio/checkov-action@198460677a288c3a968600d8b746869be74005c0 # v12.2987.0
+        uses: bridgecrewio/checkov-action@v12
         with:
           framework: ansible
           output_format: sarif
@@ -67,7 +67,7 @@ jobs:
 
       # Upload SARIF to GitHub Security tab
       - name: Upload SARIF Results
-        uses: github/codeql-action/upload-sarif@df513076137f8188172828b14b8c9df1b992f7f1 # v3.28.10
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: checkov-results.sarif
@@ -82,17 +82,17 @@ jobs:
       contents: read
     steps:
       - name: Checkout Code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4
 
       # Validate GitHub Actions workflow YAML
       - name: Actionlint (Workflow Validation)
-        uses: rhysd/actionlint-action@733027ef81e975c60233b8a1c93a02242171129b # v1.7.7
+        uses: rhysd/actionlint-action@v1
         with:
           extra_args: -shellcheck
 
       # Setup Python for Ansible linting tools
       - name: Set up Python
-        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
+        uses: actions/setup-python@v5
         with:
           python-version: "3.13"
           cache: 'pip'
@@ -132,11 +132,11 @@ jobs:
       options: --systemd=always --security-opt seccomp=unconfined
     steps:
       - name: Checkout Code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4
 
       # Cache Ansible Collections (deterministic by requirements.yml hash)
       - name: Cache Ansible Collections
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache@v4
         with:
           path: ~/.ansible/collections
           key: ansible-collections-${{ hashFiles('requirements.yml') }}
@@ -145,7 +145,7 @@ jobs:
 
       # Cache Python virtual environment (deterministic by requirements.yml hash)
       - name: Cache Python Venv
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache@v4
         with:
           path: .ansible-venv
           key: python-venv-${{ runner.os }}-3.13-${{ hashFiles('requirements.yml') }}
@@ -283,7 +283,7 @@ jobs:
 
       # Upload logs as artifacts
       - name: Upload Ansible Logs
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cd69 # v4.6.0
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ansible-logs-fedora-${{ matrix.fedora-version }}
