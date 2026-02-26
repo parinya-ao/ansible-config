@@ -30,8 +30,10 @@
 - name: "STATE: Configure keyboard layout via localectl"
   ansible.builtin.command: >
     localectl set-x11-keymap {{ locale_primary_keyboard_layout }}
+  register: locale_keymap_result
+  changed_when: locale_keymap_result.rc == 0
+  failed_when: false
   when: locale_remove_secondary_layouts
-  changed_when: true
 
 - name: "STATE: Configure GNOME input sources (user-level)"
   when: ansible_env.DISPLAY is defined
@@ -100,6 +102,7 @@
   ansible.builtin.command: localectl status
   register: locale_input_status
   changed_when: false
+  failed_when: false
 
 - name: "VERIFY: Show input configuration"
   ansible.builtin.debug:

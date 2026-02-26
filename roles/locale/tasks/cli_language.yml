@@ -103,12 +103,16 @@
   become: false
   register: locale_systemd_reload
   failed_when: false
-  when: ansible_env.XDG_RUNTIME_DIR is defined
+  changed_when: false
+  when:
+    - ansible_env.XDG_RUNTIME_DIR is defined
+    - not (ansible_env.CI is defined or ansible_env.GITHUB_ACTIONS is defined)
 
 - name: "VERIFY: Display current locale environment"
   ansible.builtin.command: locale
   register: locale_current_env
   changed_when: false
+  failed_when: false
   become: false
 
 - name: "VERIFY: Show current locale environment"

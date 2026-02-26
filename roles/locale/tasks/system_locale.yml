@@ -39,14 +39,17 @@
 
 - name: "STATE: Localed configuration must match target locale"
   ansible.builtin.command: localectl set-locale LANG={{ locale_lang }}
+  register: locale_localed_set
   when: locale_system_locale_config.changed or locale_environment_config.changed
-  changed_when: true
+  changed_when: locale_localed_set.rc == 0
+  failed_when: false
   notify: Regenerate locales
 
 - name: "VERIFY: Current locale configuration"
   ansible.builtin.command: localectl status
   register: locale_current_status
   changed_when: false
+  failed_when: false
 
 - name: "VERIFY: Display current locale status"
   ansible.builtin.debug:

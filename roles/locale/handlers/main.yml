@@ -6,7 +6,7 @@
 # Fedora uses systemd-localed for locale management
 # =============================================================================
 
-- name: Restart systemd-localed
+- name: Regenerate locales
   ansible.builtin.systemd:
     name: systemd-localed.service
     state: restarted
