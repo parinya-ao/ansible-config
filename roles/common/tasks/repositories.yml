@@ -18,6 +18,7 @@
     - repositories
     - rpm-fusion
 
+# checkov:skip=CKV2_ANSIBLE_4:RPM Fusion GPG key is embedded within the RPM package itself
 - name: Install RPM Fusion free repository
   ansible.builtin.dnf:
     name: "{{ common_rpm_fusion_free_url }}"
@@ -38,6 +39,7 @@
     - repositories
     - rpm-fusion
 
+# checkov:skip=CKV2_ANSIBLE_4:RPM Fusion GPG key is embedded within the RPM package itself
 - name: Install RPM Fusion nonfree repository
   ansible.builtin.dnf:
     name: "{{ common_rpm_fusion_nonfree_url }}"
