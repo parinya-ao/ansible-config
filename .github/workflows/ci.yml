@@ -128,8 +128,8 @@ jobs:
         fedora-version: ["latest"]
     container:
       image: fedora:${{ matrix.fedora-version }}
-      # Use cgroup v2 mount for systemd without full privileges
-      options: --systemd=always --security-opt seccomp=unconfined
+      # Use standard Docker options for systemd support (not Podman's --systemd flag)
+      options: --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --security-opt seccomp=unconfined
     steps:
       - name: Checkout Code
         uses: actions/checkout@main
