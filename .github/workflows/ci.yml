@@ -230,10 +230,18 @@ jobs:
           # Allow some changed for systemd tasks that legitimately change
           if [ "$FAILED_COUNT" -gt 0 ]; then
               echo "FAILED: Tasks failed during idempotence check"
+              echo "=== FAILED TASKS ==="
+              grep -E '(TASK \[|failed:|fatal:)' idempotence.log | tail -50
               exit 1
           elif [ "$CHANGED_COUNT" -gt 5 ]; then
               echo "FAILED: Too many changed tasks ($CHANGED_COUNT) - idempotency issue detected"
               echo "Note: Up to 5 changed tasks allowed for systemd/container quirks"
+              echo ""
+              echo "=== CHANGED TASKS (showing last 30) ==="
+              grep -E 'TASK \[.*\] \*\*\*' idempotence.log | grep -A1 'changed:' | head -60
+              echo ""
+              echo "=== FULL CHANGE DETAILS ==="
+              grep -B2 'changed:' idempotence.log | grep -E '(TASK \[|changed:)' | tail -60
               exit 1
           else
               echo "PASSED: Idempotence check within acceptable tolerance"

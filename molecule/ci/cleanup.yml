@@ -6,6 +6,7 @@
 - name: Cleanup test artifacts
   hosts: all
   gather_facts: false
+  ignore_unreachable: true
   tasks:
     - name: Remove test directories
       ansible.builtin.file:

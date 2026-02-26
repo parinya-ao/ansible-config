@@ -35,7 +35,7 @@
   changed_when: false
   failed_when: false
   when:
-    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_repo.stat.exists
     - lookup('env', 'CI') != 'true'
 
 - name: Ensure python3-psutil is installed for dconf module
@@ -43,7 +43,7 @@
     name: python3-psutil
     state: present
   when:
-    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_repo.stat.exists
     - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Configure Ctrl+Alt+T keyboard shortcut for Ghostty
@@ -52,7 +52,7 @@
     value: "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
     state: present
   when:
-    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_repo.stat.exists
     - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Set Ghostty keyboard shortcut name
@@ -61,7 +61,7 @@
     value: "'Ghostty Terminal'"
     state: present
   when:
-    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_repo.stat.exists
     - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Set Ghostty keyboard shortcut command
@@ -70,7 +70,7 @@
     value: "'ghostty'"
     state: present
   when:
-    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_repo.stat.exists
     - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Set Ghostty keyboard shortcut binding (Ctrl+Alt+T)
@@ -79,7 +79,7 @@
     value: "'<Ctrl><Alt>t'"
     state: present
   when:
-    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_enable is succeeded | default(false)
+    - desktop_ghostty_binary.rc == 0 or desktop_ghostty_copr_repo.stat.exists
     - desktop_ghostty_dbus_check.rc is defined and desktop_ghostty_dbus_check.rc == 0
 
 - name: Ensure Ghostty config directory exists

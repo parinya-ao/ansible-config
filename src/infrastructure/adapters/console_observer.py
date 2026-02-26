@@ -154,7 +154,7 @@ class ConsoleObserverAdapter(ObserverPort):
         self.log(LogLevel.INFO, self._colorize("=" * 60, self.CYAN + self.BOLD))
 
         status_color = self.GREEN if summary["success"] else self.RED
-        self.log(LogLevel.INFO, f"  Status:           {self._colorize(summary['success'].upper(), status_color)}")
+        self.log(LogLevel.INFO, f"  Status:           {self._colorize(str(summary['success']).upper(), status_color)}")
         self.log(LogLevel.INFO, f"  Total iterations: {summary['total_iterations']}")
         self.log(LogLevel.INFO, f"  Fixes applied:    {summary['total_fixes']}")
         self.log(LogLevel.INFO, f"  Errors handled:   {summary['errors_count']}")
