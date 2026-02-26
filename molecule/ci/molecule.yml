@@ -13,7 +13,7 @@ driver:
 
 platforms:
   - name: fedora-ci
-    image: registry.fedoraproject.org/fedora:latest
+    image: quay.io/fedora/fedora-toolbox:43
     # Use pre-built image
     pre_build_image: true
     # Keep container running with sleep infinity

@@ -12,8 +12,8 @@ driver:
   name: podman
 
 platforms:
-  - name: fedora-latest
-    image: registry.fedoraproject.org/fedora:latest
+  - name: fedora-toolbox
+    image: quay.io/fedora/fedora-toolbox:43
     # Use pre-built image
     pre_build_image: true
     # Keep container running with sleep infinity
