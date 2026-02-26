@@ -159,11 +159,8 @@ jobs:
       # Bootstrap Python environment with DNF5 bindings for Fedora 41+
       - name: Bootstrap Python Environment
         run: |
-          # Install Python 3.13 and DNF5 bindings (required for Fedora 41+)
-          dnf install -y python3.13 python3.13-pip python3-libdnf5
-
-          # Ensure python3 points to python3.13
-          alternatives --set python3 /usr/bin/python3.13 || true
+          # Install Python 3 and pip (Fedora's python3 is already 3.13+ in latest)
+          dnf install -y python3 python3-pip python3-libdnf5
 
       # Install Ansible and Collections
       - name: Install Ansible and Collections
