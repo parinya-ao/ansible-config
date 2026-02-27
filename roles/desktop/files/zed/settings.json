@@ -9,25 +9,109 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+    "ui_font_family": "Inter",
+    "buffer_font_family": "Intel One Mono",
+    "ui_font_size": 16,
+    "buffer_font_size": 15,
+    "theme": {
+        "mode": "system",
+        "light": "One Light",
+        "dark": "One Dark"
+    },
+    "vim_mode": true,
+
     "use_on_type_format": true,
     "ensure_final_newline_on_save": true,
     "remove_trailing_whitespace_on_save": true,
     "format_on_save": "on",
+    "autosave": "on_focus_change",
+    "auto_signature_help": true,
+    "show_completions_on_input": true,
+
+    "languages": {
+        "Python": {
+            "language_servers": ["pyright", "ruff"],
+            "formatter": "language_server",
+            "format_on_save": "on"
+        },
+        "TypeScript": {
+            "language_servers": ["vtsls", "eslint"],
+            "formatter": "language_server"
+        },
+        "YAML": {
+            "language_servers": ["yaml-language-server"],
+            "tab_size": 2
+        },
+        "Ansible": {
+            "language_servers": ["ansible-language-server"]
+        },
+        "TOML": {
+            "language_servers": ["taplo"]
+        }
+    },
+
     "lsp": {
+        "pyright": {
+            "settings": {
+                "python": {
+                    "analysis": {
+                        "typeCheckingMode": "strict",
+                        "autoSearchPaths": true,
+                        "useLibraryCodeForTypes": true,
+                        "diagnosticMode": "workspace"
+                    }
+                }
+            }
+        },
+        "ruff": {
+            "initialization_options": {
+                "settings": {
+                    "args": ["--select=E,F,I,UP", "--fix"]
+                }
+            }
+        },
         "vtsls": {
             "settings": {
                 "typescript": {
-                    "updateImportsOnFileMove": {
-                        "enabled": "always",
-                    },
+                    "updateImportsOnFileMove": { "enabled": "always" },
+                    "inlayHints": {
+                        "parameterNames": {
+                            "enabled": "all",
+                            "suppressWhenArgumentMatchesName": true
+                        },
+                        "parameterTypes": { "enabled": true },
+                        "variableTypes": { "enabled": true },
+                        "propertyDeclarationTypes": { "enabled": true },
+                        "functionLikeReturnTypes": { "enabled": true },
+                        "enumMemberValues": { "enabled": true }
+                    }
                 },
                 "javascript": {
-                    "updateImportsOnFileMove": {
-                        "enabled": "always",
+                    "updateImportsOnFileMove": { "enabled": "always" }
+                }
+            }
+        },
+        "yaml-language-server": {
+            "settings": {
+                "yaml": {
+                    "schemaStore": {
+                        "enable": true,
+                        "url": "https://www.schemastore.org/api/json/catalog.json"
                     },
-                },
-            },
-            "enable_lsp_tasks": true,
+                    "format": { "enable": true, "singleQuote": true },
+                    "validate": true,
+                    "hover": true
+                }
+            }
+        },
+        "ansible-language-server": {
+            "settings": {
+                "ansible": {
+                    "validation": {
+                        "lint": { "enabled": true, "path": "ansible-lint" }
+                    }
+                }
+            }
         },
         "discord_presence": {
             "initialization_options": {
@@ -43,45 +127,23 @@
                 "idle": {
                     "timeout": 300,
                     "action": "change_activity",
-                    "state": "Idling",
-                },
-            },
-        },
+                    "state": "Idling"
+                }
+            }
+        }
     },
-    "hard_tabs": false,
-    "tab_size": 4,
+
     "agent": {
-        "tool_permissions": {
-            "tools": {
-                "create_directory": {
-                    "default_mode": "allow",
-                },
-                "delete_path": {
-                    "default_mode": "allow",
-                },
-                "move_path": {
-                    "default_mode": "allow",
-                },
-                "terminal": {
-                    "always_allow": [
-                        {
-                            "pattern": "^cat\\s",
-                        },
-                    ],
-                    "default_mode": "allow",
-                },
-            },
-        },
         "default_profile": "agent",
         "profiles": {
             "agent": {
                 "default_model": {
-                    "provider": "GLM",
-                    "model": "GLM-4.7",
+                    "provider": "copilot_chat",
+                    "model": "claude-haiku-4.5",
+                    "enable_thinking": false
                 },
                 "name": "agent",
                 "tools": {
-                    "thinking": true,
                     "copy_path": true,
                     "create_directory": true,
                     "delete_path": true,
@@ -89,27 +151,38 @@
                     "edit_file": true,
                     "fetch": true,
                     "find_path": true,
-                    "save_file": true,
-                    "terminal": true,
-                    "restore_file_from_disk": true,
-                    "read_file": true,
-                    "open": true,
-                    "now": true,
-                    "move_path": true,
-                    "list_directory": true,
                     "grep": true,
+                    "list_directory": true,
+                    "move_path": true,
+                    "now": true,
+                    "open": true,
+                    "read_file": true,
+                    "restore_file_from_disk": true,
+                    "save_file": true,
+                    "terminal": true
                 },
                 "enable_all_context_servers": false,
-                "context_servers": {},
-            },
+                "context_servers": {
+                    "mcp-server-context7": {
+                        "tools": {
+                            "query-docs": true,
+                            "resolve-library-id": true
+                        }
+                    },
+                    "mcp-server-sequential-thinking": {
+                        "tools": {
+                            "sequentialthinking": true
+                        }
+                    }
+                }
+            }
         },
         "default_model": {
             "provider": "copilot_chat",
-            "model": "claude-sonnet-4.5",
-        },
-        "favorite_models": [],
-        "model_parameters": [],
+            "model": "gpt-4o"
+        }
     },
+
     "language_models": {
         "openai_compatible": {
             "GLM": {
@@ -125,47 +198,31 @@
                             "images": false,
                             "parallel_tool_calls": false,
                             "prompt_cache_key": false,
-                            "chat_completions": true,
-                        },
-                    },
-                ],
-            },
-        },
+                            "chat_completions": true
+                        }
+                    }
+                ]
+            }
+        }
     },
+
     "context_servers": {
         "mcp-server-context7": {
             "enabled": true,
             "remote": false,
-            "settings": {},
-        },
+            "settings": {}
+        }
     },
-    "ui_font_family": "Inter",
-    "buffer_line_height": "comfortable",
-    "buffer_font_family": "Intel One Mono",
-    "audio": {
-        "experimental.auto_speaker_volume": false,
-    },
-    "auto_signature_help": false,
-    "autosave": "off",
-    "vim_mode": true,
-    "ui_font_size": 16,
-    "buffer_font_size": 15,
-    "theme": {
-        "mode": "system",
-        "light": "One Light",
-        "dark": "One Dark",
-    },
-    "show_completions_on_input": true,
-    "show_edit_predictions": false,
+
     "agent_servers": {
         "github-copilot": {
-            "type": "registry",
+            "type": "registry"
         },
         "Kimi Code CLI": {
             "type": "custom",
             "command": "kimi",
             "args": ["acp"],
-            "env": {},
-        },
-    },
+            "env": {}
+        }
+    }
 }

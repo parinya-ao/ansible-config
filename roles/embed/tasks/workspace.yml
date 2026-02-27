@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Create embedded development workspace directory
+
+- name: Create embed workspace directory
+  ansible.builtin.file:
+    path: "{{ embed_workspace_dir }}"
+    state: directory
+    owner: "{{ embed_target_user }}"
+    group: "{{ embed_target_user }}"
+    mode: "0755"
+  become: true
+
+- name: Display workspace location
+  ansible.builtin.debug:
+    msg: "Embedded workspace created at: {{ embed_workspace_dir }}"

@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Default variables for embed role
+# These are low-priority variables that can be overridden by playbooks
+
+# Feature flags for conditional role execution
+embed_install_arm_toolchain: true
+embed_install_stm32cubemx: true
+embed_install_esp_tools: true
+embed_install_serial_tools: true
+embed_configure_dialout_group: true
+
+# ARM GCC toolchain packages (for STM32, ARM Cortex-M development)
+embed_arm_toolchain_packages:
+  - arm-none-eabi-gcc-cs
+  - arm-none-eabi-binutils-cs
+  - arm-none-eabi-newlib
+
+# STM32CubeMX Flatpak configuration
+embed_stm32cubemx_flatpak_id: com.st.STM32CubeMX
+embed_stm32cubemx_flatpak_remote: flathub
+embed_stm32cubemx_flatpak_repo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+
+# ESP development tools (for ESP32/ESP8266)
+embed_esp_tools:
+  - esptool
+
+# Serial debugging tools
+embed_serial_tools:
+  - minicom
+
+# Workspace configuration
+embed_workspace_dir: "{{ embed_target_home }}/develop/embed"

@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Install ESP development tools (ESP32/ESP8266)
+
+- name: Install ESP tools packages
+  ansible.builtin.dnf:
+    name: "{{ embed_esp_tools }}"
+    state: present
+  become: true
+
+- name: Verify esptool installation
+  ansible.builtin.command: esptool version
+  register: embed_esptool_version
+  changed_when: false
+  failed_when: embed_esptool_version.rc != 0
+
+- name: Display esptool version
+  ansible.builtin.debug:
+    msg: "{{ embed_esptool_version.stdout }}"

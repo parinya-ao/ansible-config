@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Install ARM GCC toolchain for STM32/ARM Cortex-M development
+
+- name: Install ARM GCC toolchain packages
+  ansible.builtin.dnf:
+    name: "{{ embed_arm_toolchain_packages }}"
+    state: present
+  become: true
+
+- name: Verify ARM GCC installation
+  ansible.builtin.command: arm-none-eabi-gcc --version
+  register: embed_arm_gcc_version
+  changed_when: false
+  failed_when: embed_arm_gcc_version.rc != 0
+
+- name: Display ARM GCC version
+  ansible.builtin.debug:
+    msg: "{{ embed_arm_gcc_version.stdout_lines[0] }}"

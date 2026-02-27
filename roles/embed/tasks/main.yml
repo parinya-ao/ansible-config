@@ -1,0 +1,90 @@
+# SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/embed
+# Embedded development environment setup role
+
+# Resolve the real (non-root) user and home directory.
+# When the playbook runs with become: true, ansible_facts['user_dir'] and
+# ansible_facts['user_id'] resolve to root. We need the actual invoking user
+# so that per-user tools are installed into the correct home directory.
+- name: Determine the real (non-root) target user
+  ansible.builtin.set_fact:
+    embed_target_user: "{{ ansible_env.SUDO_USER | default(ansible_facts['user_id']) }}"
+  tags:
+    - always
+
+- name: Look up target user passwd entry
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ embed_target_user }}"
+  tags:
+    - always
+
+- name: Set target user home directory
+  ansible.builtin.set_fact:
+    embed_target_home: "{{ ansible_facts.getent_passwd[embed_target_user][4] }}"
+  tags:
+    - always
+
+- name: Display embedded development setup info
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "Embedded Development Environment Setup"
+      - "=========================================="
+      - "Target user: {{ embed_target_user }}"
+      - "Target home: {{ embed_target_home }}"
+      - "ARM toolchain: {{ 'Enabled' if embed_install_arm_toolchain else 'Disabled' }}"
+      - "STM32CubeMX: {{ 'Enabled' if embed_install_stm32cubemx else 'Disabled' }}"
+      - "ESP tools: {{ 'Enabled' if embed_install_esp_tools else 'Disabled' }}"
+      - "Serial tools: {{ 'Enabled' if embed_install_serial_tools else 'Disabled' }}"
+      - "Dialout group: {{ 'Enabled' if embed_configure_dialout_group else 'Disabled' }}"
+      - "=========================================="
+  tags:
+    - always
+
+- name: Install ARM GCC toolchain
+  ansible.builtin.import_tasks: arm-toolchain.yml
+  when: embed_install_arm_toolchain
+  tags:
+    - embed
+    - arm
+    - toolchain
+
+- name: Install ESP development tools
+  ansible.builtin.import_tasks: esp-tools.yml
+  when: embed_install_esp_tools
+  tags:
+    - embed
+    - esp
+    - esptool
+
+- name: Install serial debugging tools
+  ansible.builtin.import_tasks: serial-tools.yml
+  when: embed_install_serial_tools
+  tags:
+    - embed
+    - serial
+    - debug
+
+- name: Configure dialout group for serial access
+  ansible.builtin.import_tasks: dialout-group.yml
+  when: embed_configure_dialout_group
+  tags:
+    - embed
+    - serial
+    - permissions
+
+- name: Install STM32CubeMX via Flatpak
+  ansible.builtin.import_tasks: stm32cubemx.yml
+  when: embed_install_stm32cubemx
+  tags:
+    - embed
+    - stm32
+    - flatpak
+
+- name: Create workspace directory
+  ansible.builtin.import_tasks: workspace.yml
+  tags:
+    - embed
+    - workspace

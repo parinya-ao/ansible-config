@@ -38,6 +38,7 @@
           - "  7. font        - Font installation"
           - "  8. wifi        - Wi-Fi configuration and optimization"
           - "  9. multimedia  - Multimedia codecs and video acceleration"
+          - " 10. embed       - Embedded development (ARM toolchain, STM32CubeMX)"
           - "=========================================="
           - "Note: Fish shell will be installed first and used for all subsequent tasks"
 
@@ -96,6 +97,13 @@
         - multimedia
         - codecs
 
+    - role: embed
+      tags:
+        - embed
+        - embedded
+        - stm32
+        - esp
+
   # Post-tasks: Display summary after running roles
   post_tasks:
     - name: Display completion summary
@@ -116,12 +124,16 @@
           - "Next Steps:"
           - "=========================================="
           - "1. Log out and log back in for group changes"
-          - "   (e.g., docker group)"
+          - "   (e.g., docker, dialout groups)"
           - "2. Verify installations:"
           - "   - docker --version"
           - "   - node --version"
           - "   - cargo --version"
           - "   - ghostty --version"
+          - "   - arm-none-eabi-gcc --version"
           - "3. Run 'flatpak list' to see installed apps"
           - "4. Run 'fc-list' to see installed fonts"
+          - "5. For embedded dev:"
+          - "   - flatpak run com.st.STM32CubeMX"
+          - "   - minicom -D /dev/ttyACM0 -b 115200"
           - "=========================================="

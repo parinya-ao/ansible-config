@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Install STM32CubeMX via Flatpak
+
+- name: Add Flathub remote
+  community.general.flatpak_remote:
+    name: "{{ embed_stm32cubemx_flatpak_remote }}"
+    state: present
+    flatpakrepo_url: "{{ embed_stm32cubemx_flatpak_repo_url }}"
+  become: true
+
+- name: Install STM32CubeMX via Flatpak
+  community.general.flatpak:
+    name: "{{ embed_stm32cubemx_flatpak_id }}"
+    state: present
+  become: true
+  register: embed_stm32cubemx_install
+
+- name: Verify STM32CubeMX installation
+  ansible.builtin.command: flatpak list --app
+  register: embed_flatpak_list
+  changed_when: false
+
+- name: Display STM32CubeMX installation status
+  ansible.builtin.debug:
+    msg: >-
+      STM32CubeMX {{
+      'installed successfully' if embed_stm32cubemx_flatpak_id in embed_flatpak_list.stdout
+      else 'installation may have failed'
+      }}
+
+- name: Display STM32CubeMX launch command
+  ansible.builtin.debug:
+    msg: "Launch STM32CubeMX with: flatpak run {{ embed_stm32cubemx_flatpak_id }}"
+  when: embed_stm32cubemx_flatpak_id in embed_flatpak_list.stdout

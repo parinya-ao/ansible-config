@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Configure dialout group for serial port access
+
+- name: Add target user to dialout group
+  ansible.builtin.user:
+    name: "{{ embed_target_user }}"
+    groups: dialout
+    append: true
+  become: true
+
+- name: Verify dialout group membership
+  ansible.builtin.command: groups {{ embed_target_user }}
+  register: embed_user_groups
+  changed_when: false
+
+- name: Display group membership info
+  ansible.builtin.debug:
+    msg:
+      - "User {{ embed_target_user }} groups: {{ embed_user_groups.stdout }}"
+      - "Note: You may need to log out and log back in for group changes to take effect."
