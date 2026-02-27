@@ -45,6 +45,14 @@
     - developers
     - compilers
 
+# Neovim configuration
+- name: Configure Neovim with LazyVim
+  ansible.builtin.import_tasks: neovim.yml
+  when: developer_install_lazyvim
+  tags:
+    - developers
+    - neovim
+
 # Bun runtime
 - name: Install Bun
   ansible.builtin.import_tasks: bun.yml

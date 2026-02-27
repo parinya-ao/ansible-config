@@ -1,0 +1,20 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Neovim configuration tasks
+# Installs LazyVim starter configuration
+
+- name: Check if LazyVim config exists
+  ansible.builtin.stat:
+    path: "{{ developer_target_home }}/.config/nvim"
+  register: developer_neovim_config_dir
+  become_user: "{{ developer_target_user }}"
+
+- name: Clone LazyVim starter configuration
+  ansible.builtin.git:
+    repo: https://github.com/LazyVim/starter
+    dest: "{{ developer_target_home }}/.config/nvim"
+    force: false
+  become_user: "{{ developer_target_user }}"
+  when:
+    - developer_install_lazyvim | bool
+    - not developer_neovim_config_dir.stat.exists
