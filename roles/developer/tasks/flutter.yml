@@ -35,6 +35,10 @@
       - xz
       - zip
       - mesa-libGLU
+      - ninja-build
+      - gtk3-devel
+      - mesa-utils
+      - google-chrome-stable
     state: present
   become: true
   tags:
@@ -77,6 +81,29 @@
     path: "{{ developer_target_home }}/.bashrc"
     line: 'export PATH="{{ developer_target_home }}/develop/flutter/bin:$PATH"'
     regexp: 'export PATH=".*flutter/bin:\$PATH"'
+    state: present
+    create: true
+    owner: "{{ developer_target_user }}"
+    mode: "0644"
+  tags:
+    - flutter
+    - mobile
+
+- name: Ensure Fish config directory exists
+  ansible.builtin.file:
+    path: "{{ developer_target_home }}/.config/fish"
+    state: directory
+    mode: "0755"
+    owner: "{{ developer_target_user }}"
+  tags:
+    - flutter
+    - mobile
+
+- name: Add Flutter to Fish PATH
+  ansible.builtin.lineinfile:
+    path: "{{ developer_target_home }}/.config/fish/config.fish"
+    line: 'fish_add_path {{ developer_target_home }}/develop/flutter/bin'
+    regexp: 'fish_add_path.*flutter/bin'
     state: present
     create: true
     owner: "{{ developer_target_user }}"
