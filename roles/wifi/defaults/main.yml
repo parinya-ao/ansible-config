@@ -65,3 +65,42 @@ wifi_enable_bluetooth_optimization: true
 # =============================================================================
 # Disable USB autosuspend for stable USB tethering
 wifi_disable_usb_autosuspend: true
+
+# =============================================================================
+# GRUB Configuration
+# =============================================================================
+# Configure /etc/default/grub with custom settings
+# When enabled, overrides the default GRUB configuration
+wifi_configure_grub: true
+
+# GRUB timeout in seconds
+wifi_grub_timeout: 3
+
+# GRUB default entry (saved = last used)
+wifi_grub_default: "saved"
+
+# Additional kernel command line arguments
+# Note: iwlwifi.power_save=0 is added automatically
+wifi_grub_cmdline_linux: "systemd.show_status=true loglevel=3"
+
+# =============================================================================
+# Service Disabling Options
+# =============================================================================
+# Disable dnf5-automatic.service (automatic package updates)
+wifi_disable_dnf5_automatic: true
+
+# Disable CUPS printing service and socket (if no printer is used)
+wifi_disable_cups: true
+
+# Disable avahi-daemon (mDNS/DNS-SD network discovery)
+wifi_disable_avahi: true
+
+# Disable ModemManager (4G/SIM modem management)
+wifi_disable_modemmanager: true
+
+# =============================================================================
+# Boot Optimization Options
+# =============================================================================
+# Remove wpa_supplicant from boot critical path
+# This prevents network services from blocking graphical target (~2s faster boot)
+wifi_optimize_boot_critical_path: true

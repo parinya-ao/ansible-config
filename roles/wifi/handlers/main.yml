@@ -11,7 +11,15 @@
   ansible.builtin.command: sysctl --system
   changed_when: false
 
+- name: Regenerate GRUB config
+  ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
+  changed_when: false
+
 - name: Reboot if needed
   ansible.builtin.reboot:
     msg: "Rebooting to apply Wi-Fi configuration"
     reboot_timeout: 600
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
