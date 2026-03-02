@@ -1,0 +1,21 @@
+---
+# SPDX-License-Identifier: MIT-0
+# GRUB configuration for Wi-Fi power management
+
+- name: Configure /etc/default/grub
+  ansible.builtin.copy:
+    dest: /etc/default/grub
+    mode: "0644"
+    owner: root
+    group: root
+    content: |
+      GRUB_TIMEOUT={{ wifi_grub_timeout }}
+      GRUB_DISTRIBUTOR="$(sed 's, release .*$,,g' /etc/system-release)"
+      GRUB_DEFAULT={{ wifi_grub_default }}
+      GRUB_DISABLE_SUBMENU=true
+      GRUB_TERMINAL_OUTPUT="console"
+      GRUB_CMDLINE_LINUX="{{ wifi_grub_cmdline_linux }} iwlwifi.power_save=0"
+      GRUB_DISABLE_RECOVERY="true"
+      GRUB_ENABLE_BLSCFG=true
+  notify: Regenerate GRUB config
+  when: wifi_configure_grub
