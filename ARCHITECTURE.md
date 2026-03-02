@@ -37,6 +37,7 @@ practices with role-based modularity and idempotent operations.
 │   ├── git/                   # Git configuration with SSH key signing
 │   ├── font/                  # Programming fonts (JetBrains Mono, Fira Code, Inter, Sarabun)
 │   ├── wifi/                  # Wi-Fi performance optimization
+│   ├── power/                 # TLP power management (disabled by default)
 │   └── multimedia/            # Codecs, FFmpeg, hardware video acceleration
 │
 ├── .github/                   # GitHub Actions CI/CD
@@ -229,7 +230,23 @@ font files for development and multilingual support.
 
 **Key Tasks:** NetworkManager and wireless driver configuration
 
-#### 3.2.9. multimedia (Codecs & Hardware Acceleration)
+#### 3.2.9. power (TLP Power Management)
+
+**Description:** Installs and configures TLP for advanced power management and battery optimization.
+Disabled by default (`power_install_tlp: false`).
+
+**Key Tasks:**
+- Disables and masks `power-profiles-daemon` (GNOME default)
+- Installs TLP packages: `tlp`, `tlp-pd`, `tlp-rdw`
+- Configures SELinux boolean `tlp_can_write_to_d` for Fedora 38+ compatibility
+- Deploys optimized `/etc/tlp.conf` with battery charge thresholds
+
+**Variables:** `power_install_tlp`, `power_cpu_scaling_governor_on_ac`, `power_start_charge_thresh_bat0`, `power_stop_charge_thresh_bat0`
+
+**Feature Toggles:**
+- `power_install_tlp` - Main enable/disable toggle
+
+#### 3.2.10. multimedia (Codecs & Hardware Acceleration)
 
 **Description:** Installs multimedia codecs, FFmpeg, and enables hardware-accelerated
 video decoding for smooth media playback.
