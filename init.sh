@@ -6,7 +6,7 @@
 #                     ANSIBLE CONFIG - BOOTSTRAP SCRIPT                        #
 #         Minimal bootstrapper for Fedora Workstation provisioning             #
 #                                                                               #
-# Philosophy: Bash handles environment setup only. Ansible handles all logic.  #
+# Philosophy: Use system Ansible package via DNF                               #
 #################################################################################
 
 set -euo pipefail
@@ -16,11 +16,9 @@ set -euo pipefail
 #################################################################################
 
 readonly PROGDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly VENV_DIR="${PROGDIR}/.ansible-venv"
 readonly REQUIREMENTS="${PROGDIR}/requirements.yml"
 readonly INVENTORY="${PROGDIR}/inventory"
 readonly PLAYBOOK="${PROGDIR}/playbook.yaml"
-readonly ANSIBLE_VERSION="${ANSIBLE_VERSION:-2.18}"
 
 #################################################################################
 #                              HELPER FUNCTIONS                                  #
@@ -39,31 +37,16 @@ print_error() {
 #                              MAIN WORKFLOW                                     #
 #################################################################################
 
-# Step 1: Bootstrap Python virtual environment
-setup_venv() {
-    print_step "Phase 1: Bootstrapping Python Environment"
+# Step 1: Install Ansible via DNF
+install_ansible() {
+    print_step "Phase 1: Installing Ansible via DNF"
 
-    # Verify venv integrity, not just directory existence
-    if [[ ! -f "${VENV_DIR}/bin/activate" ]]; then
-        echo "Virtual environment missing or invalid. Recreating..."
-        rm -rf "$VENV_DIR"
-        python3 -m venv "$VENV_DIR"
+    if ! command -v ansible-playbook &> /dev/null; then
+        echo "Installing ansible package..."
+        sudo dnf install -y ansible
     else
-        echo "Virtual environment exists at ${VENV_DIR}"
+        echo "Ansible already installed"
     fi
-
-    # shellcheck source=/dev/null
-    source "${VENV_DIR}/bin/activate"
-
-    # Ensure we are actually in the venv before proceeding
-    if [[ "$VIRTUAL_ENV" != "$VENV_DIR" ]]; then
-        print_error "Failed to activate virtual environment."
-        exit 1
-    fi
-
-    echo "Upgrading pip and installing ansible-core..."
-    # Combine installations to reduce round-trips
-    pip install --quiet --upgrade pip "ansible-core>=${ANSIBLE_VERSION},<2.19"
 }
 
 # Step 2: Install Ansible Galaxy collections
@@ -94,7 +77,7 @@ run_playbook() {
 #################################################################################
 
 main() {
-    setup_venv
+    install_ansible
     install_collections
     run_playbook "$@"
 }
