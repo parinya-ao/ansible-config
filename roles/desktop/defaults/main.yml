@@ -38,6 +38,7 @@ desktop_packages:
   - xclip
   - gnome-extensions-app
   - gnome-tweaks
+  - podman-compose
 
 # Starship configuration
 desktop_starship_install: true
