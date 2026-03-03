@@ -3,7 +3,7 @@
 # System update tasks
 
 - name: Update all packages (refresh metadata + upgrade)
-  ansible.builtin.command: dnf upgrade --refresh -y
+  ansible.builtin.command: dnf upgrade --refresh -y -v
   become: true
   when:
     - common_system_update_enabled
