@@ -1,0 +1,189 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Level 2: Snapshot & Rollback - Btrfs + Snapper
+
+- name: Check if Btrfs is the root filesystem
+  ansible.builtin.command:
+    cmd: findmnt -n -o FSTYPE /
+  register: stability_root_fstype
+  changed_when: false
+  when:
+    - stability_enable_level2_snapshot | bool
+    - stability_snapper_enable | bool
+  tags:
+    - stability
+    - level2
+    - snapper
+
+- name: Display filesystem type warning
+  ansible.builtin.debug:
+    msg: |
+      WARNING: Root filesystem is {{ stability_root_fstype.stdout }}, not Btrfs.
+      Snapper snapshot functionality requires Btrfs filesystem.
+      Skipping Level 2 (Snapshot & Rollback) configuration.
+  when:
+    - stability_enable_level2_snapshot | bool
+    - stability_snapper_enable | bool
+    - stability_root_fstype.stdout != "btrfs"
+  tags:
+    - stability
+    - level2
+    - snapper
+
+- name: Install Snapper and Btrfs tools
+  ansible.builtin.dnf:
+    name: "{{ stability_snapper_packages }}"
+    state: present
+  become: true
+  when:
+    - stability_enable_level2_snapshot | bool
+    - stability_snapper_enable | bool
+    - stability_root_fstype.stdout == "btrfs"
+  tags:
+    - stability
+    - level2
+    - snapper
+
+# =============================================================================
+# Create Snapper configurations
+# =============================================================================
+- name: Create Snapper configuration for each path
+  ansible.builtin.command:
+    cmd: snapper -c {{ item.name }} create-config {{ item.path }}
+    creates: /etc/snapper/configs/{{ item.name }}
+  become: true
+  loop: "{{ stability_snapper_configs }}"
+  when:
+    - stability_enable_level2_snapshot | bool
+    - stability_snapper_enable | bool
+    - stability_root_fstype.stdout == "btrfs"
+  notify:
+    - Refresh GRUB for snapshots
+  tags:
+    - stability
+    - level2
+    - snapper
+
+- name: Set Snapper timeline configuration vars
+  ansible.builtin.set_fact:
+    stability_snapper_timeline_config:
+      - {name: "root", param: "TIMELINE_CREATE", value: "{{ stability_snapper_timeline_enable | bool | lower }}"}
+      - {name: "root", param: "TIMELINE_HOURLY", value: "{{ stability_snapper_timeline_hourly | bool | lower }}"}
+      - {name: "root", param: "TIMELINE_DAILY", value: "{{ stability_snapper_timeline_daily | bool | lower }}"}
+      - {name: "root", param: "TIMELINE_WEEKLY", value: "{{ stability_snapper_timeline_weekly | bool | lower }}"}
+      - {name: "root", param: "TIMELINE_MONTHLY", value: "{{ stability_snapper_timeline_monthly | bool | lower }}"}
+      - {name: "root", param: "TIMELINE_LIMIT_HOURLY", value: "{{ stability_snapper_timeline_limit_hourly }}"}
+      - {name: "root", param: "TIMELINE_LIMIT_DAILY", value: "{{ stability_snapper_timeline_limit_daily }}"}
+      - {name: "root", param: "TIMELINE_LIMIT_WEEKLY", value: "{{ stability_snapper_timeline_limit_weekly }}"}
+      - {name: "root", param: "TIMELINE_LIMIT_MONTHLY", value: "{{ stability_snapper_timeline_limit_monthly }}"}
+      - {name: "home", param: "TIMELINE_CREATE", value: "{{ stability_snapper_timeline_enable | bool | lower }}"}
+      - {name: "home", param: "TIMELINE_HOURLY", value: "{{ stability_snapper_timeline_hourly | bool | lower }}"}
+      - {name: "home", param: "TIMELINE_DAILY", value: "{{ stability_snapper_timeline_daily | bool | lower }}"}
+      - {name: "home", param: "TIMELINE_WEEKLY", value: "{{ stability_snapper_timeline_weekly | bool | lower }}"}
+      - {name: "home", param: "TIMELINE_MONTHLY", value: "{{ stability_snapper_timeline_monthly | bool | lower }}"}
+      - {name: "home", param: "TIMELINE_LIMIT_HOURLY", value: "{{ stability_snapper_timeline_limit_hourly }}"}
+      - {name: "home", param: "TIMELINE_LIMIT_DAILY", value: "{{ stability_snapper_timeline_limit_daily }}"}
+      - {name: "home", param: "TIMELINE_LIMIT_WEEKLY", value: "{{ stability_snapper_timeline_limit_weekly }}"}
+      - {name: "home", param: "TIMELINE_LIMIT_MONTHLY", value: "{{ stability_snapper_timeline_limit_monthly }}"}
+  when:
+    - stability_enable_level2_snapshot | bool
+    - stability_snapper_enable | bool
+    - stability_root_fstype.stdout == "btrfs"
+  tags:
+    - stability
+    - level2
+    - snapper
+
+- name: Configure Snapper timeline settings
+  ansible.builtin.lineinfile:
+    path: /etc/snapper/configs/{{ item.name }}
+    regexp: "^{{ item.param }}\\s*="
+    line: '{{ item.param }}="{{ item.value }}"'
+  loop: "{{ stability_snapper_timeline_config }}"
+  become: true
+  when:
+    - stability_enable_level2_snapshot | bool
+    - stability_snapper_enable | bool
+    - stability_root_fstype.stdout == "btrfs"
+  notify:
+    - Refresh GRUB for snapshots
+  tags:
+    - stability
+    - level2
+    - snapper
+
+# =============================================================================
+# Enable snapper dnf plugin
+# =============================================================================
+- name: Install dnf-plugin-snapper
+  ansible.builtin.dnf:
+    name: dnf-plugin-snapper
+    state: present
+  become: true
+  when:
+    - stability_enable_level2_snapshot | bool
+    - stability_snapper_enable | bool
+    - stability_snapper_dnf_plugin_enable | bool
+    - stability_root_fstype.stdout == "btrfs"
+  tags:
+    - stability
+    - level2
+    - snapper
+
+- name: Enable snapper dnf plugin
+  ansible.builtin.lineinfile:
+    path: /etc/dnf/plugins/snapper.conf
+    regexp: "^enabled\\s*="
+    line: "enabled={{ stability_snapper_enable | bool | int }}"
+    create: true
+    mode: "0644"
+  become: true
+  when:
+    - stability_enable_level2_snapshot | bool
+    - stability_snapper_enable | bool
+    - stability_snapper_dnf_plugin_enable | bool
+    - stability_root_fstype.stdout == "btrfs"
+  tags:
+    - stability
+    - level2
+    - snapper
+
+- name: Enable and start snapper timeline cleanup
+  ansible.builtin.systemd:
+    name: "snapper-{{ item }}.timer"
+    enabled: true
+    state: started
+    daemon_reload: true
+  become: true
+  loop: ["cleanup", "timeline"]
+  when:
+    - stability_enable_level2_snapshot | bool
+    - stability_snapper_enable | bool
+    - stability_root_fstype.stdout == "btrfs"
+  tags:
+    - stability
+    - level2
+    - snapper
+
+- name: Create Snapper snapshot success message
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "Snapper Snapshot & Rollback Enabled!"
+      - "=========================================="
+      - "Automatic snapshots will be created:"
+      - "- Before and after dnf operations"
+      - "- On timeline schedule ({{ stability_snapper_timeline_enable }})"
+      - ""
+      - "To rollback if system breaks:"
+      - "1. Reboot and select snapshot from GRUB menu"
+      - "2. Or use: snapper rollback"
+      - "=========================================="
+  when:
+    - stability_enable_level2_snapshot | bool
+    - stability_snapper_enable | bool
+    - stability_root_fstype.stdout == "btrfs"
+  tags:
+    - stability
+    - level2
+    - snapper

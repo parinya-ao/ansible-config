@@ -32,25 +32,36 @@
           - "  1. common      - Base system configuration (Fish shell installed early)"
           - "  2. locale      - English-only environment enforcement"
           - "  3. git        - Git configuration with SSH signing"
-          - "  4. docker      - Docker CE installation"
-          - "  5. desktop     - Desktop environment and applications"
-          - "  6. developer   - Development tools and runtimes"
-          - "  7. font        - Font installation"
-          - "  8. wifi        - Wi-Fi configuration and optimization"
-          - "  9. power       - TLP power management (disabled by default)"
-          - " 10. multimedia  - Multimedia codecs and video acceleration"
-          - " 11. embed       - Embedded development (ARM toolchain, STM32CubeMX)"
+          - "  4. stability   - Fedora stability and hardening (3 levels)"
+          - "  5. docker      - Docker CE installation"
+          - "  6. desktop     - Desktop environment and applications"
+          - "  7. developer   - Development tools and runtimes"
+          - "  8. font        - Font installation"
+          - "  9. wifi        - Wi-Fi configuration and optimization"
+          - " 10. power       - TLP power management (disabled by default)"
+          - " 11. multimedia  - Multimedia codecs and video acceleration"
+          - " 12. embed       - Embedded development (ARM toolchain, STM32CubeMX)"
           - "=========================================="
           - "Note: Fish shell will be installed first and used for all subsequent tasks"
 
     - name: Display Ansible version
-      ansible.builtin.command: ansible --version
+      ansible.builtin.shell: |
+        # Try to find ansible in PATH or venv
+        if command -v ansible >/dev/null 2>&1; then
+          ansible --version
+        elif [ -f "./.ansible-venv/bin/ansible" ]; then
+          ./.ansible-venv/bin/ansible --version
+        else
+          echo "Ansible version: Not found in PATH or venv"
+          echo "Using ansible-playbook for execution"
+        fi
       register: ansible_version_output
       changed_when: false
+      failed_when: false
 
     - name: Display Ansible version output
       ansible.builtin.debug:
-        msg: "{{ ansible_version_output.stdout_lines }}"
+        msg: "{{ ansible_version_output.stdout_lines | default(['Unable to determine Ansible version']) }}"
 
   roles:
     - role: common
@@ -67,6 +78,13 @@
       tags:
         - git
         - dotfiles
+
+    - role: stability
+      tags:
+        - stability
+        - security
+        - hardening
+        - snapshot
 
     - role: docker
       tags:
@@ -146,4 +164,7 @@
           - "6. For embedded dev:"
           - "   - flatpak run com.st.STM32CubeMX"
           - "   - minicom -D /dev/ttyACM0 -b 115200"
+          - "7. For stability (if Level 2 enabled):"
+          - "   - snapper list (view snapshots)"
+          - "   - snapper rollback (if needed)"
           - "=========================================="

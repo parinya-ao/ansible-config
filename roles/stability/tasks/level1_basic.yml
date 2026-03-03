@@ -1,0 +1,87 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Level 1: Basic Stability - dnf-automatic and firewalld
+
+# =============================================================================
+# dnf-automatic - Security-only automatic updates
+# =============================================================================
+- name: Install dnf-automatic
+  ansible.builtin.dnf:
+    name: dnf-automatic
+    state: present
+  become: true
+  when:
+    - stability_enable_level1_basic | bool
+    - stability_dnf_automatic_enable | bool
+  tags:
+    - stability
+    - level1
+    - dnf_automatic
+
+- name: Configure dnf-automatic for security updates
+  ansible.builtin.lineinfile:
+    path: /etc/dnf/automatic.conf
+    regexp: "^{{ item.key }}\\s*="
+    line: "{{ item.key }} = {{ item.value }}"
+    create: false
+  loop:
+    - {key: "upgrade_type", value: "{{ stability_dnf_automatic_upgrade_type }}"}
+    - {key: "apply_updates", value: "{{ stability_dnf_automatic_apply_updates | bool | lower }}"}
+    - {key: "emit_via", value: "motd"}
+    - {key: "download_updates", value: "true"}
+  become: true
+  when:
+    - stability_enable_level1_basic | bool
+    - stability_dnf_automatic_enable | bool
+  notify:
+    - Restart dnf-automatic timer
+  tags:
+    - stability
+    - level1
+    - dnf_automatic
+
+- name: Enable and start dnf-automatic timer
+  ansible.builtin.systemd:
+    name: dnf-automatic.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+  become: true
+  when:
+    - stability_enable_level1_basic | bool
+    - stability_dnf_automatic_enable | bool
+  tags:
+    - stability
+    - level1
+    - dnf_automatic
+
+# =============================================================================
+# Firewalld - Basic firewall protection
+# =============================================================================
+- name: Ensure firewalld is installed
+  ansible.builtin.dnf:
+    name: firewalld
+    state: present
+  become: true
+  when:
+    - stability_enable_level1_basic | bool
+    - stability_firewalld_enable | bool
+  tags:
+    - stability
+    - level1
+    - firewalld
+
+- name: Enable and start firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    enabled: true
+    state: started
+    daemon_reload: true
+  become: true
+  when:
+    - stability_enable_level1_basic | bool
+    - stability_firewalld_enable | bool
+  tags:
+    - stability
+    - level1
+    - firewalld

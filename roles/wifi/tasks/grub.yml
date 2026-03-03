@@ -14,7 +14,7 @@
       GRUB_DEFAULT={{ wifi_grub_default }}
       GRUB_DISABLE_SUBMENU=true
       GRUB_TERMINAL_OUTPUT="console"
-      GRUB_CMDLINE_LINUX="{{ wifi_grub_cmdline_linux }} iwlwifi.power_save=0"
+      GRUB_CMDLINE_LINUX="{{ wifi_grub_cmdline_linux }} iwlwifi.power_save=0{% if wifi_disable_plymouth %} plymouth.enable=0 disablehooks=plymouth{% endif %}"
       GRUB_DISABLE_RECOVERY="true"
       GRUB_ENABLE_BLSCFG=true
   notify: Regenerate GRUB config

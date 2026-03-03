@@ -104,3 +104,8 @@ wifi_disable_modemmanager: true
 # Remove wpa_supplicant from boot critical path
 # This prevents network services from blocking graphical target (~2s faster boot)
 wifi_optimize_boot_critical_path: true
+
+# Disable Plymouth boot splash screen
+# Plymouth can add 3+ seconds to boot time. Disabling it can reduce boot time by ~50%
+# Recommended for single-user systems where boot animation is not needed
+wifi_disable_plymouth: true
