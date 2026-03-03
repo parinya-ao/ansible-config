@@ -63,3 +63,7 @@
           - "RAM: {{ ansible_memtotal_mb }}MB"
           - "Arch: {{ ansible_architecture }}"
           - "=========================================="
+  rescue:
+    - name: Display pre-flight validation error
+      ansible.builtin.debug:
+        msg: "Pre-flight validation failed. Please check the error messages above."

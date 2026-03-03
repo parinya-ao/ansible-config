@@ -55,7 +55,7 @@ install_collections() {
 
     if [[ -f "$REQUIREMENTS" ]]; then
         echo "Installing collections from requirements.yml..."
-        ansible-galaxy collection install -r "$REQUIREMENTS" --force || true
+        ansible-galaxy collection install -r "$REQUIREMENTS"
     else
         echo "No requirements.yml found, skipping collection install"
     fi

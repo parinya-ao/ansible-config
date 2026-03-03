@@ -2,11 +2,8 @@
 # SPDX-License-Identifier: MIT-0
 # System update tasks
 
-- name: Update all packages
-  ansible.builtin.dnf:
-    name: "*"
-    update_cache: true
-    update_only: true
+- name: Update all packages (refresh metadata + upgrade)
+  ansible.builtin.command: dnf upgrade --refresh -y -v
   become: true
   when:
     - common_system_update_enabled
@@ -15,6 +12,8 @@
   retries: "{{ common_dnf_retries }}"
   delay: "{{ common_dnf_delay }}"
   until: common_dnf_update_result is succeeded
+  changed_when: common_dnf_update_result.rc == 0
+  failed_when: common_dnf_update_result.rc != 0
   tags:
     - system-update
     - update

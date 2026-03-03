@@ -74,6 +74,10 @@
         - locale_gnome_input_sources.rc == 0
       changed_when: true
       become: false
+  rescue:
+    - name: Display GNOME input sources configuration error
+      ansible.builtin.debug:
+        msg: "Failed to configure GNOME input sources. This is non-critical."
 
 - name: "STATE: Configure ibus for English input"
   when:
@@ -103,6 +107,10 @@
       become: false
       register: locale_ibus_registry
       failed_when: false
+  rescue:
+    - name: Display ibus configuration error
+      ansible.builtin.debug:
+        msg: "Failed to configure ibus. This is non-critical."
 
 - name: "VERIFY: Display current input configuration"
   ansible.builtin.command: localectl status
