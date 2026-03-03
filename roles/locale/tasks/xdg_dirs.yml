@@ -88,6 +88,13 @@
   become: false
   failed_when: false
 
+- name: "STATE: Ensure .config directory exists"
+  ansible.builtin.file:
+    path: "{{ locale_real_home }}/.config"
+    state: directory
+    mode: "0755"
+  become: false
+
 - name: "STATE: Create XDG user-dirs.dirs configuration"
   ansible.builtin.copy:
     dest: "{{ locale_real_home }}/.config/user-dirs.dirs"
