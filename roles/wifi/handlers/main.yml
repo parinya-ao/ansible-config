@@ -6,6 +6,7 @@
   ansible.builtin.systemd:
     name: NetworkManager
     state: restarted
+  failed_when: false
 
 - name: Apply sysctl settings
   ansible.builtin.command: sysctl --system
@@ -22,4 +23,5 @@
 
 - name: Reload systemd daemon
   ansible.builtin.systemd:
-    daemon_reload: true
+    daemon_reload: false
+  failed_when: false

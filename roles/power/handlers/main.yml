@@ -10,6 +10,7 @@
     state: restarted
   become: true
   listen: restart tlp
+  failed_when: false
 
 - name: Restart TLP-PD service
   ansible.builtin.systemd:
@@ -17,3 +18,4 @@
     state: restarted
   become: true
   listen: restart tlp-pd
+  failed_when: false

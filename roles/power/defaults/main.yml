@@ -5,7 +5,7 @@
 # =============================================================================
 
 # Main toggle for TLP installation
-power_install_tlp: false
+power_install_tlp: true
 
 # -----------------------------------------------------------------------------
 # CPU Scaling Governors

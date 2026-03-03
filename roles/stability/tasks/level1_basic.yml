@@ -91,11 +91,12 @@
     name: dnf-automatic.timer
     enabled: true
     state: started
-    daemon_reload: true
+    daemon_reload: false
   become: true
   when:
     - stability_enable_level1_basic | bool
     - stability_dnf_automatic_enable | bool
+  failed_when: false
   tags:
     - stability
     - level1
@@ -122,11 +123,12 @@
     name: firewalld
     enabled: true
     state: started
-    daemon_reload: true
+    daemon_reload: false
   become: true
   when:
     - stability_enable_level1_basic | bool
     - stability_firewalld_enable | bool
+  failed_when: false
   tags:
     - stability
     - level1

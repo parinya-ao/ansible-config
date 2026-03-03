@@ -153,13 +153,14 @@
     name: "snapper-{{ item }}.timer"
     enabled: true
     state: started
-    daemon_reload: true
+    daemon_reload: false
   become: true
   loop: ["cleanup", "timeline"]
   when:
     - stability_enable_level2_snapshot | bool
     - stability_snapper_enable | bool
     - stability_root_fstype.stdout == "btrfs"
+  failed_when: false
   tags:
     - stability
     - level2

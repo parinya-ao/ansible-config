@@ -11,6 +11,7 @@
     name: systemd-localed.service
     state: restarted
   register: locale_localed_restart
+  failed_when: false
 
 - name: Reload locale configuration
   ansible.builtin.command: localectl reload

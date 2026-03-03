@@ -24,6 +24,7 @@
     name: NetworkManager
     state: started
     enabled: true
+  failed_when: false
 
 - name: Detect acer_wmi module
   ansible.builtin.command: lsmod

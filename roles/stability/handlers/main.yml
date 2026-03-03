@@ -6,8 +6,9 @@
   ansible.builtin.systemd:
     name: dnf-automatic.timer
     state: restarted
-    daemon_reload: true
+    daemon_reload: false
   become: true
+  failed_when: false
 
 - name: Reload sysctl settings
   ansible.builtin.command: sysctl -p /etc/sysctl.d/99-stability.conf
