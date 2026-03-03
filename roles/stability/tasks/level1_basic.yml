@@ -25,10 +25,10 @@
     line: "{{ item.key }} = {{ item.value }}"
     create: false
   loop:
-    - {key: "upgrade_type", value: "{{ stability_dnf_automatic_upgrade_type }}"}
-    - {key: "apply_updates", value: "{{ stability_dnf_automatic_apply_updates | bool | lower }}"}
-    - {key: "emit_via", value: "motd"}
-    - {key: "download_updates", value: "true"}
+    - { key: "upgrade_type", value: "{{ stability_dnf_automatic_upgrade_type }}" }
+    - { key: "apply_updates", value: "{{ stability_dnf_automatic_apply_updates | bool | lower }}" }
+    - { key: "emit_via", value: "motd" }
+    - { key: "download_updates", value: "true" }
   become: true
   when:
     - stability_enable_level1_basic | bool

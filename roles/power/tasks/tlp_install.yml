@@ -1,3 +1,4 @@
+---
 # SPDX-License-Identifier: MIT-0
 # =============================================================================
 # TLP Installation Tasks
@@ -58,7 +59,7 @@
     dest: /etc/tlp.conf
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
     backup: true
   become: true
   notify: restart tlp

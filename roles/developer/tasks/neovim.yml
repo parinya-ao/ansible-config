@@ -7,13 +7,16 @@
   ansible.builtin.stat:
     path: "{{ developer_target_home }}/.config/nvim"
   register: developer_neovim_config_dir
+  become: true
   become_user: "{{ developer_target_user }}"
 
 - name: Clone LazyVim starter configuration
   ansible.builtin.git:
     repo: https://github.com/LazyVim/starter
     dest: "{{ developer_target_home }}/.config/nvim"
+    version: main
     force: false
+  become: true
   become_user: "{{ developer_target_user }}"
   when:
     - developer_install_lazyvim | bool

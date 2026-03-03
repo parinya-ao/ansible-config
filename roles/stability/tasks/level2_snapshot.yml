@@ -67,24 +67,24 @@
 - name: Set Snapper timeline configuration vars
   ansible.builtin.set_fact:
     stability_snapper_timeline_config:
-      - {name: "root", param: "TIMELINE_CREATE", value: "{{ stability_snapper_timeline_enable | bool | lower }}"}
-      - {name: "root", param: "TIMELINE_HOURLY", value: "{{ stability_snapper_timeline_hourly | bool | lower }}"}
-      - {name: "root", param: "TIMELINE_DAILY", value: "{{ stability_snapper_timeline_daily | bool | lower }}"}
-      - {name: "root", param: "TIMELINE_WEEKLY", value: "{{ stability_snapper_timeline_weekly | bool | lower }}"}
-      - {name: "root", param: "TIMELINE_MONTHLY", value: "{{ stability_snapper_timeline_monthly | bool | lower }}"}
-      - {name: "root", param: "TIMELINE_LIMIT_HOURLY", value: "{{ stability_snapper_timeline_limit_hourly }}"}
-      - {name: "root", param: "TIMELINE_LIMIT_DAILY", value: "{{ stability_snapper_timeline_limit_daily }}"}
-      - {name: "root", param: "TIMELINE_LIMIT_WEEKLY", value: "{{ stability_snapper_timeline_limit_weekly }}"}
-      - {name: "root", param: "TIMELINE_LIMIT_MONTHLY", value: "{{ stability_snapper_timeline_limit_monthly }}"}
-      - {name: "home", param: "TIMELINE_CREATE", value: "{{ stability_snapper_timeline_enable | bool | lower }}"}
-      - {name: "home", param: "TIMELINE_HOURLY", value: "{{ stability_snapper_timeline_hourly | bool | lower }}"}
-      - {name: "home", param: "TIMELINE_DAILY", value: "{{ stability_snapper_timeline_daily | bool | lower }}"}
-      - {name: "home", param: "TIMELINE_WEEKLY", value: "{{ stability_snapper_timeline_weekly | bool | lower }}"}
-      - {name: "home", param: "TIMELINE_MONTHLY", value: "{{ stability_snapper_timeline_monthly | bool | lower }}"}
-      - {name: "home", param: "TIMELINE_LIMIT_HOURLY", value: "{{ stability_snapper_timeline_limit_hourly }}"}
-      - {name: "home", param: "TIMELINE_LIMIT_DAILY", value: "{{ stability_snapper_timeline_limit_daily }}"}
-      - {name: "home", param: "TIMELINE_LIMIT_WEEKLY", value: "{{ stability_snapper_timeline_limit_weekly }}"}
-      - {name: "home", param: "TIMELINE_LIMIT_MONTHLY", value: "{{ stability_snapper_timeline_limit_monthly }}"}
+      - { name: "root", param: "TIMELINE_CREATE", value: "{{ stability_snapper_timeline_enable | bool | lower }}" }
+      - { name: "root", param: "TIMELINE_HOURLY", value: "{{ stability_snapper_timeline_hourly | bool | lower }}" }
+      - { name: "root", param: "TIMELINE_DAILY", value: "{{ stability_snapper_timeline_daily | bool | lower }}" }
+      - { name: "root", param: "TIMELINE_WEEKLY", value: "{{ stability_snapper_timeline_weekly | bool | lower }}" }
+      - { name: "root", param: "TIMELINE_MONTHLY", value: "{{ stability_snapper_timeline_monthly | bool | lower }}" }
+      - { name: "root", param: "TIMELINE_LIMIT_HOURLY", value: "{{ stability_snapper_timeline_limit_hourly }}" }
+      - { name: "root", param: "TIMELINE_LIMIT_DAILY", value: "{{ stability_snapper_timeline_limit_daily }}" }
+      - { name: "root", param: "TIMELINE_LIMIT_WEEKLY", value: "{{ stability_snapper_timeline_limit_weekly }}" }
+      - { name: "root", param: "TIMELINE_LIMIT_MONTHLY", value: "{{ stability_snapper_timeline_limit_monthly }}" }
+      - { name: "home", param: "TIMELINE_CREATE", value: "{{ stability_snapper_timeline_enable | bool | lower }}" }
+      - { name: "home", param: "TIMELINE_HOURLY", value: "{{ stability_snapper_timeline_hourly | bool | lower }}" }
+      - { name: "home", param: "TIMELINE_DAILY", value: "{{ stability_snapper_timeline_daily | bool | lower }}" }
+      - { name: "home", param: "TIMELINE_WEEKLY", value: "{{ stability_snapper_timeline_weekly | bool | lower }}" }
+      - { name: "home", param: "TIMELINE_MONTHLY", value: "{{ stability_snapper_timeline_monthly | bool | lower }}" }
+      - { name: "home", param: "TIMELINE_LIMIT_HOURLY", value: "{{ stability_snapper_timeline_limit_hourly }}" }
+      - { name: "home", param: "TIMELINE_LIMIT_DAILY", value: "{{ stability_snapper_timeline_limit_daily }}" }
+      - { name: "home", param: "TIMELINE_LIMIT_WEEKLY", value: "{{ stability_snapper_timeline_limit_weekly }}" }
+      - { name: "home", param: "TIMELINE_LIMIT_MONTHLY", value: "{{ stability_snapper_timeline_limit_monthly }}" }
   when:
     - stability_enable_level2_snapshot | bool
     - stability_snapper_enable | bool

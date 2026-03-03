@@ -102,8 +102,8 @@
 - name: Add Flutter to Fish PATH
   ansible.builtin.lineinfile:
     path: "{{ developer_target_home }}/.config/fish/config.fish"
-    line: 'fish_add_path {{ developer_target_home }}/develop/flutter/bin'
-    regexp: 'fish_add_path.*flutter/bin'
+    line: "fish_add_path {{ developer_target_home }}/develop/flutter/bin"
+    regexp: "fish_add_path.*flutter/bin"
     state: present
     create: true
     owner: "{{ developer_target_user }}"
