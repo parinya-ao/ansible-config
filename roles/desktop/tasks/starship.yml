@@ -12,6 +12,9 @@
     url: "{{ desktop_starship_install_url }}"
     dest: /tmp/starship-install.sh
     mode: "0755"
+    timeout: 60
+    retries: 5
+    delay: 10
   when: not desktop_starship_check.stat.exists
 
 - name: Run Starship installer
