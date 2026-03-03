@@ -18,12 +18,58 @@
     - level1
     - dnf_automatic
 
+- name: Ensure dnf-automatic config exists
+  ansible.builtin.file:
+    path: /etc/dnf/automatic.conf
+    state: touch
+    mode: "0644"
+    modification_time: preserve
+    access_time: preserve
+  become: true
+  when:
+    - stability_enable_level1_basic | bool
+    - stability_dnf_automatic_enable | bool
+  tags:
+    - stability
+    - level1
+    - dnf_automatic
+
+- name: Ensure dnf-automatic config has base sections (if file was empty)
+  ansible.builtin.blockinfile:
+    path: /etc/dnf/automatic.conf
+    block: |
+      [commands]
+      # What kind of upgrade to perform:
+      # default                            = all available upgrades
+      # security                           = security upgrades only
+      upgrade_type = default
+      # Whether updates should be downloaded when they are available
+      download_updates = no
+      # Whether updates should be applied when they are available
+      apply_updates = no
+
+      [emitters]
+      # Emit via motd
+      emit_via = motd
+
+      # Whether to emit messages via systemd journal
+      emit_via_journal = no
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - base config"
+    create: false
+  become: true
+  when:
+    - stability_enable_level1_basic | bool
+    - stability_dnf_automatic_enable | bool
+  tags:
+    - stability
+    - level1
+    - dnf_automatic
+
 - name: Configure dnf-automatic for security updates
   ansible.builtin.lineinfile:
     path: /etc/dnf/automatic.conf
     regexp: "^{{ item.key }}\\s*="
     line: "{{ item.key }} = {{ item.value }}"
-    create: false
   loop:
     - { key: "upgrade_type", value: "{{ stability_dnf_automatic_upgrade_type }}" }
     - { key: "apply_updates", value: "{{ stability_dnf_automatic_apply_updates | bool | lower }}" }
