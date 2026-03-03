@@ -4,8 +4,9 @@
 # Git configuration with optional SSH signing support
 
 # Actual user information (captured before privilege escalation)
-git_actual_user_home: "{{ lookup('env', 'HOME') }}"
-git_actual_user_name: "{{ lookup('env', 'USER') }}"
+# When running with sudo, use SUDO_USER to get the real user
+git_actual_user_home: "{% if ansible_env.SUDO_USER is defined %}/home/{{ ansible_env.SUDO_USER }}{% else %}{{ ansible_user_dir }}{% endif %}"
+git_actual_user_name: "{% if ansible_env.SUDO_USER is defined %}{{ ansible_env.SUDO_USER }}{% else %}{{ ansible_user_id }}{% endif %}"
 
 # Git user account to configure (defaults to current user)
 git_config_user: "{{ ansible_facts['user_id'] }}"

@@ -82,21 +82,21 @@
   block:
     - name: "STATE: Create ibus configuration directory"
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.config/ibus"
+        path: "{{ locale_real_home }}/.config/ibus"
         state: directory
         mode: "0755"
       become: false
 
     - name: "STATE: Create ibus bus directory"
       ansible.builtin.file:
-        path: "{{ ansible_user_dir }}/.config/ibus/bus"
+        path: "{{ locale_real_home }}/.config/ibus/bus"
         state: directory
         mode: "0755"
       become: false
 
     - name: "STATE: Create ibus registry file"
       ansible.builtin.copy:
-        dest: "{{ ansible_user_dir }}/.config/ibus/bus/registry"
+        dest: "{{ locale_real_home }}/.config/ibus/bus/registry"
         content: ""
         mode: "0644"
         force: false

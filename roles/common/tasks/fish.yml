@@ -3,6 +3,11 @@
 # Install and configure Fish shell early in the process
 # After installation, all subsequent Ansible tasks will use Fish shell
 
+# Detect real user when running with sudo
+- name: Detect real user for shell configuration
+  ansible.builtin.set_fact:
+    common_real_user: "{% if ansible_env.SUDO_USER is defined %}{{ ansible_env.SUDO_USER }}{% else %}{{ ansible_user_id }}{% endif %}"
+
 - name: Install Fish shell
   ansible.builtin.dnf:
     name: fish
@@ -21,7 +26,7 @@
 
 - name: Set Fish as default shell for user
   ansible.builtin.user:
-    name: "{{ ansible_facts.user_id }}"
+    name: "{{ common_real_user }}"
     shell: "{{ common_fish_path.stdout }}"
   when: common_fish_set_default
 

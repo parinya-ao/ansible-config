@@ -21,6 +21,21 @@
       or ansible_env.CI is defined
       or ansible_env.GITHUB_ACTIONS is defined }}
 
+# =============================================================================
+# REAL USER DETECTION (Sudo-Aware Design)
+# =============================================================================
+# When running with sudo ansible-playbook, ansible_user_dir becomes /root
+# We need to detect the real user's home directory for XDG operations
+- name: "GATHER: Detect real user home directory (sudo-aware)"
+  ansible.builtin.set_fact:
+    locale_real_home: >-
+      {% if ansible_env.SUDO_USER is defined %}
+      /home/{{ ansible_env.SUDO_USER }}
+      {% else %}
+      {{ ansible_user_dir }}
+      {% endif %}
+  when: locale_real_home is not defined
+
 # Pre-flight Validation
 - name: Run pre-flight validation
   ansible.builtin.import_tasks: preflight.yml
