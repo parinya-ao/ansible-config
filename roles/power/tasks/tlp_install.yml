@@ -16,7 +16,6 @@
   ansible.builtin.dnf:
     name:
       - tlp
-      - tlp-pd
       - tlp-rdw
     state: present
   become: true
@@ -24,14 +23,6 @@
 - name: Enable and start tlp.service
   ansible.builtin.systemd:
     name: tlp.service
-    enabled: true
-    state: started
-  become: true
-  failed_when: false
-
-- name: Enable and start tlp-pd.service
-  ansible.builtin.systemd:
-    name: tlp-pd.service
     enabled: true
     state: started
   become: true
