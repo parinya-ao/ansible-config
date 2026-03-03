@@ -13,6 +13,7 @@ developer_install_lazyvim: true
 # Compilers and development tools package list
 developer_compilers_packages:
   - clang
+  - clangd
   - gcc
   - gcc-c++
   - cmake
