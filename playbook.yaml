@@ -37,7 +37,6 @@
           - "  6. desktop     - Desktop environment and applications"
           - "  7. developer   - Development tools and runtimes"
           - "  8. font        - Font installation"
-          - "  9. wifi        - Wi-Fi configuration and optimization"
           - " 10. power       - TLP power management (disabled by default)"
           - " 11. multimedia  - Multimedia codecs and video acceleration"
           - " 12. embed       - Embedded development (ARM toolchain, STM32CubeMX)"
@@ -105,11 +104,6 @@
       tags:
         - font
         - fonts
-
-    - role: wifi
-      tags:
-        - wifi
-        - network
 
     - role: power
       tags:

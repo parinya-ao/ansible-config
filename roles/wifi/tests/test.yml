@@ -1,8 +1,0 @@
-# SPDX-License-Identifier: MIT-0
----
-- name: Test Wi-Fi role
-  hosts: localhost
-  remote_user: root
-  become: true
-  roles:
-    - wifi
