@@ -33,9 +33,8 @@
           - "  2. locale      - English-only environment enforcement"
           - "  3. git        - Git configuration with SSH signing"
           - "  4. stability   - Fedora stability and hardening (3 levels)"
-          - "  5. docker      - Docker CE installation"
-          - "  6. desktop     - Desktop environment and applications"
-          - "  7. developer   - Development tools and runtimes"
+          - "  5. desktop     - Desktop environment and applications"
+          - "  6. developer   - Development tools and runtimes"
           - "  8. font        - Font installation"
           - " 10. power       - TLP power management (disabled by default)"
           - " 11. multimedia  - Multimedia codecs and video acceleration"
@@ -84,11 +83,6 @@
         - security
         - hardening
         - snapshot
-
-    - role: docker
-      tags:
-        - docker
-        - containers
 
     - role: desktop
       tags:
@@ -143,9 +137,9 @@
           - "Next Steps:"
           - "=========================================="
           - "1. Log out and log back in for group changes"
-          - "   (e.g., docker, dialout groups)"
+          - "   (e.g., dialout group)"
           - "2. Verify installations:"
-          - "   - docker --version"
+          - "   - podman --version"
           - "   - node --version"
           - "   - cargo --version"
           - "   - ghostty --version"
