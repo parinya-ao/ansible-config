@@ -15,10 +15,14 @@
 
 - name: Install DNF Automatic (Security Updates)
   ansible.builtin.dnf:
-    name: dnf-automatic
+    name: "{{ item }}"
     state: present
   become: true
   when: ansible_facts['os_family'] == "RedHat"
+  loop:
+    - dnf-automatic
+    - dnf5-automatic
+  failed_when: false
   tags:
     - maintenance
     - security
