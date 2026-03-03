@@ -36,8 +36,6 @@ stability_snapper_enable: true
 # Snapper packages to install
 stability_snapper_packages:
   - snapper
-  - grub-btrfs
-  - btrfs-assistant
 
 # Snapper configurations to create
 stability_snapper_configs:
