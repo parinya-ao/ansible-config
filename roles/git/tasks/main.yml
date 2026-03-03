@@ -183,3 +183,7 @@
         name: commit.gpgsign
         value: "{{ git_commit_gpgsign }}"
         scope: "{{ git_config_scope }}"
+  rescue:
+    - name: Display git SSH signing configuration error
+      ansible.builtin.debug:
+        msg: "Failed to configure git SSH signing. This is non-critical."
