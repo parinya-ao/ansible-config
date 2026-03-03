@@ -77,10 +77,3 @@
     - gnome
     - defaults
 
-- name: Install Firefox ESR
-  ansible.builtin.import_tasks: firefox-esr.yml
-  when: desktop_install_firefox_esr
-  tags:
-    - desktop
-    - firefox
-    - browser

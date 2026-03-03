@@ -56,5 +56,3 @@ desktop_typst_version: "0.14.2"
 # Ghostty terminal configuration
 desktop_install_ghostty: true
 
-# Firefox ESR configuration
-desktop_install_firefox_esr: true

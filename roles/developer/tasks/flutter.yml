@@ -37,7 +37,6 @@
       - mesa-libGLU
       - ninja-build
       - gtk3-devel
-      - google-chrome-stable
     state: present
   become: true
   tags:
