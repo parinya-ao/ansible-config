@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: MIT-0
+---
+# Install serial debugging tools
+
+- name: Install serial debugging packages
+  ansible.builtin.dnf:
+    name: "{{ embed_serial_tools }}"
+    state: present
+  become: true
+
+- name: Verify minicom installation
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Display minicom installation status
+  ansible.builtin.debug:
+    msg: "minicom {{ 'is installed' if ansible_facts.packages['minicom'] is defined else 'is NOT installed' }}"
+
+- name: Display minicom version
+  ansible.builtin.debug:
+    msg: "minicom installed: {{ embed_minicom_version.stdout }}"

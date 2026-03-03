@@ -44,6 +44,7 @@ This playbook automates the setup of a Fedora workstation for development work. 
 | **git** | Git configuration with SSH key signing |
 | **font** | JetBrains Mono, Fira Code, Inter, Sarabun (Thai) |
 | **wifi** | Wi-Fi performance optimization |
+| **power** | TLP power management (disabled by default) |
 | **multimedia** | Codecs, FFmpeg, hardware video acceleration |
 
 ## Prerequisites

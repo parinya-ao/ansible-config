@@ -70,6 +70,24 @@ locale_configure_xdg_dirs: false
 # Skip WiFi configuration in CI (no wireless hardware)
 wifi_install_iw: false
 wifi_configure_regulatory_domain: false
+wifi_task: ""  # Empty to skip all WiFi tasks in CI
+wifi_enable_network_tuning: false  # Skip network tuning in CI
+wifi_enable_bluetooth_optimization: false  # Skip Bluetooth optimization in CI
+wifi_disable_usb_autosuspend: false  # Skip USB config in CI
+
+# =============================================================================
+# Stability Role Variables
+# =============================================================================
+# Disable systemd-dependent features in CI (containers don't have systemd as PID 1)
+stability_dnf_automatic_enable: false  # Skip timer enable (daemon-reload fails in containers)
+stability_firewalld_enable: false  # Skip firewalld (requires systemd)
+stability_snapper_enable: false  # Skip snapper (requires systemd timers, Btrfs not in CI)
+
+# =============================================================================
+# Power Role Variables
+# =============================================================================
+# Disable TLP in CI (no battery in containers)
+power_install_tlp: false
 
 # =============================================================================
 # Logging Configuration

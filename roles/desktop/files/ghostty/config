@@ -1,3 +1,31 @@
+# ==========================================
+# GHOSTTY: STABLE ARCHITECT WORKSPACE
+# ==========================================
+
+command = /usr/bin/fish
+shell-integration = fish
+
+# Typography
+font-family = "Intel One Mono"
+font-size = 13
+font-feature = "liga", "calt"
+
+# UI & Performance
+theme = "Catppuccin Mocha"
 background-opacity = 0.95
-background-blur-radius = 20
-window-padding-color = extend
+background-blur-radius = 10
+unfocused-split-opacity = 0.7
+split-divider-color = #3e4452
+
+# Interaction
+copy-on-select = true
+confirm-close-surface = true
+scrollback-limit = 1000000
+
+# Keybindings
+keybind = ctrl+shift+d=new_split:right
+keybind = ctrl+shift+s=new_split:down
+keybind = ctrl+shift+h=goto_split:left
+keybind = ctrl+shift+j=goto_split:bottom
+keybind = ctrl+shift+k=goto_split:top
+keybind = ctrl+shift+l=goto_split:right

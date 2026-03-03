@@ -1,4 +1,5 @@
 ---
+# SPDX-License-Identifier: MIT-0
 # Default variables for Wi-Fi role
 
 # Which Wi-Fi task to run
@@ -7,3 +8,104 @@
 #   - disable_powersave: Disable Wi-Fi power save (Intel only)
 #   - no_powersave: Disable ALL Wi-Fi power saving for maximum stability
 wifi_task: "no_powersave"
+
+# =============================================================================
+# Intel iwlwifi Driver Options (for no_powersave mode)
+# =============================================================================
+# Disable U-APSD (Unscheduled Automatic Power Save Delivery)
+# Prevents "Connected, No Internet" issues and connection drops
+wifi_iwlwifi_uapsd_disable: true
+
+# Disable D0i3 (Intel Wi-Fi deep sleep state)
+# Prevents network "stalls" where connection stays active but no data flows
+wifi_iwlwifi_d0i3_disable: true
+
+# Disable 802.11n (HT mode) for maximum stability in crowded areas
+# Trade-off: Reduces max speed but significantly improves connection stability
+# Recommended for: Condos, offices, areas with many nearby Wi-Fi networks
+# Set to true only if you still experience drops after other optimizations
+wifi_iwlwifi_11n_disable: false
+
+# 11n_disable value (if enabled): 1=disable all HT, 8=disable aggressive TX aggregation only
+wifi_iwlwifi_11n_disable_value: "8"
+
+# =============================================================================
+# Bluetooth Coexistence Options
+# =============================================================================
+# Enable Bluetooth/Wi-Fi coexistence
+# Set to true if using Bluetooth mouse/keyboard/headphones with Wi-Fi
+# Set to false to prioritize Wi-Fi stability over Bluetooth
+wifi_iwlwifi_bt_coex_active: true
+
+# Reduce scanning frequency to prevent Bluetooth audio stuttering
+wifi_iwlwifi_scan_ant_prio_enable: true
+
+# =============================================================================
+# CPU Optimization Options
+# =============================================================================
+# Use hardware encryption (0=hardware, 1=software)
+# Hardware (0) = lower CPU usage, Software (1) = more stable if firmware has bugs
+wifi_iwlwifi_swcrypto: "0"
+
+# =============================================================================
+# Network Stack Optimization (Kernel Parameters)
+# =============================================================================
+# Enable network stack tuning for reduced CPU overhead
+wifi_enable_network_tuning: true
+
+# =============================================================================
+# Bluetooth Latency Optimization
+# =============================================================================
+# Enable Bluetooth latency optimization for multiple BT devices
+# Increases netdev_max_backlog to reduce Bluetooth input queue delay
+wifi_enable_bluetooth_optimization: true
+
+# =============================================================================
+# USB Tethering Optimization
+# =============================================================================
+# Disable USB autosuspend for stable USB tethering
+wifi_disable_usb_autosuspend: true
+
+# =============================================================================
+# GRUB Configuration
+# =============================================================================
+# Configure /etc/default/grub with custom settings
+# When enabled, overrides the default GRUB configuration
+wifi_configure_grub: true
+
+# GRUB timeout in seconds
+wifi_grub_timeout: 3
+
+# GRUB default entry (saved = last used)
+wifi_grub_default: "saved"
+
+# Additional kernel command line arguments
+# Note: iwlwifi.power_save=0 is added automatically
+wifi_grub_cmdline_linux: "systemd.show_status=true loglevel=3"
+
+# =============================================================================
+# Service Disabling Options
+# =============================================================================
+# Disable dnf5-automatic.service (automatic package updates)
+wifi_disable_dnf5_automatic: true
+
+# Disable CUPS printing service and socket (if no printer is used)
+wifi_disable_cups: true
+
+# Disable avahi-daemon (mDNS/DNS-SD network discovery)
+wifi_disable_avahi: true
+
+# Disable ModemManager (4G/SIM modem management)
+wifi_disable_modemmanager: true
+
+# =============================================================================
+# Boot Optimization Options
+# =============================================================================
+# Remove wpa_supplicant from boot critical path
+# This prevents network services from blocking graphical target (~2s faster boot)
+wifi_optimize_boot_critical_path: true
+
+# Disable Plymouth boot splash screen
+# Plymouth can add 3+ seconds to boot time. Disabling it can reduce boot time by ~50%
+# Recommended for single-user systems where boot animation is not needed
+wifi_disable_plymouth: true

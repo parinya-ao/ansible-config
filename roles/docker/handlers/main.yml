@@ -12,12 +12,14 @@
     state: restarted
     daemon_reload: true
   become: true
+  failed_when: false
 
 - name: Reload Docker daemon
   ansible.builtin.systemd:
     name: docker
     state: reloaded
   become: true
+  failed_when: false
 
 - name: User added to docker group
   ansible.builtin.debug:
@@ -32,3 +34,4 @@
     daemon_reload: true
   become: true
   when: docker_daemon_config is defined
+  failed_when: false
