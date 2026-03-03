@@ -5,7 +5,7 @@
 
 # Feature flags for conditional role execution
 embed_install_arm_toolchain: true
-embed_install_stm32cubemx: true
+embed_install_stm32cubemx: false
 embed_install_esp_tools: true
 embed_install_serial_tools: true
 embed_configure_dialout_group: true
