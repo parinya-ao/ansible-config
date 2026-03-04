@@ -14,10 +14,32 @@ desktop_enable_flatpak_font_access: true
 desktop_install_gnome_extensions: true
 desktop_install_zed: true
 
-# GNOME extensions
+# GNOME extensions (RPM packages)
 desktop_gnome_extensions:
   - gnome-shell-extension-pop-shell
   - nautilus-python
+
+# GNOME Shell extensions from extensions.gnome.org
+desktop_install_shell_extensions: true
+desktop_shell_extensions_user: "{{ desktop_target_user | default(ansible_facts['user_id']) }}"
+
+# Extension definitions: url, uuid, enabled
+desktop_shell_extensions_list:
+  - name: "Dash to Panel"
+    url: "https://extensions.gnome.org/extension-data/dash-to-paneljderose9.github.com.v60.shell-extension.zip"
+    uuid: "dash-to-panel@jderose9.github.com"
+    enabled: true
+  - name: "ArcMenu"
+    url: "https://extensions.gnome.org/extension-data/arcmenuprojectarcmenu.com.v45.shell-extension.zip"
+    uuid: "arcmenu@arcmenu.com"
+    enabled: true
+
+# Dash to Panel settings (Windows-like layout)
+desktop_dashtopanel_position: "BOTTOM"
+desktop_dashtoppanel_show_apps: true
+
+# ArcMenu settings
+desktop_arcmenu_button_position: "Start"
 
 # Zed editor download URL
 desktop_zed_download_url: "https://github.com/zed-industries/zed/releases/latest/download/zed-linux-x86_64.tar.gz"

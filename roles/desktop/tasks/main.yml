@@ -31,11 +31,19 @@
     - desktop
     - packages
 
-- name: Install GNOME extensions
+- name: Install GNOME extensions (RPM packages)
   ansible.builtin.import_tasks: gnome-extensions.yml
   tags:
     - desktop
     - gnome
+    - extensions
+
+- name: Install GNOME Shell extensions from extensions.gnome.org
+  ansible.builtin.import_tasks: shell-extensions.yml
+  tags:
+    - desktop
+    - gnome
+    - shell-extensions
 
 - name: Install Starship prompt
   ansible.builtin.import_tasks: starship.yml

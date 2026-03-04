@@ -1,0 +1,160 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Install and configure GNOME Shell extensions from extensions.gnome.org
+
+# All tasks must run as the target user for correct permissions and dconf access
+
+- name: Ensure GNOME Shell extensions directory exists
+  ansible.builtin.file:
+    path: "{{ desktop_target_home }}/.local/share/gnome-shell/extensions"
+    state: directory
+    owner: "{{ desktop_shell_extensions_user }}"
+    mode: "0755"
+  become: false
+  when: desktop_install_shell_extensions | bool
+  tags:
+    - desktop
+    - gnome
+    - extensions
+
+- name: Create temp directory for extension downloads
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: _gnome_extensions
+  register: desktop_shell_ext_tmp
+  changed_when: false
+  become: false
+  when: desktop_install_shell_extensions | bool
+  tags:
+    - desktop
+    - gnome
+    - extensions
+
+- name: Download GNOME Shell extensions
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ desktop_shell_ext_tmp.path }}/{{ item.uuid }}.zip"
+    mode: "0644"
+  loop: "{{ desktop_shell_extensions_list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  become: false
+  when: desktop_install_shell_extensions | bool
+  retries: 3
+  delay: 2
+  tags:
+    - desktop
+    - gnome
+    - extensions
+
+- name: Extract GNOME Shell extensions
+  ansible.builtin.unarchive:
+    src: "{{ desktop_shell_ext_tmp.path }}/{{ item.uuid }}.zip"
+    dest: "{{ desktop_target_home }}/.local/share/gnome-shell/extensions/"
+    owner: "{{ desktop_shell_extensions_user }}"
+    mode: "0755"
+  loop: "{{ desktop_shell_extensions_list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  become: false
+  when: desktop_install_shell_extensions | bool
+  tags:
+    - desktop
+    - gnome
+    - extensions
+
+- name: Get current enabled extensions list
+  ansible.builtin.command:
+    cmd: gsettings get org.gnome.shell enabled-extensions
+  register: desktop_enabled_extensions
+  changed_when: false
+  failed_when: false
+  become: false
+  when: desktop_install_shell_extensions | bool
+  tags:
+    - desktop
+    - gnome
+    - extensions
+
+- name: Parse enabled extensions
+  ansible.builtin.set_fact:
+    desktop_current_extensions: >-
+      {{ desktop_enabled_extensions.stdout | default("[]")
+         | regex_replace("^[@a-zA-Z]+ '(.*)'$", "\1")
+         | regex_replace("'", "\"")
+         | from_json }}
+  changed_when: false
+  become: false
+  when:
+    - desktop_install_shell_extensions | bool
+    - desktop_enabled_extensions.rc == 0
+  tags:
+    - desktop
+    - gnome
+    - extensions
+
+- name: Enable GNOME Shell extensions
+  ansible.builtin.command:
+    cmd: >-
+      gsettings set org.gnome.shell enabled-extensions
+      '{{ (desktop_current_extensions | default([]))
+          + (desktop_shell_extensions_list
+              | selectattr("enabled", "equalto", true)
+              | map(attribute="uuid")
+              | list)
+          | unique
+          | to_json }}'
+  become: false
+  when:
+    - desktop_install_shell_extensions | bool
+    - desktop_enabled_extensions.rc == 0
+  changed_when: true
+  tags:
+    - desktop
+    - gnome
+    - extensions
+
+- name: Set Dash to Panel schema path
+  ansible.builtin.set_fact:
+    desktop_dtp_schema_path: >-
+      {{ desktop_target_home }}/.local/share/gnome-shell/extensions/
+      dash-to-panel@jderose9.github.com/schemas
+  when: desktop_install_shell_extensions | bool
+
+- name: Configure Dash to Panel
+  ansible.builtin.command: >-
+    gsettings --schemadir {{ desktop_dtp_schema_path }}
+    set org.gnome.shell.extensions.dash-to-panel
+    {{ item.key }} {{ item.value }}
+  loop:
+    - key: panel-position
+      value: "'{{ desktop_dashtopanel_position }}'"
+    - key: show-apps-button
+      value: "{{ desktop_dashtoppanel_show_apps | lower }}"
+  become: false
+  when:
+    - desktop_install_shell_extensions | bool
+    - desktop_shell_extensions_list
+      | selectattr("uuid", "equalto", "dash-to-panel@jderose9.github.com")
+      | selectattr("enabled", "equalto", true)
+      | list
+      | length > 0
+  changed_when: true
+  failed_when: false
+  tags:
+    - desktop
+    - gnome
+    - extensions
+
+- name: Clean up temp directory
+  ansible.builtin.file:
+    path: "{{ desktop_shell_ext_tmp.path }}"
+    state: absent
+  become: false
+  when:
+    - desktop_install_shell_extensions | bool
+    - desktop_shell_ext_tmp is defined
+  tags:
+    - desktop
+    - gnome
+    - extensions
