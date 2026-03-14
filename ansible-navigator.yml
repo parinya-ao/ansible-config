@@ -1,0 +1,19 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Ansible Navigator Configuration
+
+ansible-navigator:
+  mode: stdout
+  playbook-artifact:
+    enable: true
+    save-as: "{playbook_dir}/ansible-artifacts/{playbook_name}-{time_stamp}.json"
+  logging:
+    level: warning
+    file: ./ansible-navigator.log
+  execution-environment:
+    image: ghcr.io/ansible/creator-ee:latest
+  ansible:
+    cmdline: "--forks 10"
+    config: ./ansible.cfg
+    inventory:
+      - ./inventory/hosts
