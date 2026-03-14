@@ -21,7 +21,10 @@ ansible:
       gathering: smart
       stdout_callback: yaml
       # Add collections path for containers.podman connection plugin
-      collections_path: /home/parinya/personal/ansible-config/collections:~/.ansible/collections:/usr/share/ansible/collections
+      collections_path: >-
+        /home/parinya/personal/ansible-config/collections:
+        ~/.ansible/collections:
+        /usr/share/ansible/collections
     ssh_connection:
       pipelining: true
 

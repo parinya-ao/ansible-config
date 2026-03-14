@@ -1,0 +1,19 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Sample Component Scenario
+# =============================================================================
+# This scenario tests a specific collection component (role, plugin, etc.)
+# It inherits all configuration from config.yml and uses shared resources
+# =============================================================================
+
+# Empty file - inherits all configuration from config.yml
+# Add scenario-specific overrides here if needed:
+#
+# scenario:
+#   name: sample-component
+#   test_sequence:
+#     - prepare
+#     - converge
+#     - verify
+#     - idempotence

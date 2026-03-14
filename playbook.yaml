@@ -19,10 +19,10 @@
           - "Ansible Configuration Playbook"
           - "=========================================="
           - "Target Host: {{ inventory_hostname }}"
-          - "OS Family: {{ ansible_facts['os_family'] }}"
-          - "Distribution: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
-          - "Architecture: {{ ansible_facts['architecture'] }}"
-          - "Python Version: {{ ansible_facts['python_version'] }}"
+          - "OS Family: {{ ansible_facts.os_family }}"
+          - "Distribution: {{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+          - "Architecture: {{ ansible_facts.architecture }}"
+          - "Python Version: {{ ansible_facts.python_version }}"
           - "=========================================="
 
     - name: Display roles to be applied
@@ -44,7 +44,7 @@
       ansible.builtin.shell: |
         if command -v ansible >/dev/null 2>&1; then
           ansible --version
-        elif [ -f "./.ansible-venv/bin/ansible" ]; then
+        elif [ -f ./.ansible-venv/bin/ansible ]; then
           ./.ansible-venv/bin/ansible --version
         else
           echo "Ansible version: Not found"
@@ -116,7 +116,7 @@
           - "Playbook Execution Completed"
           - "=========================================="
           - "Target Host: {{ inventory_hostname }}"
-          - "Timestamp: {{ ansible_facts['date_time']['iso8601'] }}"
+          - "Timestamp: {{ ansible_facts.date_time.iso8601 }}"
           - "=========================================="
 
     - name: Display next steps

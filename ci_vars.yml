@@ -1,9 +1,10 @@
 ---
 # SPDX-License-Identifier: MIT-0
 # =============================================================================
-# CI-Specific Ansible Variables
+# CI-Specific Ansible Variables for Fedora Rawhide
 # =============================================================================
 # These variables override defaults for CI/CD pipeline execution
+# Optimized for Fedora Rawhide (rolling development branch) with DNF5
 # Disables features that require physical hardware, user interaction,
 # or services that don't work in containerized environments
 # =============================================================================
@@ -48,8 +49,9 @@ developer_install_flutter: false
 # =============================================================================
 # Docker Role Variables
 # =============================================================================
-# Use Docker CE from official repos in CI
-docker_use_fedora_native: false
+# Use DNF5 native for Fedora Rawhide (default package manager)
+docker_use_fedora_native: true
+docker_use_dnf5: true
 
 # =============================================================================
 # Multimedia Role Variables

@@ -1,0 +1,57 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Destroy Playbook - Clean Up Shared Testing Resources
+# =============================================================================
+# This playbook removes all shared testing resources created by the create playbook
+# Runs last after all component scenarios have completed their tests
+# =============================================================================
+
+- name: Destroy shared testing resources
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Remove shared temporary directory
+      ansible.builtin.file:
+        path: "{{ tmp_dir }}/molecule-shared"
+        state: absent
+      vars:
+        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
+      failed_when: false
+
+    - name: Remove resource state files for each test host
+      ansible.builtin.file:
+        path: "{{ tmp_dir }}/molecule-shared/{{ item }}_created.yml"
+        state: absent
+      loop: "{{ groups['test_resources'] | default([]) }}"
+      vars:
+        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
+      failed_when: false
+
+    - name: Clean up molecule cache
+      ansible.builtin.file:
+        path: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') | default('/tmp/molecule') }}"
+        state: absent
+      failed_when: false
+
+    - name: Display cleanup completion
+      ansible.builtin.debug:
+        msg: "Shared testing resources destroyed successfully"
+
+- name: Verify resource destruction
+  hosts: test_resources
+  gather_facts: false
+  tasks:
+    - name: Check if resource state file is removed
+      ansible.builtin.stat:
+        path: "{{ tmp_dir }}/molecule-shared/{{ inventory_hostname }}_created.yml"
+      register: result
+      vars:
+        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
+
+    - name: Assert resource was destroyed
+      ansible.builtin.assert:
+        that:
+          - not result.stat.exists
+        fail_msg: "Resource state file still exists for {{ inventory_hostname }}"
+        success_msg: "Resource state file removed for {{ inventory_hostname }}"

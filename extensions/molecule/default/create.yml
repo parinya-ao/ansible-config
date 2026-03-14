@@ -1,0 +1,68 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Create Playbook - Initialize Shared Testing Resources
+# =============================================================================
+# This playbook creates testing resources that all scenarios will share
+# Resources can be: files, directories, containers, or any test infrastructure
+# =============================================================================
+
+- name: Initialize shared testing resources
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Create shared temporary directory
+      ansible.builtin.file:
+        path: "{{ tmp_dir }}/molecule-shared"
+        state: directory
+        mode: "0755"
+      vars:
+        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
+
+    - name: Create resource state file for each test host
+      ansible.builtin.copy:
+        dest: "{{ tmp_dir }}/molecule-shared/{{ item }}_created.yml"
+        content: |
+          # Resource state file
+          # Created by Molecule default scenario
+          # Host: {{ item }}
+          # Timestamp: {{ ansible_date_time.iso8601 | default('unknown') }}
+          state: created
+          attributes: {{ hostvars[item].attributes | default({}) | to_json }}
+        mode: "0644"
+      loop: "{{ groups['test_resources'] | default([]) }}"
+      when: groups['test_resources'] is defined
+
+    - name: Verify DNF5 is available (Fedora 41+)
+      ansible.builtin.command:
+        cmd: dnf5 --version
+      register: dnf5_check
+      changed_when: false
+      failed_when: false
+
+    - name: Display DNF5 version
+      ansible.builtin.debug:
+        msg: "DNF5 version: {{ dnf5_check.stdout_lines[0] | default('DNF5 available') }}"
+      when: dnf5_check.rc == 0
+
+    - name: Display Python version
+      ansible.builtin.debug:
+        msg: "Python version: {{ ansible_python_version | default('unknown') }}"
+
+- name: Verify resource creation
+  hosts: test_resources
+  gather_facts: false
+  tasks:
+    - name: Check if resource state file exists
+      ansible.builtin.stat:
+        path: "{{ tmp_dir }}/molecule-shared/{{ inventory_hostname }}_created.yml"
+      register: result
+      vars:
+        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
+
+    - name: Assert resource was created
+      ansible.builtin.assert:
+        that:
+          - result.stat.exists
+        fail_msg: "Resource state file not found for {{ inventory_hostname }}"
+        success_msg: "Resource state file exists for {{ inventory_hostname }}"

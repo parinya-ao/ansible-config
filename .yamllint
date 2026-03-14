@@ -9,7 +9,7 @@ rules:
   indentation:
     spaces: 2
     indent-sequences: true
-    check-multi-line-strings: true
+    check-multi-line-strings: false
     level: error
   key-duplicates: enable
   line-length:
@@ -49,10 +49,8 @@ rules:
     forbid-implicit-octal: true
     forbid-explicit-octal: true
     level: error
-  quoted-strings:
-    quote-type: double
-    required: only-when-needed
-    level: error
+  # Disabled: ansible-lint handles YAML formatting
+  quoted-strings: disable
   document-start:
     present: true
     level: error

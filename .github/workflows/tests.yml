@@ -26,18 +26,25 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: Install dependencies
         run: |
           pip install ansible-dev-tools
           ansible-galaxy collection install -r requirements.yml
 
-      - name: Run ansible-lint
-        run: ansible-lint --profile production
+      - name: Run ansible-lint (strict mode)
+        run: ansible-lint --profile production --strict
+        env:
+          ANSIBLE_LINT_STRICT: "1"
+          ANSIBLE_FORCE_COLOR: "1"
+          PY_COLORS: "1"
 
-      - name: Run yamllint
-        run: yamllint .
+      - name: Run yamllint (strict mode)
+        run: yamllint -c .yamllint .
+        env:
+          ANSIBLE_FORCE_COLOR: "1"
+          PY_COLORS: "1"
 
   test:
     name: Test
@@ -45,9 +52,9 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.12"
+          - "3.13"
         ansible-version:
-          - "2.18"
+          - "2.19"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
