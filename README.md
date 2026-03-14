@@ -3,7 +3,7 @@
 > Automated Fedora Workstation provisioning using Ansible. Transform a fresh Fedora installation into a fully configured development environment with consistent tooling, desktop applications, and development runtimes.
 
 ![Fedora](https://img.shields.io/badge/Fedora-Latest-blue?logo=fedora&logoColor=white)
-![Ansible](https://img.shields.io/badge/Ansible-2.13+-red?logo=ansible)
+![Ansible](https://img.shields.io/badge/Ansible-2.15+-red?logo=ansible)
 ![License](https://img.shields.io/badge/License-MIT--0-green)
 
 ## Table of Contents
@@ -38,12 +38,11 @@ This playbook automates the setup of a Fedora workstation for development work. 
 | Role | Description |
 |-------|-------------|
 | **common** | DNF optimization, RPM Fusion, system updates, firmware, core packages |
-| **desktop** | Flatpak apps, Starship prompt, Ghostty terminal, Flatpak font access |
-| **developer** | Compilers, Rust, Go, Node.js, Bun, Python (uv), Flutter, Android SDK |
-| **docker** | Docker CE, Docker Compose, user group management |
+| **locale** | English-only environment enforcement |
 | **git** | Git configuration with SSH key signing |
+| **stability** | Fedora stability and hardening |
+| **developer** | Compilers, Rust, Go, Node.js, Bun, Python (uv), Flutter, Android SDK |
 | **font** | JetBrains Mono, Fira Code, Inter, Sarabun (Thai) |
-| **wifi** | Wi-Fi performance optimization |
 | **power** | TLP power management (disabled by default) |
 | **multimedia** | Codecs, FFmpeg, hardware video acceleration |
 
@@ -51,7 +50,7 @@ This playbook automates the setup of a Fedora workstation for development work. 
 
 - Fedora Linux (40+ recommended)
 - `sudo` privileges for system-level changes
-- Ansible 2.13+ (or use `./init.sh` to bootstrap)
+- Ansible 2.15+ (or use `./init.sh` to bootstrap)
 
 ## Quick Start
 
@@ -60,11 +59,14 @@ This playbook automates the setup of a Fedora workstation for development work. 
 git clone https://github.com/yourusername/ansible-config.git
 cd ansible-config
 
+# Install collection dependencies
+ansible-galaxy collection install -r requirements.yml
+
 # Run the complete playbook
-ansible-playbook playbook.yaml -i inventory.ini
+ansible-playbook site.yml -i inventory/hosts
 
 # Run specific roles only (by tag)
-ansible-playbook playbook.yaml -i inventory.ini --tags font,desktop
+ansible-playbook site.yml -i inventory/hosts --tags font,developer
 
 # Use init script (installs Ansible if missing)
 ./init.sh
@@ -81,37 +83,51 @@ The `init.sh` script handles:
 
 ```
 ansible-config/
-├── playbook.yaml          # Main entry point - runs all roles
-├── inventory.ini          # Localhost inventory
-├── requirements.yml       # Ansible collection dependencies
-├── init.sh                # Bootstrap script
-├── roles/
-│   ├── common/           # Base system configuration
-│   ├── desktop/          # GUI apps and settings
-│   ├── developer/        # Development tools
-│   ├── docker/           # Docker CE
-│   ├── git/              # Git configuration
-│   ├── font/             # Programming fonts
-│   ├── wifi/             # Wi-Fi optimization
-│   └── multimedia/       # Codecs and video acceleration
-├── .github/workflows/    # CI/CD pipelines
-└── .ansible/lint         # Lint configuration
+├── site.yml                 # Main entry point (ansible-creator standard)
+├── playbook.yaml            # Main playbook configuration
+├── inventory/
+│   ├── hosts               # Inventory file
+│   └── group_vars/
+│       └── all.yml         # Group variables
+├── requirements.yml         # Ansible collection dependencies
+├── ansible.cfg              # Ansible configuration
+├── ansible-navigator.yml    # Ansible Navigator configuration
+├── init.sh                  # Bootstrap script
+├── collections/
+│   └── ansible_collections/
+│       └── local/
+│           └── workstation/    # Local collection
+│               ├── galaxy.yml  # Collection metadata
+│               ├── README.md
+│               ├── meta/
+│               │   └── runtime.yml
+│               └── roles/
+│                   ├── common/
+│                   ├── locale/
+│                   ├── git/
+│                   ├── stability/
+│                   ├── developer/
+│                   ├── font/
+│                   ├── power/
+│                   └── multimedia/
+├── .github/workflows/      # CI/CD pipelines
+├── .devcontainer/          # DevContainer configuration
+└── .pre-commit-config.yaml # Pre-commit hooks
 ```
 
 ## Customization
 
 ### Role Variables
 
-Each role has configurable defaults in `roles/<name>/defaults/main.yml`:
+Each role has configurable defaults in `collections/ansible_collections/local/workstation/roles/<name>/defaults/main.yml`:
 
 ```yaml
 # Example: font role defaults
 font_sarabun_install_enabled: true    # Install Sarabun Thai font
-font_install_enabled: true               # Main font toggle
+font_install_enabled: true            # Main font toggle
 
-# Example: desktop role defaults
-desktop_enable_flatpak_font_access: true  # Fix Flatpak font rendering
-desktop_install_ghostty: true             # Install Ghostty terminal
+# Example: developer role defaults
+developer_install_flutter: false      # Install Flutter SDK
 ```
 
 ### Feature Toggles
@@ -120,19 +136,14 @@ Override variables via command line:
 
 ```bash
 # Disable specific feature
-ansible-playbook playbook.yaml -i inventory.ini -e "desktop_install_ghostty=false"
+ansible-playbook site.yml -i inventory/hosts -e "developer_install_flutter=false"
 ```
-
-### Adding Custom Fonts
-
-1. Place font files in `roles/font/file/<YourFont>/`
-2. Run the font role: `ansible-playbook playbook.yaml -i inventory.ini --tags font`
 
 ## Development
 
 ### Code Standards
 
-- **Naming**: Registered variables MUST use role prefix (e.g., `font_*`, `desktop_*`)
+- **Naming**: Registered variables MUST use role prefix (e.g., `font_*`, `developer_*`)
 - **License**: Use `SPDX-License-Identifier: MIT-0` in all new files
 - **Structure**: Follow standard Ansible role layout (`tasks/`, `defaults/`, `handlers/`, etc.)
 
@@ -140,7 +151,7 @@ ansible-playbook playbook.yaml -i inventory.ini -e "desktop_install_ghostty=fals
 
 ```bash
 # Lint with auto-fix
-ansible-lint --profile production --fix roles/
+ansible-lint --profile production --fix
 
 # Lint entire project
 ansible-lint --profile production
@@ -150,10 +161,10 @@ ansible-lint --profile production
 
 ```bash
 # Run only font configuration
-ansible-playbook playbook.yaml -i inventory.ini --tags font
+ansible-playbook site.yml -i inventory/hosts --tags font
 
-# Run desktop setup only
-ansible-playbook playbook.yaml -i inventory.ini --tags desktop
+# Run developer setup only
+ansible-playbook site.yml -i inventory/hosts --tags developer
 ```
 
 ## Testing & CI
@@ -162,25 +173,25 @@ ansible-playbook playbook.yaml -i inventory.ini --tags desktop
 
 ```bash
 # Syntax check
-ansible-playbook playbook.yaml --syntax-check
+ansible-playbook site.yml --syntax-check
 
 # Check mode (dry run)
-ansible-playbook playbook.yaml -i inventory.ini --check
+ansible-playbook site.yml -i inventory/hosts --check
 
 # List tags
-ansible-playbook playbook.yaml --list-tags
+ansible-playbook site.yml --list-tags
 ```
 
 ### CI/CD Pipeline
 
-The `.github/workflows/ci.yml` workflow runs on:
+The `.github/workflows/tests.yml` workflow runs on:
 - Push to `main`/`develop` branches
 - Pull requests
 
 It performs:
 1. `ansible-lint` with production profile
 2. YAML syntax validation
-3. Fedora container tests with idempotence checks
+3. Playbook syntax check and dry run
 
 ## Contributing
 
@@ -189,7 +200,7 @@ Contributions are welcome! Please:
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Follow code standards (see [Development](#development))
-4. Run linting: `ansible-lint --profile production --fix roles/`
+4. Run linting: `ansible-lint --profile production`
 5. Commit your changes (`git commit -m 'Add amazing feature'`)
 6. Push to the branch (`git push origin feature/amazing-feature`)
 7. Open a Pull Request
@@ -204,17 +215,6 @@ Before submitting a PR:
 ## FAQ
 
 <details>
-<summary>How do I fix Flatpak font rendering (Discord, Obsidian)?</summary>
-
-The playbook automatically configures Flatpak to access system fonts. If you still have issues:
-
-```bash
-# Re-run the desktop role
-ansible-playbook playbook.yaml -i inventory.ini --tags desktop
-```
-</details>
-
-<details>
 <summary>Can I run this on other Linux distributions?</summary>
 
 This playbook is designed for **Fedora only**. It uses DNF, Fedora-specific COPR repositories, and assumes systemd. Adapting to other distros would require significant changes.
@@ -223,10 +223,10 @@ This playbook is designed for **Fedora only**. It uses DNF, Fedora-specific COPR
 <details>
 <summary>How do I add a new role?</summary>
 
-1. Create directory: `mkdir -p roles/your-role/{tasks,defaults,handlers}`
+1. Create directory: `mkdir -p collections/ansible_collections/local/workstation/roles/your-role/{tasks,defaults,handlers}`
 2. Add `tasks/main.yml` with your tasks
 3. Add `defaults/main.yml` with variables (use role prefix: `yourrole_*`)
-4. Import in `playbook.yaml`
+4. Update `playbook.yaml` to include the new role
 </details>
 
 ## Project Status
@@ -244,4 +244,4 @@ MIT-0. See [LICENSE](LICENSE) for details.
 - [Ansible](https://www.ansible.com/) - Configuration management
 - [Fedora](https://fedoraproject.org/) - The base distribution
 - [Flathub](https://flathub.org/) - Flatpak application repository
-- Font authors: JetBrains Mono, Fira Code, Inter, and Sarabun
+- Font authors: JetBrains Mono, Fira Code, Inter, Sarabun

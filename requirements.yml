@@ -7,3 +7,6 @@ collections:
     version: ">=8.0.0"
   - name: ansible.posix
     version: ">=1.5.0"
+  - name: local.workstation
+    source: ./collections/ansible_collections/local/workstation
+    type: dir
