@@ -2,6 +2,12 @@
 # SPDX-License-Identifier: MIT-0
 # tasks file for roles/multimedia
 
+- name: Check if RPM Fusion is available
+  ansible.builtin.stat:
+    path: /etc/yum.repos.d/rpmfusion-free.repo
+  register: multimedia_rpmfusion_check
+  changed_when: false
+
 - name: Install multimedia codec packages
   ansible.builtin.dnf:
     name: "@multimedia"
@@ -17,7 +23,9 @@
     name: "ffmpeg"
     state: present
     allowerasing: true
-  when: multimedia_install_codecs | bool
+  when:
+    - multimedia_install_codecs | bool
+    - multimedia_rpmfusion_check.stat.exists
   become: true
   tags:
     - multimedia
@@ -28,7 +36,9 @@
     name: "{{ multimedia_codec_packages }}"
     state: present
     allowerasing: true
-  when: multimedia_install_codecs | bool
+  when:
+    - multimedia_install_codecs | bool
+    - multimedia_rpmfusion_check.stat.exists
   become: true
   tags:
     - multimedia
@@ -47,7 +57,6 @@
 - name: Install hardware video acceleration base packages
   ansible.builtin.dnf:
     name:
-      - ffmpeg-libs
       - libva
       - libva-utils
     state: present
@@ -56,6 +65,25 @@
   tags:
     - multimedia
     - video-acceleration
+
+- name: Install ffmpeg-libs from RPM Fusion
+  ansible.builtin.dnf:
+    name: ffmpeg-libs
+    state: present
+  when:
+    - multimedia_install_video_acceleration | bool
+    - multimedia_rpmfusion_check.stat.exists
+  become: true
+  tags:
+    - multimedia
+    - video-acceleration
+
+- name: Display RPM Fusion unavailable notice
+  ansible.builtin.debug:
+    msg: "RPM Fusion repositories not available - skipping FFmpeg and some hardware acceleration packages"
+  when:
+    - multimedia_install_codecs | bool
+    - not multimedia_rpmfusion_check.stat.exists
 
 - name: Install Intel video acceleration drivers
   ansible.builtin.dnf:
@@ -78,6 +106,7 @@
   when:
     - multimedia_install_video_acceleration | bool
     - multimedia_gpu_vendor == "amd"
+    - multimedia_rpmfusion_check.stat.exists
   become: true
   tags:
     - multimedia
