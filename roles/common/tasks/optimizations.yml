@@ -36,16 +36,6 @@
     - optimizations
     - boot
 
-- name: Remove Gnome Software from autostart
-  ansible.builtin.file:
-    path: /etc/xdg/autostart/org.gnome.Software.desktop
-    state: absent
-  when: common_apply_optimizations | bool
-  become: true
-  tags:
-    - optimizations
-    - gnome
-
 - name: Set system hostname
   ansible.builtin.hostname:
     name: "{{ common_hostname }}"

@@ -31,7 +31,7 @@ practices with role-based modularity and idempotent operations.
 │   ├── locale/                # English-only environment enforcement
 │   │   ├── tasks/             # system_locale.yml, xdg_dirs.yml, input_method.yml, cli_language.yml
 │   │   └── defaults/          # Locale configuration variables
-│   ├── desktop/               # GUI apps: GNOME, Flatpak, Ghostty, Starship
+│   ├── desktop/               # GUI apps: Flatpak, Ghostty, Starship
 │   ├── developer/             # Dev tools: compilers, Bun, Python (uv), Flutter, Android
 │   ├── docker/                # Docker CE installation and configuration
 │   ├── git/                   # Git configuration with SSH key signing
@@ -166,10 +166,9 @@ and debugging.
 #### 3.2.3. desktop (Desktop Environment & GUI Apps)
 
 **Description:** Installs and configures desktop applications, terminal emulators,
-and shell enhancements for GNOME desktop environment.
+and shell enhancements.
 
 **Key Tasks:**
-- GNOME Shell extensions and tweaks
 - Flatpak runtime configuration
 - Ghostty terminal emulator
 - Starship prompt for bash/zsh
@@ -236,7 +235,7 @@ font files for development and multilingual support.
 Disabled by default (`power_install_tlp: false`).
 
 **Key Tasks:**
-- Disables and masks `power-profiles-daemon` (GNOME default)
+- Disables and masks `power-profiles-daemon`
 - Installs TLP packages: `tlp`, `tlp-pd`, `tlp-rdw`
 - Configures SELinux boolean `tlp_can_write_to_d` for Fedora 38+ compatibility
 - Deploys optimized `/etc/tlp.conf` with battery charge thresholds
@@ -411,7 +410,6 @@ ansible-lint --profile production --fix roles/
 | **Idempotence** | Property where applying an operation multiple times has the same effect as applying it once |
 | **Role** | Ansible unit of organization containing tasks, variables, handlers, files, and templates |
 | **Playbook** | Ansible orchestration file that defines roles and execution order |
-| **GNOME** | Default desktop environment for Fedora Workstation |
 | **Rustup** | Rust toolchain installer and version manager |
 | **uv** | Modern Python package installer and project manager |
 | **Bun** | JavaScript runtime and package manager |

@@ -35,7 +35,6 @@ desktop_enable_flatpak_font_access: false
 # Reduce installed Flatpak apps in CI
 desktop_flatpak_apps:
   - com.github.MarkText
-  - org.gnome.gitlab.somas.Amateus
 
 # =============================================================================
 # Developer Role Variables

@@ -5,7 +5,7 @@
 
 ## Overview
 
-Installs and configures [TLP](https://linrunner.de/tlp/) for advanced power management on Fedora workstations. TLP provides significant battery life improvements compared to the default `power-profiles-daemon` included with GNOME.
+Installs and configures [TLP](https://linrunner.de/tlp/) for advanced power management on Fedora workstations. TLP provides significant battery life improvements compared to the default `power-profiles-daemon`.
 
 > **Important:** TLP conflicts with `power-profiles-daemon`. This role automatically disables and masks the default daemon before installing TLP.
 
@@ -174,7 +174,6 @@ sudo dnf install akmod-tp_smapi
 |---------|-----|----------------------|
 | **Battery Life** | Excellent (2-4hr improvement) | Moderate |
 | **Customization** | Granular control | 3 presets only |
-| **Fedora GNOME** | Requires manual setup | Built-in |
 | **SELinux** | Needs configuration | No issues |
 | **Laptop Support** | Broad (ThinkPad, Dell, Framework) | Generic |
 

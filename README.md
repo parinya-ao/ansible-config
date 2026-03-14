@@ -25,7 +25,7 @@ This playbook automates the setup of a Fedora workstation for development work. 
 
 - System optimizations and core utilities
 - Development tools and runtimes
-- Desktop applications and GNOME settings
+- Desktop applications and settings
 - Fonts including Thai language support
 - Docker and container tools
 - Multimedia codecs and hardware acceleration
@@ -38,7 +38,7 @@ This playbook automates the setup of a Fedora workstation for development work. 
 | Role | Description |
 |-------|-------------|
 | **common** | DNF optimization, RPM Fusion, system updates, firmware, core packages |
-| **desktop** | Flatpak apps, GNOME extensions, Starship prompt, Ghostty terminal, Flatpak font access |
+| **desktop** | Flatpak apps, Starship prompt, Ghostty terminal, Flatpak font access |
 | **developer** | Compilers, Rust, Go, Node.js, Bun, Python (uv), Flutter, Android SDK |
 | **docker** | Docker CE, Docker Compose, user group management |
 | **git** | Git configuration with SSH key signing |

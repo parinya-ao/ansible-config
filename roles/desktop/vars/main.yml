@@ -1,7 +1,0 @@
-# SPDX-License-Identifier: MIT-0
----
-# vars file for roles/desktop
-# These are high-priority variables used internally by the role
-
-# Starship binary path
-desktop_starship_bin_path: /usr/local/bin/starship
