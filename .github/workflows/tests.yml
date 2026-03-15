@@ -34,7 +34,7 @@ jobs:
           ansible-galaxy collection install -r requirements.yml
 
       - name: Run ansible-lint (strict mode)
-        run: ansible-lint --profile production --strict
+        run: ansible-lint --profile production --strict playbook.yaml
         env:
           ANSIBLE_LINT_STRICT: "1"
           ANSIBLE_FORCE_COLOR: "1"

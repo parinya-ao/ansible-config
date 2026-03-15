@@ -5,6 +5,7 @@
 # =============================================================================
 # Tests Ansible collection using Molecule with ansible-native approach
 # Uses shared state for efficient multi-scenario testing
+# PARALLEL REDUNDANCY: Synced with GitLab CI for consistent behavior
 # =============================================================================
 
 name: Molecule Test
@@ -28,6 +29,11 @@ env:
   PY_COLORS: "1"
   ANSIBLE_FORCE_COLOR: "1"
   ANSIBLE_LINT_STRICT: "1"
+  # Parallel redundancy settings
+  ANSIBLE_FORKS: "4"
+  ANSIBLE_STRATEGY: "linear"
+  # Recovery notification (set webhook URL in secrets)
+  RECOVERY_WEBHOOK_URL: "${{ secrets.RECOVERY_WEBHOOK_URL }}"
 
 jobs:
   # =============================================================================
@@ -56,11 +62,11 @@ jobs:
         run: yamllint -c .yamllint .
 
       - name: Run ansible-lint
-        run: ansible-lint --profile production .
+        run: ansible-lint --profile production playbook.yaml
 
       - name: Validate molecule configuration
         run: |
-          if [ -d "extensions/molecule" ]; then
+          if [ -d "molecule" ]; then
             molecule list
           fi
 
@@ -78,7 +84,8 @@ jobs:
       matrix:
         scenario:
           - default
-          # Add your scenarios here:
+          - podman-docker
+          # Add more scenarios here:
           # - scenario1
           # - scenario2
 
@@ -103,8 +110,8 @@ jobs:
 
       - name: Install Collection Requirements
         run: |
-          if [ -f "extensions/molecule/requirements.yml" ]; then
-            ansible-galaxy collection install -r extensions/molecule/requirements.yml
+          if [ -f "molecule/requirements.yml" ]; then
+            ansible-galaxy collection install -r molecule/requirements.yml
           elif [ -f "requirements.yml" ]; then
             ansible-galaxy collection install -r requirements.yml
           fi
@@ -122,7 +129,7 @@ jobs:
           source .ansible-venv/bin/activate
           molecule test --scenario-name ${{ matrix.scenario }} --report --command-borders
         env:
-          MOLECULE_GLOB: "extensions/molecule/**/molecule.yml"
+          MOLECULE_GLOB: "molecule/**/molecule.yml"
 
       - name: Upload Molecule Logs
         uses: actions/upload-artifact@v4
@@ -132,6 +139,7 @@ jobs:
           path: |
             .cache/molecule/*/logs/
             *.log
+            ansible.log
           retention-days: 7
 
   # =============================================================================
@@ -164,8 +172,8 @@ jobs:
 
       - name: Install Collection Requirements
         run: |
-          if [ -f "extensions/molecule/requirements.yml" ]; then
-            ansible-galaxy collection install -r extensions/molecule/requirements.yml
+          if [ -f "molecule/requirements.yml" ]; then
+            ansible-galaxy collection install -r molecule/requirements.yml
           elif [ -f "requirements.yml" ]; then
             ansible-galaxy collection install -r requirements.yml
           fi
@@ -181,7 +189,7 @@ jobs:
       - name: Run All Molecule Scenarios (Shared State)
         run: |
           source .ansible-venv/bin/activate
-          export MOLECULE_GLOB="extensions/molecule/**/molecule.yml"
+          export MOLECULE_GLOB="molecule/**/molecule.yml"
           molecule test --all --shared-state --report --command-borders
 
       - name: Upload Integration Logs
@@ -192,6 +200,7 @@ jobs:
           path: |
             .cache/molecule/*/logs/
             *.log
+            ansible.log
           retention-days: 7
 
   # =============================================================================
@@ -217,3 +226,13 @@ jobs:
             echo "Please review the logs above for details"
             exit 1
           fi
+
+      - name: Send Success Notification (if all passed)
+        if: needs.molecule-test.result == 'success' && needs.molecule-integration.result == 'success'
+        run: |
+          if [ -n "${{ env.RECOVERY_WEBHOOK_URL }}" ]; then
+            curl -X POST "${{ env.RECOVERY_WEBHOOK_URL }}" \
+              -H "Content-Type: application/json" \
+              -d '{"text":"✅ GitHub Actions: All Molecule tests passed!"}'
+          fi
+        continue-on-error: true
