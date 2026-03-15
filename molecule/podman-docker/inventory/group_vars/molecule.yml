@@ -1,0 +1,23 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Group variables for all container hosts
+# Applies to both Podman and Docker containers
+
+# Container runtime configuration
+container_log_driver: json-file
+container_systemd: false
+
+# Test environment variables
+molecule_test: true
+ci_env: true
+
+# Common container settings
+container_env:
+  MOLECULE_TEST_CONTAINER: "true"
+  ANSIBLE_DEV_TOOLS_CONTAINER: "1"
+  CI: "true"
+  PY_COLORS: "1"
+
+# Ansible configuration for containers
+ansible_become: true
+ansible_python_interpreter: /usr/bin/python3

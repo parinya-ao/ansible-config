@@ -1,0 +1,19 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Group variables for Podman containers
+# Specific settings for Podman runtime
+
+# Podman-specific configuration
+container_runtime: podman
+ansible_connection: containers.podman.podman
+
+# Podman security settings
+container_privileged: false
+container_read_only: false
+container_ipc: private
+
+# Podman capabilities (minimal for security)
+container_capabilities:
+  - CHOWN
+  - SETUID
+  - SETGID

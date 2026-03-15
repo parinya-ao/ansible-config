@@ -1,0 +1,8 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Host-specific variables for Podman test container
+
+container_env:
+  TEST_HOST: "molecule-fedora-podman"
+  TEST_RUNTIME: "podman"
+  PODMAN_TEST_VAR: "from_podman_host_vars"

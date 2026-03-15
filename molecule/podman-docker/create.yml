@@ -1,0 +1,112 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Create playbook - Creates containers with Podman primary, Docker fallback
+# Supports both runtimes for redundancy and testing
+
+- name: Create container instances
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    podman_creation_results: []
+    docker_fallback_results: []
+
+  tasks:
+    - name: Validate containers group exists and has hosts
+      ansible.builtin.assert:
+        that:
+          - groups['molecule'] is defined
+          - groups['molecule'] | length > 0
+        fail_msg: "No hosts found in molecule group - inventory may not be loaded correctly"
+
+    - name: Display inventory groups for debugging
+      ansible.builtin.debug:
+        msg:
+          - "All groups: {{ groups.keys() | list }}"
+          - "Molecule hosts: {{ groups['molecule'] | default([]) }}"
+          - "Podman hosts: {{ groups['podman_containers'] | default([]) }}"
+          - "Docker hosts: {{ groups['docker_containers'] | default([]) }}"
+
+    - name: Create Podman containers
+      containers.podman.podman_container:
+        hostname: "{{ item }}"
+        name: "{{ item }}"
+        image: "{{ hostvars[item]['container_image'] }}"
+        command: "{{ hostvars[item]['container_command'] | default('sleep 1d') }}"
+        privileged: "{{ hostvars[item]['container_privileged'] | default(false) }}"
+        volumes: "{{ hostvars[item]['container_volumes'] | default(omit) }}"
+        capabilities: "{{ hostvars[item]['container_capabilities'] | default(omit) }}"
+        systemd: "{{ hostvars[item]['container_systemd'] | default(false) }}"
+        log_driver: "{{ hostvars[item]['container_log_driver'] | default('json-file') }}"
+        env: "{{ hostvars[item]['container_env'] | default(omit) }}"
+        state: started
+        pull: true
+      register: podman_result
+      loop: "{{ groups['podman_containers'] | default([]) }}"
+      loop_control:
+        label: "{{ item }}"
+      when: groups['podman_containers'] is defined and groups['podman_containers'] | length > 0
+
+    - name: Store Podman creation results
+      ansible.builtin.set_fact:
+        podman_creation_results: "{{ podman_result.results | default([]) }}"
+      when: podman_result is defined
+
+    - name: Create Docker containers (fallback/redundancy)
+      community.docker.docker_container:
+        name: "{{ item }}"
+        image: "{{ hostvars[item]['container_image'] }}"
+        command: "{{ hostvars[item]['container_command'] | default('sleep 1d') }}"
+        privileged: "{{ hostvars[item]['container_privileged'] | default(false) }}"
+        volumes: "{{ hostvars[item]['container_volumes'] | default(omit) }}"
+        capabilities: "{{ hostvars[item]['container_capabilities'] | default(omit) }}"
+        log_driver: "{{ hostvars[item]['container_log_driver'] | default('json-file') }}"
+        env: "{{ hostvars[item]['container_env'] | default(omit) }}"
+        state: started
+        pull: true
+        auto_remove: false
+      register: docker_result
+      loop: "{{ groups['docker_containers'] | default([]) }}"
+      loop_control:
+        label: "{{ item }}"
+      when: groups['docker_containers'] is defined and groups['docker_containers'] | length > 0
+
+    - name: Store Docker creation results
+      ansible.builtin.set_fact:
+        docker_fallback_results: "{{ docker_result.results | default([]) }}"
+      when: docker_result is defined
+
+    - name: Verify Podman containers are running
+      ansible.builtin.include_tasks:
+        file: tasks/create-fail.yml
+      vars:
+        runtime: podman
+      when: item.container.State.ExitCode != 0 or not item.container.State.Running
+      loop: "{{ podman_creation_results }}"
+      loop_control:
+        label: "{{ item.container.Name }}"
+      failed_when: false
+
+    - name: Verify Docker containers are running
+      ansible.builtin.include_tasks:
+        file: tasks/create-fail.yml
+      vars:
+        runtime: docker
+      when: item.container.State.ExitCode != 0 or not item.container.State.Running
+      loop: "{{ docker_fallback_results }}"
+      loop_control:
+        label: "{{ item.container.Name }}"
+      failed_when: false
+
+    - name: Wait for all containers to be ready
+      ansible.builtin.wait_for_connection:
+        timeout: 60
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['molecule'] | default([]) }}"
+
+    - name: Display creation summary
+      ansible.builtin.debug:
+        msg:
+          - "Podman containers created: {{ podman_creation_results | length }}"
+          - "Docker containers created: {{ docker_fallback_results | length }}"
+          - "Total molecule hosts: {{ groups['molecule'] | default([]) | length }}"

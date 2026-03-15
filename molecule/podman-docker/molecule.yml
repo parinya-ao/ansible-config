@@ -1,0 +1,49 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Molecule configuration for Podman with Docker fallback
+# Purpose: Test with Podman as primary, Docker as secondary redundancy
+
+ansible:
+  executor:
+    backend: ansible-playbook
+    args:
+      ansible_playbook:
+        - --inventory=${MOLECULE_SCENARIO_DIRECTORY}/inventory/
+  env:
+    ANSIBLE_FORCE_COLOR: true
+    PY_COLORS: true
+    CI: "true"
+  cfg:
+    defaults:
+      interpreter_python: auto_silent
+      host_key_checking: false
+      fact_caching: memory
+      gathering: smart
+      stdout_callback: yaml
+      collections_path: >-
+        /home/parinya/personal/ansible-config/collections:
+        ~/.ansible/collections:
+        /usr/share/ansible/collections
+    ssh_connection:
+      pipelining: true
+
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+
+scenario:
+  name: podman-docker
+  test_sequence:
+    - dependency
+    - destroy
+    - create
+    - converge
+    - idempotence
+    - verify
+    - cleanup
+    - destroy
+
+verifier:
+  name: ansible
+  enabled: true

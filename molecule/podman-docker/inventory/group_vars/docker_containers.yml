@@ -1,0 +1,18 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Group variables for Docker containers
+# Specific settings for Docker runtime
+
+# Docker-specific configuration
+container_runtime: docker
+ansible_connection: community.docker.docker
+
+# Docker security settings
+container_privileged: false
+container_read_only: false
+
+# Docker capabilities (minimal for security)
+container_capabilities:
+  - CHOWN
+  - SETUID
+  - SETGID
