@@ -45,3 +45,5 @@ idempotence.log
 kics-results/
 *.tar.gz
 collections/ansible_collections/*/dist/
+
+collections/
