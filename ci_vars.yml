@@ -138,7 +138,9 @@ ci_platform: >-
   lookup('env', 'GITHUB_ACTIONS') | ternary('github', 'unknown')) }}
 
 # Shared cache directory for both CI platforms
-cache_dir: "{{ lookup('env', 'CI_PROJECT_DIR') | default(lookup('env', 'GITHUB_WORKSPACE') | default('/tmp/ansible-cache')) }}"
+cache_dir: >-
+  {{ lookup('env', 'CI_PROJECT_DIR') |
+  default(lookup('env', 'GITHUB_WORKSPACE') | default('/tmp/ansible-cache')) }}
 
 # Parallel execution settings
 ansible_forks: 4  # Conservative for CI runners
