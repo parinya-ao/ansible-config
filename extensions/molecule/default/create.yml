@@ -8,7 +8,7 @@
 # Creates containers from inventory definitions with systemd compliance
 # =============================================================================
 
-- name: Create container instances (Primary: Podman)
+- name: Create container instances - Primary Podman
   hosts: localhost
   gather_facts: false
   vars:
