@@ -9,8 +9,8 @@
   hosts: localhost
   connection: local
   become: true
+  gather_facts: true
 
-  # Pre-tasks: Display system information before running roles
   pre_tasks:
     - name: Display system information
       ansible.builtin.debug:
@@ -19,39 +19,35 @@
           - "Ansible Configuration Playbook"
           - "=========================================="
           - "Target Host: {{ inventory_hostname }}"
-          - "OS Family: {{ ansible_facts['os_family'] }}"
-          - "Distribution: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
-          - "Architecture: {{ ansible_facts['architecture'] }}"
-          - "Python Version: {{ ansible_facts['python_version'] }}"
+          - "OS Family: {{ ansible_facts.os_family }}"
+          - "Distribution: {{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+          - "Architecture: {{ ansible_facts.architecture }}"
+          - "Python Version: {{ ansible_facts.python_version }}"
           - "=========================================="
 
     - name: Display roles to be applied
       ansible.builtin.debug:
         msg:
           - "Roles to be applied:"
-          - "  1. common      - Base system configuration (Fish shell installed early)"
+          - "  1. common      - Base system configuration"
           - "  2. locale      - English-only environment enforcement"
           - "  3. git        - Git configuration with SSH signing"
-          - "  4. stability   - Fedora stability and hardening (3 levels)"
-          - "  5. desktop     - Desktop environment and applications"
-          - "  6. developer   - Development tools and runtimes"
-          - "  8. font        - Font installation"
-          - " 10. power       - TLP power management (disabled by default)"
-          - " 11. multimedia  - Multimedia codecs and video acceleration"
-          - " 12. embed       - Embedded development (ARM toolchain, STM32CubeMX)"
+          - "  4. stability   - Fedora stability and hardening"
+          - "  5. developer   - Development tools and runtimes"
+          - "  6. font        - Font installation"
+          - "  7. power       - TLP power management (disabled by default)"
+          - "  8. multimedia  - Multimedia codecs and video acceleration"
+          - "  9. embed       - Embedded development"
           - "=========================================="
-          - "Note: Fish shell will be installed first and used for all subsequent tasks"
 
     - name: Display Ansible version
       ansible.builtin.shell: |
-        # Try to find ansible in PATH or venv
         if command -v ansible >/dev/null 2>&1; then
           ansible --version
-        elif [ -f "./.ansible-venv/bin/ansible" ]; then
+        elif [ -f ./.ansible-venv/bin/ansible ]; then
           ./.ansible-venv/bin/ansible --version
         else
-          echo "Ansible version: Not found in PATH or venv"
-          echo "Using ansible-playbook for execution"
+          echo "Ansible version: Not found"
         fi
       register: ansible_version_output
       changed_when: false
@@ -62,62 +58,55 @@
         msg: "{{ ansible_version_output.stdout_lines | default(['Unable to determine Ansible version']) }}"
 
   roles:
-    - role: common
+    - role: local.workstation.common
       tags:
         - common
         - base
 
-    - role: locale
+    - role: local.workstation.locale
       tags:
         - locale
         - language
 
-    - role: git
+    - role: local.workstation.git
       tags:
         - git
         - dotfiles
 
-    - role: stability
+    - role: local.workstation.stability
       tags:
         - stability
         - security
         - hardening
         - snapshot
 
-    - role: desktop
-      tags:
-        - desktop
-        - gui
-
-    - role: developer
+    - role: local.workstation.developer
       tags:
         - developer
         - development
 
-    - role: font
+    - role: local.workstation.font
       tags:
         - font
         - fonts
 
-    - role: power
+    - role: local.workstation.power
       tags:
         - power
         - tlp
         - battery
 
-    - role: multimedia
+    - role: local.workstation.multimedia
       tags:
         - multimedia
         - codecs
 
-    - role: embed
+    - role: local.workstation.embed
       tags:
         - embed
         - embedded
-        - stm32
         - esp
 
-  # Post-tasks: Display summary after running roles
   post_tasks:
     - name: Display completion summary
       ansible.builtin.debug:
@@ -126,8 +115,7 @@
           - "Playbook Execution Completed"
           - "=========================================="
           - "Target Host: {{ inventory_hostname }}"
-          - "Shell Used: {{ ansible_shell_executable | default('/bin/bash') }}"
-          - "Timestamp: {{ ansible_facts['date_time']['iso8601'] }}"
+          - "Timestamp: {{ ansible_facts.date_time.iso8601 }}"
           - "=========================================="
 
     - name: Display next steps
@@ -137,22 +125,9 @@
           - "Next Steps:"
           - "=========================================="
           - "1. Log out and log back in for group changes"
-          - "   (e.g., dialout group)"
           - "2. Verify installations:"
-          - "   - podman --version"
           - "   - node --version"
           - "   - cargo --version"
-          - "   - ghostty --version"
-          - "   - arm-none-eabi-gcc --version"
           - "3. Run 'flatpak list' to see installed apps"
           - "4. Run 'fc-list' to see installed fonts"
-          - "5. For TLP power management (if enabled):"
-          - "   - sudo tlp-stat -s"
-          - "   - sudo tlp-stat -b"
-          - "6. For embedded dev:"
-          - "   - flatpak run com.st.STM32CubeMX"
-          - "   - minicom -D /dev/ttyACM0 -b 115200"
-          - "7. For stability (if Level 2 enabled):"
-          - "   - snapper list (view snapshots)"
-          - "   - snapper rollback (if needed)"
           - "=========================================="

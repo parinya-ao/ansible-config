@@ -1,0 +1,63 @@
+---
+# SPDX-License-Identifier: MIT-0
+# YAML Lint configuration - Very Strict Mode
+extends: default
+
+rules:
+  # Strict indentation and formatting
+  comments-indentation: false
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+    level: error
+  key-duplicates: enable
+  line-length:
+    max: 120
+    level: error
+  new-line-at-end-of-file: enable
+  new-lines:
+    type: unix
+    level: error
+  trailing-spaces: enable
+  truthy:
+    allowed-values: ["true", "false"]
+    level: error
+  comments:
+    min-spaces-from-content: 1
+    require-starting-space: true
+    level: error
+  braces:
+    max-spaces-inside: 1
+    level: error
+  brackets:
+    max-spaces-inside: 0
+    level: error
+  colons:
+    max-spaces-after: 1
+    level: error
+  commas:
+    max-spaces-after: 1
+    level: error
+  empty-lines:
+    max: 2
+    level: error
+  hyphens:
+    max-spaces-after: 1
+    level: error
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true
+    level: error
+  # Disabled: ansible-lint handles YAML formatting
+  quoted-strings: disable
+  document-start:
+    present: true
+    level: error
+
+ignore: |
+  .venv/
+  .ansible-venv/
+  collections/
+  *.j2
+  .github/

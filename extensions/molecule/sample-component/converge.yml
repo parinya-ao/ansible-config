@@ -1,0 +1,51 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Converge Playbook - Main Test Execution
+# =============================================================================
+# This playbook executes the collection component being tested
+# Replace the include_role task with your actual collection component
+# =============================================================================
+
+- name: Execute collection component test
+  hosts: test_resources
+  gather_facts: true
+  tasks:
+    - name: Display test information
+      ansible.builtin.debug:
+        msg: >-
+          Testing on {{ ansible_distribution }} {{ ansible_distribution_version }}
+          with Python {{ ansible_python_version }}
+
+    - name: Create test file
+      ansible.builtin.copy:
+        dest: "{{ tmp_dir }}/{{ inventory_hostname }}.txt"
+        content: |
+          Molecule test running on {{ inventory_hostname }}
+          Distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          Python: {{ ansible_python_version }}
+          Timestamp: {{ ansible_date_time.iso8601 | default('unknown') }}
+        mode: "0644"
+      vars:
+        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
+
+    - name: Include collection role (replace with your actual role)
+      ansible.builtin.include_role:
+        name: test_namespace.test_collection.sample_role
+      vars:
+        role_config: test_value
+      when: false  # Disabled by default - enable when you have a real role
+
+    - name: Verify test file was created
+      ansible.builtin.stat:
+        path: "{{ tmp_dir }}/{{ inventory_hostname }}.txt"
+      register: test_file
+      vars:
+        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
+
+    - name: Assert test file exists
+      ansible.builtin.assert:
+        that:
+          - test_file.stat.exists
+        fail_msg: "Test file was not created"
+        success_msg: "Test file created successfully"

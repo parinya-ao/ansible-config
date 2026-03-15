@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: MIT-0
+# GitHub CODEOWNERS for automatic reviewer assignment
+
+# Default owners for all files
+* @parinya-ao
+
+# Collection-specific owners
+/collections/ansible_collections/local/workstation/ @parinya-ao
+
+# Workflow files
+/.github/workflows/ @parinya-ao
+
+# Documentation
+/README.md @parinya-ao
+/ARCHITECTURE.md @parinya-ao
+/docs/ @parinya-ao

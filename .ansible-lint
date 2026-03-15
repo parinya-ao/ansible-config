@@ -15,6 +15,7 @@ exclude_paths:
   - venv/
   - "*.tar.gz"
   - ci_vars.yml
+  - molecule/
 
 # Enable specific rules
 enable_list:

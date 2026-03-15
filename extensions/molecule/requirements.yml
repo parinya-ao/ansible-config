@@ -1,0 +1,22 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Molecule Collection Requirements
+# =============================================================================
+# Collections required for molecule testing scenarios
+# =============================================================================
+
+collections:
+  # Podman container support for Fedora Rawhide testing
+  - name: containers.podman
+    version: ">=1.10.0"
+
+  # General community collections
+  - name: community.general
+    version: ">=6.0.0"
+
+  # Additional collections for specific testing needs
+  # - name: community.docker
+  #   version: ">=3.0.0"
+  # - name: ansible.posix
+  #   version: ">=1.5.0"

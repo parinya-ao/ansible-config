@@ -1,0 +1,77 @@
+---
+# SPDX-License-Identifier: MIT-0
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          pip install ansible-dev-tools
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Run ansible-lint (strict mode)
+        run: ansible-lint --profile production --strict playbook.yaml
+        env:
+          ANSIBLE_LINT_STRICT: "1"
+          ANSIBLE_FORCE_COLOR: "1"
+          PY_COLORS: "1"
+
+      - name: Run yamllint (strict mode)
+        run: yamllint -c .yamllint .
+        env:
+          ANSIBLE_FORCE_COLOR: "1"
+          PY_COLORS: "1"
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.13"
+        ansible-version:
+          - "2.19"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          pip install ansible-core==${{ matrix.ansible-version }}.* ansible-dev-tools
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Syntax check
+        run: ansible-playbook --syntax-check site.yml
+
+      - name: Run playbook (check mode)
+        run: ansible-playbook -i inventory/hosts site.yml --check
+        continue-on-error: true

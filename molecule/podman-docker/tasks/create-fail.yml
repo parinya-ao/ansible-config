@@ -1,0 +1,33 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Error handling tasks for container creation failures
+# Retrieves and displays container logs when creation fails
+
+- name: Retrieve container logs (Podman)
+  ansible.builtin.command:
+    cmd: podman logs {{ item.container.Name }}
+  changed_when: false
+  register: logfile_cmd
+  when: runtime | default('podman') == 'podman'
+  failed_when: false
+
+- name: Retrieve container logs (Docker)
+  ansible.builtin.command:
+    cmd: docker logs {{ item.container.Name }}
+  changed_when: false
+  register: logfile_cmd
+  when: runtime | default('podman') == 'docker'
+  failed_when: false
+
+- name: Display container log and fail
+  ansible.builtin.fail:
+    msg: |
+      Container {{ item.container.Name }} ({{ runtime | default('unknown') }}) failed to start properly.
+
+      Exit Code: {{ item.container.State.ExitCode }}
+      Running: {{ item.container.State.Running }}
+      Status: {{ item.container.State.Status | default('unknown') }}
+
+      Log output:
+      {{ logfile_cmd.stdout | default('No logs available') }}
+      {{ logfile_cmd.stderr | default('') }}

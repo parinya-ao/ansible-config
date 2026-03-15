@@ -1,0 +1,61 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Verify Playbook - Validation Tests
+# =============================================================================
+# This playbook validates that the converge playbook achieved desired results
+# Add your test assertions here
+# =============================================================================
+
+- name: Verify collection component functionality
+  hosts: test_resources
+  gather_facts: true
+  tasks:
+    - name: Check if my_variable is set correctly
+      ansible.builtin.assert:
+        that:
+          - my_variable is defined
+          - my_variable == (inventory_hostname | reverse)
+        fail_msg: >-
+          my_variable is not set correctly.
+          Expected '{{ inventory_hostname | reverse }}',
+          got '{{ my_variable | default('undefined') }}'
+        success_msg: "my_variable is set correctly to '{{ my_variable }}'"
+
+    - name: Verify test file content
+      ansible.builtin.slurp:
+        src: "{{ tmp_dir }}/{{ inventory_hostname }}.txt"
+      register: file_content
+      vars:
+        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
+
+    - name: Assert file contains expected information
+      ansible.builtin.assert:
+        that:
+          - file_content.content | b64decode | contains(inventory_hostname)
+          - file_content.content | b64decode | contains(ansible_distribution)
+        fail_msg: "Test file does not contain expected information"
+        success_msg: "Test file contains expected information"
+
+    - name: Verify DNF5 is available (Fedora 41+)
+      ansible.builtin.command:
+        cmd: dnf5 --version
+      register: dnf5_check
+      changed_when: false
+      failed_when: false
+
+    - name: Assert DNF5 is available
+      ansible.builtin.assert:
+        that:
+          - dnf5_check.rc == 0
+        fail_msg: "DNF5 is not available on Fedora Rawhide"
+        success_msg: "DNF5 is available: {{ dnf5_check.stdout_lines[0] | default('version unknown') }}"
+      when: dnf5_check.rc is defined
+
+    - name: Display verification summary
+      ansible.builtin.debug:
+        msg: >-
+          Verification passed for {{ inventory_hostname }}:
+          - my_variable: {{ my_variable | default('N/A') }}
+          - attributes: {{ attributes | default({}) | to_json }}
+          - Python: {{ ansible_python_version | default('N/A') }}

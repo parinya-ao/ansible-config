@@ -1,0 +1,106 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Destroy playbook - Removes all test containers
+# Handles both Podman and Docker containers with proper error handling
+
+- name: Destroy container instances
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    podman_destroy_results: []
+    docker_destroy_results: []
+
+  tasks:
+    - name: Display destruction summary
+      ansible.builtin.debug:
+        msg:
+          - "Destroying Podman containers: {{ groups['podman_containers'] | default([]) }}"
+          - "Destroying Docker containers: {{ groups['docker_containers'] | default([]) }}"
+
+    - name: Get Podman container info
+      containers.podman.podman_container_info:
+        name: "{{ item }}"
+      loop: "{{ groups['podman_containers'] | default([]) }}"
+      register: podman_infos
+      loop_control:
+        label: "{{ item }}"
+      when: groups['podman_containers'] is defined
+      failed_when: false
+
+    - name: Stop running Podman containers gracefully
+      containers.podman.podman_container:
+        name: "{{ item.item }}"
+        state: stopped
+        timeout: 5
+      loop: "{{ podman_infos.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+      when:
+        - item.containers is defined
+        - item.containers | length > 0
+        - item.containers[0].State.Status | default('') == "running"
+      failed_when: false
+
+    - name: Remove Podman containers
+      containers.podman.podman_container:
+        name: "{{ item }}"
+        state: absent
+        force: true
+      loop: "{{ groups['podman_containers'] | default([]) }}"
+      loop_control:
+        label: "{{ item }}"
+      register: podman_destroy_result
+      when: groups['podman_containers'] is defined
+      failed_when: false
+
+    - name: Store Podman destruction results
+      ansible.builtin.set_fact:
+        podman_destroy_results: "{{ podman_destroy_result.results | default([]) }}"
+
+    - name: Get Docker container info
+      community.docker.docker_container_info:
+        name: "{{ item }}"
+      loop: "{{ groups['docker_containers'] | default([]) }}"
+      register: docker_infos
+      loop_control:
+        label: "{{ item }}"
+      when: groups['docker_containers'] is defined
+      failed_when: false
+
+    - name: Stop running Docker containers gracefully
+      community.docker.docker_container:
+        name: "{{ item.item }}"
+        state: stopped
+        timeout: 5
+      loop: "{{ docker_infos.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+      when:
+        - item.container is defined
+        - item.container.State.Status | default('') == "running"
+      failed_when: false
+
+    - name: Remove Docker containers
+      community.docker.docker_container:
+        name: "{{ item }}"
+        state: absent
+        force: true
+        auto_remove: true
+      loop: "{{ groups['docker_containers'] | default([]) }}"
+      loop_control:
+        label: "{{ item }}"
+      register: docker_destroy_result
+      when: groups['docker_containers'] is defined
+      failed_when: false
+
+    - name: Store Docker destruction results
+      ansible.builtin.set_fact:
+        docker_destroy_results: "{{ docker_destroy_result.results | default([]) }}"
+
+    - name: Display destruction complete
+      ansible.builtin.debug:
+        msg:
+          - "Podman containers destroyed: {{ podman_destroy_results | length }}"
+          - "Docker containers destroyed: {{ docker_destroy_results | length }}"
+          - "Total containers destroyed: {{ (podman_destroy_results | length) + (docker_destroy_results | length) }}"

@@ -1,0 +1,7 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Main site playbook - entry point for Ansible execution
+# This file imports the main playbook configuration
+
+- name: Import workstation configuration
+  ansible.builtin.import_playbook: playbook.yaml

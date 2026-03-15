@@ -1,0 +1,35 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Notification tasks for recovery and monitoring
+# Supports Discord, Slack, and Line Notify webhooks
+
+- name: Send recovery notification to webhook
+  ansible.builtin.uri:
+    url: "{{ notification_webhook_url }}"
+    method: POST
+    body_format: json
+    body: "{{ notification_payload }}"
+    headers:
+      Content-Type: application/json
+    timeout: 10
+    status_code:
+      - 200
+      - 201
+      - 204
+  register: notification_result
+  failed_when: false
+  delegate_to: localhost
+  run_once: true
+  when:
+    - notification_webhook_url is defined
+    - notification_webhook_url | length > 0
+  tags:
+    - always
+    - notification
+
+- name: Display notification status
+  ansible.builtin.debug:
+    msg: "Notification sent: {{ notification_result.status | default('not sent') }} - {{ notification_result.msg | default('webhook not configured') }}"
+  tags:
+    - always
+    - notification

@@ -1,0 +1,42 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Cleanup Playbook - Test Artifact Removal
+# =============================================================================
+# This playbook removes temporary test artifacts before destroy
+# Runs after verify/idempotence tests complete
+# =============================================================================
+
+- name: Cleanup test artifacts
+  hosts: test_resources
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Remove test files
+      ansible.builtin.file:
+        path: "{{ tmp_dir }}/{{ inventory_hostname }}.txt"
+        state: absent
+      vars:
+        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
+      failed_when: false
+
+    - name: Remove test directories
+      ansible.builtin.file:
+        path: "{{ tmp_dir }}/molecule-test/{{ inventory_hostname }}"
+        state: absent
+      vars:
+        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
+      failed_when: false
+
+    - name: Clean up any temporary ansible files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/ansible-tmp
+        - /tmp/.ansible-compat
+      failed_when: false
+
+    - name: Display cleanup completion
+      ansible.builtin.debug:
+        msg: "Cleanup completed for {{ inventory_hostname }}"

@@ -1,7 +1,51 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "ansible-config"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []
+name = "local-workstation-collection"
+version = "1.0.0"
+description = "Fedora Workstation automation collection for Ansible"
+readme = "collections/ansible_collections/local/workstation/README.md"
+license = {text = "MIT-0"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT No Attribution (MIT-0)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Systems Administration",
+]
+dependencies = [
+    "ansible-core>=2.15",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ansible-dev-tools",
+    "ansible-lint>=24.10",
+    "yamllint>=1.35",
+    "pre-commit>=4.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["collections/ansible_collections/local/workstation/plugins"]
+
+[tool.pytest.ini_options]
+testpaths = ["collections/ansible_collections/local/workstation/tests"]
+python_files = "test_*.py"
+addopts = "-v --tb=short"
+
+[tool.ansible-lint]
+profile = "production"
+exclude_paths = [
+    ".venv",
+    ".ansible-venv",
+    "collections",
+]

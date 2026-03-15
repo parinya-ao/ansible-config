@@ -1,0 +1,31 @@
+{
+  "name": "Ansible Workstation Configuration",
+  "image": "ghcr.io/ansible/creator-ee:latest",
+  "remoteUser": "vscode",
+  "runArgs": [
+    "--cap-add=SYS_PTRACE",
+    "--security-opt",
+    "seccomp=unconfined"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "redhat.ansible",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "redhat.vscode-yaml",
+        "timonwong.shellcheck"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "ansible.python.interpreterPath": "/usr/bin/python3",
+        "ansible.ansible.path": "/usr/bin/ansible",
+        "ansible.ansible.useFullyQualifiedCollectionNames": true
+      }
+    }
+  },
+  "postCreateCommand": "pip3 install --user ansible-dev-tools",
+  "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+  ]
+}

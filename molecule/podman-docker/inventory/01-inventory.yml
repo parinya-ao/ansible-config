@@ -1,0 +1,24 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Static inventory - defines base hosts with container images
+# Loaded first (01- prefix ensures correct load order)
+
+all:
+  children:
+    molecule:
+      hosts:
+        molecule-fedora-podman:
+          # Primary: Podman container
+          container_image: ghcr.io/ansible/community-ansible-dev-tools:latest
+          container_runtime: podman
+          container_command: sleep 1d
+          container_privileged: false
+          container_systemd: false
+
+        molecule-fedora-docker:
+          # Secondary: Docker container (redundancy)
+          container_image: ghcr.io/ansible/community-ansible-dev-tools:latest
+          container_runtime: docker
+          container_command: sleep 1d
+          container_privileged: false
+          container_systemd: false

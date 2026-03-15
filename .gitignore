@@ -19,11 +19,9 @@ ENV/
 # --- Ansible ---
 *.retry
 .ansible/
-collections/ansible_collections/
 
 # --- IDE ---
 .idea/
-.vscode/
 *.swp
 *.swo
 *~
@@ -45,3 +43,10 @@ idempotence.log
 
 # --- Build Artifacts ---
 kics-results/
+*.tar.gz
+collections/ansible_collections/*/dist/
+
+# --- Ansible Collections ---
+# Keep local collections, ignore external ones
+collections/ansible_collections/ansible/
+collections/ansible_collections/community/

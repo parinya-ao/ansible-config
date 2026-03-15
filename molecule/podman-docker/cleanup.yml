@@ -1,0 +1,73 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Cleanup playbook - Removes temporary test artifacts from containers
+# Handles both Podman and Docker containers intelligently
+
+- name: Cleanup container instances
+  hosts: molecule
+  gather_facts: false
+  ignore_unreachable: true
+
+  tasks:
+    - name: Check if container is running (Podman)
+      containers.podman.podman_container_info:
+        name: "{{ inventory_hostname }}"
+      register: podman_info
+      delegate_to: localhost
+      when: container_runtime | default('podman') == 'podman'
+      failed_when: false
+
+    - name: Check if container is running (Docker)
+      community.docker.docker_container_info:
+        name: "{{ inventory_hostname }}"
+      register: docker_info
+      delegate_to: localhost
+      when: container_runtime | default('podman') == 'docker'
+      failed_when: false
+
+    - name: Remove temporary files from running Podman containers
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/molecule_os_info.txt
+        - /tmp/molecule_converge_marker.txt
+      when:
+        - podman_info is defined
+        - podman_info.containers | length > 0
+        - podman_info.containers[0].State.Running | default(false)
+      failed_when: false
+
+    - name: Remove temporary files from running Docker containers
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/molecule_os_info.txt
+        - /tmp/molecule_converge_marker.txt
+      when:
+        - docker_info is defined
+        - docker_info.container is defined
+        - docker_info.container.State.Running | default(false)
+      failed_when: false
+
+    - name: Clean DNF cache
+      ansible.builtin.command:
+        cmd: dnf clean all
+      changed_when: false
+      failed_when: false
+
+    - name: Display cleanup status
+      ansible.builtin.debug:
+        msg: "Cleanup completed for {{ inventory_hostname }} ({{ container_runtime | default('unknown') }})"
+
+- name: Summary cleanup tasks
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Display cleanup summary
+      ansible.builtin.debug:
+        msg:
+          - "Cleanup complete for all molecule containers"
+          - "Podman containers cleaned: {{ groups['podman_containers'] | default([]) | length }}"
+          - "Docker containers cleaned: {{ groups['docker_containers'] | default([]) | length }}"

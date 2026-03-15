@@ -1,0 +1,15 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Default Scenario - Testing Resource Lifecycle Manager
+# =============================================================================
+# This scenario manages shared testing resources for all other scenarios
+# When shared_state is enabled, this scenario's create/destroy runs first/last
+# =============================================================================
+
+scenario:
+  name: default
+  description: Manage shared testing resource lifecycle
+  test_sequence:
+    - create
+    - destroy

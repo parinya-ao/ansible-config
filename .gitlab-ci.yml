@@ -1,0 +1,266 @@
+---
+# =============================================================================
+# Molecule CI/CD Pipeline for GitLab CI
+# =============================================================================
+# Tests Ansible collection using Molecule with ansible-native approach
+# Uses shared state for efficient multi-scenario testing
+# Runs on Fedora Rawhide with Podman
+# PARALLEL REDUNDANCY: Synced with GitHub Actions for consistent behavior
+# =============================================================================
+
+stages:
+  - validate
+  - test
+  - integration
+  - deploy
+  - notify
+
+variables:
+  PY_COLORS: "1"
+  ANSIBLE_FORCE_COLOR: "1"
+  ANSIBLE_LINT_STRICT: "1"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip"
+  MOLECULE_GLOB: "molecule/**/molecule.yml"
+  # Parallel redundancy settings
+  ANSIBLE_FORKS: "4"
+  ANSIBLE_STRATEGY: "linear"
+  # Recovery notification (set in CI/CD variables)
+  RECOVERY_WEBHOOK_URL: "${RECOVERY_WEBHOOK_URL:-}"
+
+cache:
+  paths:
+    - .pip/
+    - .ansible-venv/
+    - collections/
+
+# =============================================================================
+# STAGE 1: LINT AND VALIDATE
+# =============================================================================
+
+validate:
+  stage: validate
+  image: python:3.13-slim
+  timeout: 15m
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"
+
+  before_script:
+    - python --version
+    - pip install --upgrade pip setuptools
+    - pip install ansible-core ansible-lint yamllint
+
+  script:
+    - echo "Running YAML lint..."
+    - yamllint -c .yamllint .
+    - echo "Running Ansible lint..."
+    - ansible-lint --profile production .
+    - echo "Validating molecule configuration..."
+    - if [ -d "molecule" ]; then molecule list; fi
+
+  artifacts:
+    reports:
+      codequality:
+        - ansible-lint-report.json
+    when: always
+
+# =============================================================================
+# STAGE 2: MOLECULE TESTS (Fedora Rawhide)
+# =============================================================================
+
+molecule-test:
+  stage: test
+  image: fedora:rawhide
+  timeout: 45m
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"
+
+  variables:
+    GIT_STRATEGY: clone
+
+  before_script:
+    - echo "Bootstrapping Python environment..."
+    - dnf install -y python3 python3-pip python3-libdnf5 python3-devel podman
+    - dnf install -y glibc-langpack-en
+    - python3 --version
+    - echo "Installing Molecule and dependencies..."
+    - python3 -m pip install --upgrade pip
+    - python3 -m pip install molecule molecule-plugins[podman] ansible-core
+    - echo "Installing collection requirements..."
+    - |
+      if [ -f "molecule/requirements.yml" ]; then
+        ansible-galaxy collection install -r molecule/requirements.yml
+      elif [ -f "requirements.yml" ]; then
+        ansible-galaxy collection install -r requirements.yml
+      fi
+    - chmod +x init.sh
+    - bash init.sh --skip-install --skip-check
+
+  script:
+    - echo "Running Molecule test for scenario: ${SCENARIO_NAME}"
+    - molecule test --scenario-name ${SCENARIO_NAME} --report --command-borders
+
+  parallel:
+    matrix:
+      - SCENARIO_NAME:
+          - default
+          - podman-docker
+          # Add more scenarios here:
+          # - scenario1
+          # - scenario2
+
+  artifacts:
+    when: always
+    paths:
+      - .cache/molecule/*/logs/
+      - "*.log"
+      - "ansible.log"
+    expire_in: 7 days
+    reports:
+      junit: molecule-test-results.xml
+
+# =============================================================================
+# STAGE 3: INTEGRATION TEST (All Scenarios with Shared State)
+# =============================================================================
+
+molecule-integration:
+  stage: integration
+  image: fedora:rawhide
+  timeout: 60m
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+  variables:
+    GIT_STRATEGY: clone
+
+  before_script:
+    - echo "Bootstrapping Python environment..."
+    - dnf install -y python3 python3-pip python3-libdnf5 python3-devel podman
+    - dnf install -y glibc-langpack-en
+    - python3 --version
+    - echo "Installing Molecule and dependencies..."
+    - python3 -m pip install --upgrade pip
+    - python3 -m pip install molecule molecule-plugins[podman] ansible-core
+    - echo "Installing collection requirements..."
+    - |
+      if [ -f "molecule/requirements.yml" ]; then
+        ansible-galaxy collection install -r molecule/requirements.yml
+      elif [ -f "requirements.yml" ]; then
+        ansible-galaxy collection install -r requirements.yml
+      fi
+    - chmod +x init.sh
+    - bash init.sh --skip-install --skip-check
+
+  script:
+    - echo "Running all Molecule scenarios with shared state..."
+    - export MOLECULE_GLOB="molecule/**/molecule.yml"
+    - molecule test --all --shared-state --report --command-borders
+
+  artifacts:
+    when: always
+    paths:
+      - .cache/molecule/*/logs/
+      - "*.log"
+      - "ansible.log"
+    expire_in: 7 days
+    reports:
+      junit: molecule-integration-results.xml
+
+# =============================================================================
+# STAGE 4: DEPLOY (Optional - Example)
+# =============================================================================
+
+deploy:
+  stage: deploy
+  image: fedora:rawhide
+  timeout: 30m
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
+    - when: manual
+      allow_failure: false
+  needs:
+    - validate
+    - molecule-test
+    - molecule-integration
+  variables:
+    GIT_STRATEGY: clone
+
+  before_script:
+    - echo "Preparing deployment..."
+    - dnf install -y python3 python3-pip podman
+    - python3 -m pip install --upgrade pip
+    - python3 -m pip install molecule molecule-plugins[podman] ansible-core
+    - chmod +x init.sh
+    - bash init.sh --skip-install --skip-check
+
+  script:
+    - echo "Deployment validation..."
+    - echo "✓ All Molecule tests passed"
+    - echo "✓ Ready for production deployment"
+    # Add your deployment commands here
+    # - ansible-playbook -i inventory/production.yml playbook.yaml
+
+  environment:
+    name: production
+    url: https://example.com
+
+# =============================================================================
+# STAGE 5: SUCCESS NOTIFICATION
+# =============================================================================
+
+success-notification:
+  stage: notify
+  image: curlimages/curl:latest
+  timeout: 5m
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  needs:
+    - validate
+    - molecule-test
+    - molecule-integration
+  when: on_success
+
+  script:
+    - echo "Sending success notification..."
+    - |
+      if [ -n "${RECOVERY_WEBHOOK_URL}" ]; then
+        payload="✅ GitLab CI: All Molecule tests passed!\\nBranch: ${CI_COMMIT_BRANCH}\\nCommit: ${CI_COMMIT_SHORT_SHA}"
+        curl -X POST "${RECOVERY_WEBHOOK_URL}" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\":\"${payload}\"}"
+        echo "Notification sent successfully"
+      else
+        echo "RECOVERY_WEBHOOK_URL not set, skipping notification"
+      fi
+  continue-on-error: true
+
+# =============================================================================
+# SUCCESS CHECK (Parallel Redundancy with GitHub Actions)
+# =============================================================================
+
+success-check:
+  stage: .post
+  image: fedora:rawhide
+  timeout: 5m
+  rules:
+    - if: always()
+  needs:
+    - validate
+    - molecule-test
+    - molecule-integration
+
+  script:
+    - echo "Checking pipeline status..."
+    - |
+      if [[ "${CI_JOB_STATUS}" == "success" ]]; then
+        echo "✓ PASSED: All Molecule tests completed successfully"
+        echo "Fedora Rawhide is ready for production!"
+        exit 0
+      else
+        echo "✗ FAILED: One or more pipeline stages failed"
+        echo "Please review the logs above for details"
+        exit 1
+      fi

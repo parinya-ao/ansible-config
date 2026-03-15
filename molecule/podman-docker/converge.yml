@@ -1,0 +1,72 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Converge playbook - Applies configuration to containers
+# Tests both Podman and Docker container targets
+
+- name: Validate molecule group exists
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Display inventory groups
+      ansible.builtin.debug:
+        msg:
+          - "Molecule hosts: {{ groups['molecule'] | default([]) }}"
+          - "Podman containers: {{ groups['podman_containers'] | default([]) }}"
+          - "Docker containers: {{ groups['docker_containers'] | default([]) }}"
+
+    - name: Assert molecule group has hosts
+      ansible.builtin.assert:
+        that:
+          - groups['molecule'] is defined
+          - groups['molecule'] | length > 0
+        fail_msg: "molecule group is empty or undefined"
+
+- name: Converge - Apply configuration to all containers
+  hosts: molecule
+  gather_facts: true
+
+  vars:
+    # CI-safe defaults
+    common_skip_disk_check: true
+    common_skip_preflight: true
+
+  pre_tasks:
+    - name: Display container information
+      ansible.builtin.debug:
+        msg:
+          - "Host: {{ inventory_hostname }}"
+          - "Connection: {{ ansible_connection }}"
+          - "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+          - "Python: {{ ansible_python.version | default('N/A') }}"
+
+  roles:
+    # Add roles to test here
+    # - role: common
+    #   when: common_system_update_enabled | default(true)
+
+  tasks:
+    - name: Create test marker file
+      ansible.builtin.copy:
+        content: |
+          Container: {{ inventory_hostname }}
+          Runtime: {{ container_runtime | default('unknown') }}
+          Connection: {{ ansible_connection }}
+          Timestamp: {{ ansible_date_time.iso8601 | default('N/A') }}
+        dest: /tmp/molecule_converge_marker.txt
+        mode: "0644"
+
+    - name: Read OS release information
+      ansible.builtin.slurp:
+        src: /etc/os-release
+      register: os_release
+
+    - name: Write OS info to temporary file
+      ansible.builtin.copy:
+        content: "{{ os_release.content | b64decode }}"
+        dest: /tmp/molecule_os_info.txt
+        mode: "0644"
+
+  post_tasks:
+    - name: Display convergence complete
+      ansible.builtin.debug:
+        msg: "Convergence complete for {{ inventory_hostname }}"

@@ -1,3 +1,4 @@
+---
 # SPDX-License-Identifier: MIT-0
 # Verify playbook for CI scenario
 # Validates that the configuration achieved the desired state

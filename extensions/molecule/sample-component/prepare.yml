@@ -1,0 +1,46 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Prepare Playbook - Component Prerequisite Satisfaction
+# =============================================================================
+# This playbook installs dependencies and prepares the test environment
+# Runs before converge for each component scenario
+# =============================================================================
+
+- name: Prepare test environment
+  hosts: test_resources
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Install prerequisite packages
+      ansible.builtin.dnf:
+        name: "{{ prerequisites | default([]) }}"
+        state: present
+      when: prerequisites is defined
+      register: dnf_result
+      retries: 3
+      delay: 5
+      until: dnf_result is succeeded
+
+    - name: Display installed prerequisites
+      ansible.builtin.debug:
+        msg: "Installed prerequisites: {{ prerequisites | join(', ') }}"
+      when: prerequisites is defined
+
+    - name: Create test directories
+      ansible.builtin.file:
+        path: "{{ tmp_dir }}/molecule-test/{{ inventory_hostname }}"
+        state: directory
+        mode: "0755"
+      vars:
+        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
+
+    - name: Verify Python 3 is available
+      ansible.builtin.command:
+        cmd: python3 --version
+      register: python_version
+      changed_when: false
+
+    - name: Display Python version
+      ansible.builtin.debug:
+        msg: "Python version: {{ python_version.stdout }}"

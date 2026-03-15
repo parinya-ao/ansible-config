@@ -1,0 +1,91 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Verify playbook - Validates container configuration and state
+# Tests both Podman and Docker container targets
+
+- name: Verify container configuration
+  hosts: molecule
+  gather_facts: true
+
+  tasks:
+    - name: Read OS info file created during converge
+      ansible.builtin.slurp:
+        src: /tmp/molecule_os_info.txt
+      register: os_info_file
+
+    - name: Read converge marker file
+      ansible.builtin.slurp:
+        src: /tmp/molecule_converge_marker.txt
+      register: converge_marker
+
+    - name: Display container runtime information
+      ansible.builtin.debug:
+        msg:
+          - "Host: {{ inventory_hostname }}"
+          - "Runtime: {{ container_runtime | default('unknown') }}"
+          - "Connection: {{ ansible_connection }}"
+          - "OS Family: {{ ansible_facts['os_family'] }}"
+
+    - name: Verify marker file content
+      ansible.builtin.assert:
+        that:
+          - marker_content is search(inventory_hostname)
+          - marker_content is search('Runtime:')
+        fail_msg: "Marker file validation failed for {{ inventory_hostname }}"
+        success_msg: "Marker file validated successfully"
+      vars:
+        marker_content: "{{ converge_marker.content | b64decode }}"
+
+    - name: Verify environment variables from host_vars
+      ansible.builtin.assert:
+        that:
+          - ansible_env.TEST_HOST_VAR is defined or ansible_env.TEST_RUNTIME is defined
+        fail_msg: "Expected environment variables not found"
+        success_msg: "Environment variables verified for {{ inventory_hostname }}"
+      when: ansible_env is defined
+
+    - name: Verify Molecule test environment variable
+      ansible.builtin.assert:
+        that:
+          - ansible_env.MOLECULE_TEST_CONTAINER == "true"
+        fail_msg: "MOLECULE_TEST_CONTAINER environment variable not set correctly"
+        success_msg: "MOLECULE_TEST_CONTAINER verified"
+      when: ansible_env is defined
+
+    - name: Verify dev tools environment variable
+      ansible.builtin.assert:
+        that:
+          - ansible_env.ANSIBLE_DEV_TOOLS_CONTAINER == "1"
+        fail_msg: "ANSIBLE_DEV_TOOLS_CONTAINER environment variable not set"
+        success_msg: "ANSIBLE_DEV_TOOLS_CONTAINER verified"
+      when: ansible_env is defined
+
+    - name: Verify runtime-specific variables
+      ansible.builtin.assert:
+        that:
+          - ansible_env.TEST_RUNTIME == container_runtime
+        fail_msg: >-
+          TEST_RUNTIME ({{ ansible_env.TEST_RUNTIME }}) does not match
+          container_runtime ({{ container_runtime }})
+        success_msg: "Runtime variable verified for {{ container_runtime }}"
+      when:
+        - ansible_env is defined
+        - ansible_env.TEST_RUNTIME is defined
+
+    - name: Verify container connectivity
+      ansible.builtin.command:
+        cmd: echo "Connectivity test successful"
+      changed_when: false
+      register: connectivity_test
+
+    - name: Display connectivity test result
+      ansible.builtin.debug:
+        msg: "{{ connectivity_test.stdout }}"
+
+    - name: Verify both runtimes are tested (localhost check)
+      ansible.builtin.debug:
+        msg:
+          - "Podman containers tested: {{ groups['podman_containers'] | default([]) | length }}"
+          - "Docker containers tested: {{ groups['docker_containers'] | default([]) | length }}"
+      delegate_to: localhost
+      run_once: true
