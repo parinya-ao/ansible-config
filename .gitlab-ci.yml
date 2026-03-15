@@ -227,9 +227,10 @@ success-notification:
     - echo "Sending success notification..."
     - |
       if [ -n "${RECOVERY_WEBHOOK_URL}" ]; then
+        payload="✅ GitLab CI: All Molecule tests passed!\\nBranch: ${CI_COMMIT_BRANCH}\\nCommit: ${CI_COMMIT_SHORT_SHA}"
         curl -X POST "${RECOVERY_WEBHOOK_URL}" \
           -H "Content-Type: application/json" \
-          -d "{\"text\":\"✅ GitLab CI: All Molecule tests passed!\\nBranch: ${CI_COMMIT_BRANCH}\\nCommit: ${CI_COMMIT_SHORT_SHA}\"}"
+          -d "{\"text\":\"${payload}\"}"
         echo "Notification sent successfully"
       else
         echo "RECOVERY_WEBHOOK_URL not set, skipping notification"
