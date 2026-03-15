@@ -126,8 +126,6 @@ jobs:
       - name: Run Molecule Test
         run: |
           molecule test --scenario-name ${{ matrix.scenario }} --report --command-borders
-        env:
-          MOLECULE_GLOB: "molecule/**/molecule.yml"
 
       - name: Upload Molecule Logs
         uses: actions/upload-artifact@v4
@@ -185,7 +183,6 @@ jobs:
 
       - name: Run All Molecule Scenarios (Shared State)
         run: |
-          export MOLECULE_GLOB="molecule/**/molecule.yml"
           molecule test --all --shared-state --report --command-borders
 
       - name: Upload Integration Logs
