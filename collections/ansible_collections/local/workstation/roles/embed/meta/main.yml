@@ -3,7 +3,7 @@
 galaxy_info:
   role_name: embed
   author: parinya
-  description: Embedded development environment setup for Fedora (ARM toolchain, STM32CubeMX, ESP tools, serial debugging)
+  description: Embedded development environment setup for Fedora (ARM toolchain, ESP tools, serial debugging)
   license: MIT-0
   min_ansible_version: "2.15"
   platforms:
@@ -13,7 +13,6 @@ galaxy_info:
         - "42"
   galaxy_tags:
     - embedded
-    - stm32
     - esp
     - arm
     - development

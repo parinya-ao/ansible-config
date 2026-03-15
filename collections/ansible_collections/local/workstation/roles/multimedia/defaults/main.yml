@@ -5,7 +5,7 @@
 # Feature toggles
 multimedia_install_codecs: true
 multimedia_install_video_acceleration: true
-multimedia_install_openh264: true
+multimedia_install_openh264: false
 
 # Hardware video acceleration options
 multimedia_gpu_vendor: "" # Set to "intel" or "amd" for vendor-specific drivers

@@ -1,6 +1,6 @@
 ---
 # SPDX-License-Identifier: MIT-0
-# System optimization tasks
+# System optimization tasks with auto-recovery and rollback
 
 - name: Check current kernel args for nvidia-modeset
   ansible.builtin.command: grubby --info=DEFAULT
@@ -25,21 +25,53 @@
     - nvidia
 
 - name: Disable NetworkManager-wait-online.service
-  ansible.builtin.systemd:
-    name: NetworkManager-wait-online.service
-    enabled: false
-    state: stopped
+  ansible.builtin.block:
+    - name: Disable NetworkManager-wait-online.service
+      ansible.builtin.systemd:
+        name: NetworkManager-wait-online.service
+        enabled: false
+        state: stopped
+      become: true
+      register: nm_wait_online_result
+  rescue:
+    - name: Set recovery task name
+      ansible.builtin.set_fact:
+        recovery_task_name: "networkmanager_optimization"
+
+    - name: Execute recovery tasks
+      ansible.builtin.import_tasks: recovery.yml
+  always:
+    - name: Ensure service state is acceptable
+      ansible.builtin.systemd:
+        name: NetworkManager-wait-online.service
+        enabled: false
+      become: true
+      failed_when: false
   when: common_apply_optimizations | bool
-  become: true
-  failed_when: false
   tags:
     - optimizations
     - boot
 
 - name: Set system hostname
-  ansible.builtin.hostname:
-    name: "{{ common_hostname }}"
-  become: true
+  ansible.builtin.block:
+    - name: Set system hostname
+      ansible.builtin.hostname:
+        name: "{{ common_hostname }}"
+      become: true
+      register: hostname_result
+  rescue:
+    - name: Set recovery task name
+      ansible.builtin.set_fact:
+        recovery_task_name: "hostname_change"
+
+    - name: Execute recovery tasks
+      ansible.builtin.import_tasks: recovery.yml
+  always:
+    - name: Verify hostname
+      ansible.builtin.command: hostnamectl
+      register: hostname_verify
+      changed_when: false
+      failed_when: false
   failed_when: false
   tags:
     - optimizations
@@ -57,40 +89,136 @@
     - time
 
 - name: Set UTC time (for dual boot systems)
-  ansible.builtin.command: timedatectl set-local-rtc 0
-  when:
-    - common_set_utc_time | bool
-    - common_rtc_status.stdout is defined
-    - common_rtc_status.stdout != "no"
+  ansible.builtin.block:
+    - name: Set UTC time
+      ansible.builtin.command: timedatectl set-local-rtc 0
+      when:
+        - common_set_utc_time | bool
+        - common_rtc_status.stdout is defined
+        - common_rtc_status.stdout != "no"
+      become: true
+      register: rtc_change_result
+      changed_when: false
+  rescue:
+    - name: Set recovery task name
+      ansible.builtin.set_fact:
+        recovery_task_name: "rtc_time_change"
+
+    - name: Execute recovery tasks
+      ansible.builtin.import_tasks: recovery.yml
+  always:
+    - name: Verify RTC setting
+      ansible.builtin.command: timedatectl show --property=LocalRTC --value
+      register: rtc_verify
+      changed_when: false
+      failed_when: false
+  when: common_set_utc_time | bool
   become: true
-  changed_when: false
-  failed_when: false
   tags:
     - optimizations
     - time
 
 - name: Configure custom DNS with DNS-over-TLS
-  ansible.builtin.blockinfile:
-    path: /etc/systemd/resolved.conf.d/99-dns-over-tls.conf
-    block: |
-      [Resolve]
-      DNS={{ common_dns_servers | join(' ') }}
-      DNSOverTLS=yes
-      Domains=~.
-    create: true
-    mode: "0644"
+  ansible.builtin.block:
+    - name: Backup existing DNS configuration
+      ansible.builtin.copy:
+        src: /etc/systemd/resolved.conf.d/99-dns-over-tls.conf
+        dest: /etc/systemd/resolved.conf.d/99-dns-over-tls.conf.bak
+        remote_src: true
+        mode: preserve
+      become: true
+      register: dns_backup_result
+      failed_when: false
+      changed_when: false
+
+    - name: Configure custom DNS with DNS-over-TLS
+      ansible.builtin.blockinfile:
+        path: /etc/systemd/resolved.conf.d/99-dns-over-tls.conf
+        block: |
+          [Resolve]
+          DNS={{ common_dns_servers | join(' ') }}
+          DNSOverTLS=yes
+          Domains=~.
+        create: true
+        mode: "0644"
+      become: true
+      register: dns_config_result
+      notify:
+        - Restart systemd-resolved
+
+    - name: Validate DNS configuration
+      ansible.builtin.command: systemd-resolve --status
+      register: dns_validate
+      changed_when: false
+      failed_when: dns_validate.rc != 0
+  rescue:
+    - name: Set recovery task name
+      ansible.builtin.set_fact:
+        recovery_task_name: "dns_configuration"
+        recovery_restart_resolved: true
+
+    - name: Rollback DNS configuration if backup exists
+      ansible.builtin.copy:
+        src: "{{ dns_backup_result.backup_file | default('/etc/systemd/resolved.conf.d/99-dns-over-tls.conf.bak') }}"
+        dest: /etc/systemd/resolved.conf.d/99-dns-over-tls.conf
+        remote_src: true
+        mode: preserve
+      become: true
+      when: dns_backup_result.backup_file is defined
+      failed_when: false
+
+    - name: Execute recovery tasks
+      ansible.builtin.import_tasks: recovery.yml
+  always:
+    - name: Ensure systemd-resolved is running
+      ansible.builtin.systemd:
+        name: systemd-resolved
+        state: started
+      become: true
+      failed_when: false
   when: common_configure_custom_dns | bool
   become: true
-  notify:
-    - Restart systemd-resolved
   tags:
     - optimizations
     - dns
 
 - name: Remove Firefox default start page override
-  ansible.builtin.file:
-    path: /usr/lib64/firefox/browser/defaults/preferences/firefox-redhat-default-prefs.js
-    state: absent
+  ansible.builtin.block:
+    - name: Backup Firefox configuration
+      ansible.builtin.copy:
+        src: /usr/lib64/firefox/browser/defaults/preferences/firefox-redhat-default-prefs.js
+        dest: /usr/lib64/firefox/browser/defaults/preferences/firefox-redhat-default-prefs.js.bak
+        remote_src: true
+        mode: preserve
+      become: true
+      register: firefox_backup_result
+      failed_when: false
+      changed_when: false
+
+    - name: Remove Firefox default start page override
+      ansible.builtin.file:
+        path: /usr/lib64/firefox/browser/defaults/preferences/firefox-redhat-default-prefs.js
+        state: absent
+      become: true
+      register: firefox_remove_result
+  rescue:
+    - name: Set recovery task name
+      ansible.builtin.set_fact:
+        recovery_task_name: "firefox_optimization"
+
+    - name: Rollback Firefox configuration if backup exists
+      ansible.builtin.copy:
+        src: "{{ firefox_backup_result.backup_file | default('/usr/lib64/firefox/browser/defaults/preferences/firefox-redhat-default-prefs.js.bak') }}"
+        dest: /usr/lib64/firefox/browser/defaults/preferences/firefox-redhat-default-prefs.js
+        remote_src: true
+        mode: preserve
+      become: true
+      when: firefox_backup_result.backup_file is defined
+      failed_when: false
+
+    - name: Execute recovery tasks
+      ansible.builtin.import_tasks: recovery.yml
+  when: common_apply_optimizations | bool
   become: true
   tags:
     - optimizations

@@ -35,7 +35,6 @@
       - "Target user: {{ embed_target_user }}"
       - "Target home: {{ embed_target_home }}"
       - "ARM toolchain: {{ 'Enabled' if embed_install_arm_toolchain else 'Disabled' }}"
-      - "STM32CubeMX: {{ 'Enabled' if embed_install_stm32cubemx else 'Disabled' }}"
       - "ESP tools: {{ 'Enabled' if embed_install_esp_tools else 'Disabled' }}"
       - "Serial tools: {{ 'Enabled' if embed_install_serial_tools else 'Disabled' }}"
       - "Dialout group: {{ 'Enabled' if embed_configure_dialout_group else 'Disabled' }}"
@@ -74,14 +73,6 @@
     - embed
     - serial
     - permissions
-
-- name: Install STM32CubeMX via Flatpak
-  ansible.builtin.import_tasks: stm32cubemx.yml
-  when: embed_install_stm32cubemx
-  tags:
-    - embed
-    - stm32
-    - flatpak
 
 - name: Create workspace directory
   ansible.builtin.import_tasks: workspace.yml

@@ -7,6 +7,8 @@
 # Optimized for Fedora Rawhide (rolling development branch) with DNF5
 # Disables features that require physical hardware, user interaction,
 # or services that don't work in containerized environments
+#
+# PARALLEL REDUNDANCY: This config works with both GitHub Actions and GitLab CI
 # =============================================================================
 
 # =============================================================================
@@ -91,6 +93,21 @@ stability_snapper_enable: false  # Skip snapper (requires systemd timers, Btrfs 
 power_install_tlp: false
 
 # =============================================================================
+# Embed Role Variables (STM32CubeMX removed)
+# =============================================================================
+# ARM toolchain enabled for CI testing
+embed_install_arm_toolchain: true
+
+# ESP tools enabled for CI testing
+embed_install_esp_tools: true
+
+# Serial tools enabled for CI testing
+embed_install_serial_tools: true
+
+# Dialout group configuration
+embed_configure_dialout_group: true
+
+# =============================================================================
 # Logging Configuration
 # =============================================================================
 # Enable verbose logging for CI debugging
@@ -99,3 +116,28 @@ ansible_callback_whitelist:
   - profile_tasks
   - timer
   - yaml
+
+# =============================================================================
+# Recovery and Monitoring Configuration
+# =============================================================================
+# Enable recovery logging in CI
+recovery_log_path: /var/log/ansible_recovery.log
+recovery_webhook_url: ""  # Set to your Discord/Slack webhook URL for notifications
+
+# Health check configuration
+health_critical_services: []  # Empty in CI (no systemd)
+
+# =============================================================================
+# Parallel Redundancy Configuration
+# =============================================================================
+# These variables ensure consistent behavior across GitHub Actions and GitLab CI
+
+# CI platform detection (auto-detected, but can be overridden)
+ci_platform: "{{ lookup('env', 'GITLAB_CI') | ternary('gitlab', lookup('env', 'GITHUB_ACTIONS') | ternary('github', 'unknown')) }}"
+
+# Shared cache directory for both CI platforms
+cache_dir: "{{ lookup('env', 'CI_PROJECT_DIR') | default(lookup('env', 'GITHUB_WORKSPACE') | default('/tmp/ansible-cache')) }}"
+
+# Parallel execution settings
+ansible_forks: 4  # Conservative for CI runners
+ansible_strategy: linear  # Ensures consistent ordering across platforms

@@ -71,12 +71,33 @@
     - android
     - mobile
 
+- name: Check current Java alternative
+  ansible.builtin.shell:
+    cmd: readlink -f /usr/bin/java 2>/dev/null || echo ""
+  register: developer_current_java
+  changed_when: false
+  failed_when: false
+  tags:
+    - android
+    - mobile
+
 - name: Set Java 17 (Temurin) as default alternative
   community.general.alternatives:
     name: java
     path: /usr/lib/jvm/temurin-17-jdk/bin/java
     link: /usr/bin/java
   become: true
+  when: developer_current_java.stdout != "/usr/lib/jvm/temurin-17-jdk/bin/java"
+  tags:
+    - android
+    - mobile
+
+- name: Check current javac alternative
+  ansible.builtin.shell:
+    cmd: readlink -f /usr/bin/javac 2>/dev/null || echo ""
+  register: developer_current_javac
+  changed_when: false
+  failed_when: false
   tags:
     - android
     - mobile
@@ -87,6 +108,7 @@
     path: /usr/lib/jvm/temurin-17-jdk/bin/javac
     link: /usr/bin/javac
   become: true
+  when: developer_current_javac.stdout != "/usr/lib/jvm/temurin-17-jdk/bin/javac"
   tags:
     - android
     - mobile
@@ -172,8 +194,6 @@
     regexp: "^export ANDROID_HOME="
     state: present
     create: true
-    owner: "{{ developer_target_user }}"
-    mode: "0644"
   tags:
     - android
     - mobile
@@ -185,8 +205,6 @@
     regexp: ".*ANDROID_HOME/cmdline-tools.*"
     state: present
     create: true
-    owner: "{{ developer_target_user }}"
-    mode: "0644"
   tags:
     - android
     - mobile

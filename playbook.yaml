@@ -105,7 +105,6 @@
       tags:
         - embed
         - embedded
-        - stm32
         - esp
 
   post_tasks:

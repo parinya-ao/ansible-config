@@ -1,68 +1,157 @@
 ---
 # SPDX-License-Identifier: MIT-0
 # =============================================================================
-# Create Playbook - Initialize Shared Testing Resources
+# Create Playbook - Initialize Testing Containers
 # =============================================================================
-# This playbook creates testing resources that all scenarios will share
-# Resources can be: files, directories, containers, or any test infrastructure
+# PRIMARY: Podman containers with systemd support
+# SECONDARY: Docker containers (fallback/redundancy)
+# Creates containers from inventory definitions with systemd compliance
 # =============================================================================
 
-- name: Initialize shared testing resources
+- name: Create container instances (Primary: Podman)
+  hosts: localhost
+  gather_facts: false
+  vars:
+    molecule_inventory:
+      all:
+        hosts: {}
+        molecule: {}
+  tasks:
+    - name: Validate podman group exists
+      ansible.builtin.assert:
+        that:
+          - groups['podman_containers'] is defined
+        fail_msg: "podman_containers group not found in inventory"
+
+    - name: Create Podman containers from inventory
+      containers.podman.podman_container:
+        hostname: "{{ item }}"
+        name: "{{ item }}"
+        image: "{{ hostvars[item]['container_image'] }}"
+        command: "{{ hostvars[item]['container_command'] | default('/sbin/init') }}"
+        privileged: "{{ hostvars[item]['container_privileged'] | default(false) }}"
+        capabilities: "{{ hostvars[item]['container_capabilities'] | default(omit) }}"
+        volumes: "{{ hostvars[item]['container_volumes'] | default(omit) }}"
+        tmpfs: "{{ hostvars[item]['container_tmpfs'] | default(omit) }}"
+        systemd: "{{ hostvars[item]['container_systemd'] | default(true) }}"
+        log_driver: "{{ hostvars[item]['container_log_driver'] | default('json-file') }}"
+        state: started
+        auto_remove: "{{ container_auto_remove | default(false) }}"
+      register: podman_result
+      loop: "{{ groups['podman_containers'] | default([]) }}"
+      loop_control:
+        label: "{{ item }}"
+      when: groups['podman_containers'] is defined
+
+    - name: Verify Podman containers are running
+      ansible.builtin.include_tasks:
+        file: tasks/create-fail.yml
+      vars:
+        container_runtime: podman
+      when: >
+        item.container.State.ExitCode != 0 or
+        not item.container.State.Running
+      loop: "{{ podman_result.results | default([]) }}"
+      loop_control:
+        label: "{{ item.container.Name }}"
+
+    - name: Display Podman container info
+      ansible.builtin.debug:
+        msg: >-
+          Created Podman container: {{ item.container.Name }}
+          Image: {{ item.container.Config.Image }}
+          State: {{ item.container.State.Status }}
+          Running: {{ item.container.State.Running }}
+      loop: "{{ podman_result.results | default([]) }}"
+      loop_control:
+        label: "{{ item.container.Name }}"
+
+- name: Create container instances (Secondary: Docker)
   hosts: localhost
   gather_facts: false
   tasks:
-    - name: Create shared temporary directory
-      ansible.builtin.file:
-        path: "{{ tmp_dir }}/molecule-shared"
-        state: directory
-        mode: "0755"
+    - name: Validate docker group exists
+      ansible.builtin.assert:
+        that:
+          - groups['docker_containers'] is defined
+        fail_msg: "docker_containers group not found in inventory"
+
+    - name: Create Docker containers from inventory
+      community.docker.docker_container:
+        name: "{{ item }}"
+        image: "{{ hostvars[item]['container_image'] }}"
+        command: "{{ hostvars[item]['container_command'] | default('/sbin/init') }}"
+        privileged: "{{ hostvars[item]['container_privileged'] | default(false) }}"
+        capabilities: "{{ hostvars[item]['container_capabilities'] | default(omit) }}"
+        volumes: "{{ hostvars[item]['container_volumes'] | default(omit) }}"
+        tmpfs: "{{ hostvars[item]['container_tmpfs'] | default(omit) }}"
+        log_driver: "{{ hostvars[item]['container_log_driver'] | default('json-file') }}"
+        state: started
+        auto_remove: "{{ container_auto_remove | default(false) }}"
+        entrypoint: ""
+      register: docker_result
+      loop: "{{ groups['docker_containers'] | default([]) }}"
+      loop_control:
+        label: "{{ item }}"
+      when: groups['docker_containers'] is defined
+
+    - name: Verify Docker containers are running
+      ansible.builtin.include_tasks:
+        file: tasks/create-fail.yml
       vars:
-        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
+        container_runtime: docker
+      when: >
+        item.container.State.ExitCode != 0 or
+        not item.container.State.Running
+      loop: "{{ docker_result.results | default([]) }}"
+      loop_control:
+        label: "{{ item.container.Name }}"
 
-    - name: Create resource state file for each test host
-      ansible.builtin.copy:
-        dest: "{{ tmp_dir }}/molecule-shared/{{ item }}_created.yml"
-        content: |
-          # Resource state file
-          # Created by Molecule default scenario
-          # Host: {{ item }}
-          # Timestamp: {{ ansible_date_time.iso8601 | default('unknown') }}
-          state: created
-          attributes: {{ hostvars[item].attributes | default({}) | to_json }}
-        mode: "0644"
-      loop: "{{ groups['test_resources'] | default([]) }}"
-      when: groups['test_resources'] is defined
+    - name: Display Docker container info
+      ansible.builtin.debug:
+        msg: >-
+          Created Docker container: {{ item.container.Name }}
+          Image: {{ item.container.Config.Image }}
+          State: {{ item.container.State.Status }}
+          Running: {{ item.container.State.Running }}
+      loop: "{{ docker_result.results | default([]) }}"
+      loop_control:
+        label: "{{ item.container.Name }}"
 
-    - name: Verify DNF5 is available (Fedora 41+)
+- name: Wait for all containers to be ready
+  hosts: all_containers
+  gather_facts: false
+  tasks:
+    - name: Wait for connection
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+      delegate_to: "{{ inventory_hostname }}"
+
+    - name: Display container readiness
+      ansible.builtin.debug:
+        msg: "Container {{ inventory_hostname }} is ready"
+
+- name: Verify container creation
+  hosts: all_containers
+  gather_facts: true
+  tasks:
+    - name: Display container system information
+      ansible.builtin.debug:
+        msg: >-
+          Container: {{ inventory_hostname }}
+          OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          Family: {{ ansible_os_family }}
+          Python: {{ ansible_python_version | default('N/A') }}
+          Connection: {{ ansible_connection }}
+
+    - name: Verify systemd is available
       ansible.builtin.command:
-        cmd: dnf5 --version
-      register: dnf5_check
+        cmd: systemctl --version
+      register: systemctl_version
       changed_when: false
       failed_when: false
 
-    - name: Display DNF5 version
+    - name: Display systemd version
       ansible.builtin.debug:
-        msg: "DNF5 version: {{ dnf5_check.stdout_lines[0] | default('DNF5 available') }}"
-      when: dnf5_check.rc == 0
-
-    - name: Display Python version
-      ansible.builtin.debug:
-        msg: "Python version: {{ ansible_python_version | default('unknown') }}"
-
-- name: Verify resource creation
-  hosts: test_resources
-  gather_facts: false
-  tasks:
-    - name: Check if resource state file exists
-      ansible.builtin.stat:
-        path: "{{ tmp_dir }}/molecule-shared/{{ inventory_hostname }}_created.yml"
-      register: result
-      vars:
-        tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
-
-    - name: Assert resource was created
-      ansible.builtin.assert:
-        that:
-          - result.stat.exists
-        fail_msg: "Resource state file not found for {{ inventory_hostname }}"
-        success_msg: "Resource state file exists for {{ inventory_hostname }}"
+        msg: "Systemd available: {{ systemctl_version.rc == 0 }}"
+      when: systemctl_version.rc is defined
