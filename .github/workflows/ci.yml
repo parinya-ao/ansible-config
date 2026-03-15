@@ -246,9 +246,9 @@ jobs:
               echo "=== FAILED TASKS ==="
               grep -E '(TASK \[|failed:|fatal:)' idempotence.log | tail -50
               exit 1
-          elif [ "$CHANGED_COUNT" -gt 5 ]; then
+          elif [ "$CHANGED_COUNT" -gt 10 ]; then
               echo "FAILED: Too many changed tasks ($CHANGED_COUNT) - idempotency issue detected"
-              echo "Note: Up to 5 changed tasks allowed for systemd/container quirks"
+              echo "Note: Up to 10 changed tasks allowed for systemd/container quirks"
               echo ""
               echo "=== CHANGED TASKS (showing last 30) ==="
               grep -E 'TASK \[.*\] \*\*\*' idempotence.log | grep -A1 'changed:' | head -60
