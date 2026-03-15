@@ -5,6 +5,7 @@
 # Tests Ansible collection using Molecule with ansible-native approach
 # Uses shared state for efficient multi-scenario testing
 # Runs on Fedora Rawhide with Podman
+# PARALLEL REDUNDANCY: Synced with GitHub Actions for consistent behavior
 # =============================================================================
 
 stages:
@@ -12,13 +13,19 @@ stages:
   - test
   - integration
   - deploy
+  - notify
 
 variables:
   PY_COLORS: "1"
   ANSIBLE_FORCE_COLOR: "1"
   ANSIBLE_LINT_STRICT: "1"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip"
-  MOLECULE_GLOB: "extensions/molecule/**/molecule.yml"
+  MOLECULE_GLOB: "molecule/**/molecule.yml"
+  # Parallel redundancy settings
+  ANSIBLE_FORKS: "4"
+  ANSIBLE_STRATEGY: "linear"
+  # Recovery notification (set in CI/CD variables)
+  RECOVERY_WEBHOOK_URL: "${RECOVERY_WEBHOOK_URL:-}"
 
 cache:
   paths:
@@ -49,7 +56,7 @@ validate:
     - echo "Running Ansible lint..."
     - ansible-lint --profile production .
     - echo "Validating molecule configuration..."
-    - if [ -d "extensions/molecule" ]; then molecule list; fi
+    - if [ -d "molecule" ]; then molecule list; fi
 
   artifacts:
     reports:
@@ -82,17 +89,15 @@ molecule-test:
     - python3 -m pip install molecule molecule-plugins[podman] ansible-core
     - echo "Installing collection requirements..."
     - |
-      if [ -f "extensions/molecule/requirements.yml" ]; then
-        ansible-galaxy collection install -r extensions/molecule/requirements.yml
+      if [ -f "molecule/requirements.yml" ]; then
+        ansible-galaxy collection install -r molecule/requirements.yml
       elif [ -f "requirements.yml" ]; then
         ansible-galaxy collection install -r requirements.yml
       fi
     - chmod +x init.sh
-    - bash init.sh --skip-install --skip-check || true
-    - source .ansible-venv/bin/activate
+    - bash init.sh --skip-install --skip-check
 
   script:
-    - source .ansible-venv/bin/activate
     - echo "Running Molecule test for scenario: ${SCENARIO_NAME}"
     - molecule test --scenario-name ${SCENARIO_NAME} --report --command-borders
 
@@ -100,7 +105,8 @@ molecule-test:
     matrix:
       - SCENARIO_NAME:
           - default
-          # Add your scenarios here:
+          - podman-docker
+          # Add more scenarios here:
           # - scenario1
           # - scenario2
 
@@ -109,6 +115,7 @@ molecule-test:
     paths:
       - .cache/molecule/*/logs/
       - "*.log"
+      - "ansible.log"
     expire_in: 7 days
     reports:
       junit: molecule-test-results.xml
@@ -138,19 +145,17 @@ molecule-integration:
     - python3 -m pip install molecule molecule-plugins[podman] ansible-core
     - echo "Installing collection requirements..."
     - |
-      if [ -f "extensions/molecule/requirements.yml" ]; then
-        ansible-galaxy collection install -r extensions/molecule/requirements.yml
+      if [ -f "molecule/requirements.yml" ]; then
+        ansible-galaxy collection install -r molecule/requirements.yml
       elif [ -f "requirements.yml" ]; then
         ansible-galaxy collection install -r requirements.yml
       fi
     - chmod +x init.sh
-    - bash init.sh --skip-install --skip-check || true
-    - source .ansible-venv/bin/activate
+    - bash init.sh --skip-install --skip-check
 
   script:
-    - source .ansible-venv/bin/activate
     - echo "Running all Molecule scenarios with shared state..."
-    - export MOLECULE_GLOB="extensions/molecule/**/molecule.yml"
+    - export MOLECULE_GLOB="molecule/**/molecule.yml"
     - molecule test --all --shared-state --report --command-borders
 
   artifacts:
@@ -158,6 +163,7 @@ molecule-integration:
     paths:
       - .cache/molecule/*/logs/
       - "*.log"
+      - "ansible.log"
     expire_in: 7 days
     reports:
       junit: molecule-integration-results.xml
@@ -187,11 +193,9 @@ deploy:
     - python3 -m pip install --upgrade pip
     - python3 -m pip install molecule molecule-plugins[podman] ansible-core
     - chmod +x init.sh
-    - bash init.sh --skip-install --skip-check || true
-    - source .ansible-venv/bin/activate
+    - bash init.sh --skip-install --skip-check
 
   script:
-    - source .ansible-venv/bin/activate
     - echo "Deployment validation..."
     - echo "✓ All Molecule tests passed"
     - echo "✓ Ready for production deployment"
@@ -203,7 +207,37 @@ deploy:
     url: https://example.com
 
 # =============================================================================
-# SUCCESS NOTIFICATION
+# STAGE 5: SUCCESS NOTIFICATION
+# =============================================================================
+
+success-notification:
+  stage: notify
+  image: curlimages/curl:latest
+  timeout: 5m
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  needs:
+    - validate
+    - molecule-test
+    - molecule-integration
+  when: on_success
+
+  script:
+    - echo "Sending success notification..."
+    - |
+      if [ -n "${RECOVERY_WEBHOOK_URL}" ]; then
+        curl -X POST "${RECOVERY_WEBHOOK_URL}" \
+          -H "Content-Type: application/json" \
+          -d "{\"text\":\"✅ GitLab CI: All Molecule tests passed!\\nBranch: ${CI_COMMIT_BRANCH}\\nCommit: ${CI_COMMIT_SHORT_SHA}\"}"
+        echo "Notification sent successfully"
+      else
+        echo "RECOVERY_WEBHOOK_URL not set, skipping notification"
+      fi
+  continue-on-error: true
+
+# =============================================================================
+# SUCCESS CHECK (Parallel Redundancy with GitHub Actions)
 # =============================================================================
 
 success-check:
