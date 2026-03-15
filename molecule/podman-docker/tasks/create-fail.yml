@@ -23,11 +23,11 @@
   ansible.builtin.fail:
     msg: |
       Container {{ item.container.Name }} ({{ runtime | default('unknown') }}) failed to start properly.
-      
+
       Exit Code: {{ item.container.State.ExitCode }}
       Running: {{ item.container.State.Running }}
       Status: {{ item.container.State.Status | default('unknown') }}
-      
+
       Log output:
       {{ logfile_cmd.stdout | default('No logs available') }}
       {{ logfile_cmd.stderr | default('') }}

@@ -9,10 +9,10 @@ strict: false
 groups:
   # Create podman group for hosts using podman runtime
   podman_containers: container_runtime == 'podman'
-  
+
   # Create docker group for hosts using docker runtime
   docker_containers: container_runtime == 'docker'
-  
+
   # Create containers group for all container hosts
   containers: inventory_hostname.startswith('molecule')
 

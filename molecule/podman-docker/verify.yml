@@ -64,7 +64,9 @@
       ansible.builtin.assert:
         that:
           - ansible_env.TEST_RUNTIME == container_runtime
-        fail_msg: "TEST_RUNTIME ({{ ansible_env.TEST_RUNTIME }}) does not match container_runtime ({{ container_runtime }})"
+        fail_msg: >-
+          TEST_RUNTIME ({{ ansible_env.TEST_RUNTIME }}) does not match
+          container_runtime ({{ container_runtime }})
         success_msg: "Runtime variable verified for {{ container_runtime }}"
       when:
         - ansible_env is defined
