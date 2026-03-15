@@ -105,7 +105,7 @@ jobs:
 
       # Run Ansible Lint with production profile (strict mode)
       - name: Run Ansible Lint
-        run: ansible-lint --profile production --strict playbook.yaml roles/
+        run: ansible-lint --profile production --strict playbook.yaml
         env:
           ANSIBLE_FORCE_COLOR: "1"
           PY_COLORS: "1"
