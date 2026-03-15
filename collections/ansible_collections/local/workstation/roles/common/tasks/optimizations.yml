@@ -72,7 +72,6 @@
       register: hostname_verify
       changed_when: false
       failed_when: false
-  failed_when: false
   tags:
     - optimizations
     - hostname
