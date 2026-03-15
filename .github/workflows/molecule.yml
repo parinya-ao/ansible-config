@@ -125,6 +125,9 @@ jobs:
 
       - name: Run Molecule Test
         run: |
+          cd $GITHUB_WORKSPACE
+          pwd
+          ls -la molecule/
           molecule test --scenario-name ${{ matrix.scenario }} --report --command-borders
 
       - name: Upload Molecule Logs
@@ -183,6 +186,9 @@ jobs:
 
       - name: Run All Molecule Scenarios (Shared State)
         run: |
+          cd $GITHUB_WORKSPACE
+          pwd
+          ls -la molecule/
           molecule test --all --shared-state --report --command-borders
 
       - name: Upload Integration Logs
