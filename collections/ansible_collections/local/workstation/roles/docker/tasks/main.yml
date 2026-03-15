@@ -1,0 +1,39 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Docker role - Main entry point
+# This role installs and configures Docker CE (Community Edition) on Fedora systems including:
+# - Removal of old/obsolete Docker packages
+# - Docker CE repository configuration
+# - Docker CE packages installation
+# - Docker service management
+# - User group configuration for non-root Docker access
+
+# Remove old Docker packages
+- name: Remove old Docker packages
+  ansible.builtin.import_tasks: remove-old.yml
+  tags:
+    - docker
+
+# Configure Docker repository
+- name: Configure Docker CE repository
+  ansible.builtin.import_tasks: repository.yml
+  tags:
+    - docker
+
+# Install Docker packages
+- name: Install Docker CE packages
+  ansible.builtin.import_tasks: packages.yml
+  tags:
+    - docker
+
+# Start and enable Docker service
+- name: Configure Docker service
+  ansible.builtin.import_tasks: service.yml
+  tags:
+    - docker
+
+# Configure user access
+- name: Configure Docker user access
+  ansible.builtin.import_tasks: user-group.yml
+  tags:
+    - docker

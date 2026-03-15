@@ -1,0 +1,30 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Role metadata for common
+
+galaxy_info:
+  role_name: common
+  author: Ansible Common Configuration
+  description: Base system configuration including DNF optimization, system updates, and essential packages for Fedora systems.
+  company: personal
+
+  license: MIT-0
+
+  min_ansible_version: "2.15"
+
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+
+  galaxy_tags:
+    - system
+    - base
+    - dnf
+    - packagemanager
+    - fedora
+    - initialization
+
+dependencies: []
+  # List your role dependencies here, one per line.
+  # This is the base role and should not have dependencies.

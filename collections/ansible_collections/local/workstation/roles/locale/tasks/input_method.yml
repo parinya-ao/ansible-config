@@ -1,0 +1,82 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Input Method Configuration
+# =============================================================================
+# STATE: Input method must be configured for English primary input
+# Configures ibus or fcitx5 for consistent keyboard input
+# =============================================================================
+
+- name: "STATE: Input method package must be installed"
+  ansible.builtin.package:
+    name:
+      - ibus
+      - ibus-gtk3
+      - ibus-libpinyin
+    state: present
+  register: locale_ibus_install
+  when:
+    - locale_install_gui_tools | bool
+    - locale_input_method == "ibus"
+  failed_when: false
+
+- name: "GATHER: Check current keyboard layouts"
+  ansible.builtin.command: localectl list-x11-keymap-layouts
+  register: locale_available_layouts
+  changed_when: false
+  failed_when: false
+  when: not locale_is_container
+
+- name: "STATE: Configure keyboard layout via localectl"
+  ansible.builtin.command: >
+    localectl set-x11-keymap {{ locale_primary_keyboard_layout }}
+  register: locale_keymap_result
+  changed_when: locale_keymap_result.rc == 0
+  failed_when: false
+  when:
+    - locale_remove_secondary_layouts
+    - not locale_is_container
+
+- name: "STATE: Configure ibus for English input"
+  when:
+    - locale_input_method == "ibus"
+    - locale_install_gui_tools | bool
+  block:
+    - name: "STATE: Create ibus configuration directory"
+      ansible.builtin.file:
+        path: "{{ locale_real_home }}/.config/ibus"
+        state: directory
+        mode: "0755"
+      become: false
+
+    - name: "STATE: Create ibus bus directory"
+      ansible.builtin.file:
+        path: "{{ locale_real_home }}/.config/ibus/bus"
+        state: directory
+        mode: "0755"
+      become: false
+
+    - name: "STATE: Create ibus registry file"
+      ansible.builtin.copy:
+        dest: "{{ locale_real_home }}/.config/ibus/bus/registry"
+        content: ""
+        mode: "0644"
+        force: false
+      become: false
+      register: locale_ibus_registry
+      failed_when: false
+  rescue:
+    - name: Display ibus configuration error
+      ansible.builtin.debug:
+        msg: "Failed to configure ibus. This is non-critical."
+
+- name: "VERIFY: Display current input configuration"
+  ansible.builtin.command: localectl status
+  register: locale_input_status
+  changed_when: false
+  failed_when: false
+  when: not locale_is_container
+
+- name: "VERIFY: Show input configuration"
+  ansible.builtin.debug:
+    msg: "{{ locale_input_status.stdout_lines | default(['Skipped: Running in container, no input status available']) }}"

@@ -1,0 +1,44 @@
+---
+# SPDX-License-Identifier: MIT-0
+# defaults file for roles/git
+# Git configuration with optional SSH signing support
+
+# Actual user information (captured before privilege escalation)
+# When running with sudo, use SUDO_USER to get the real user
+git_actual_user_home: "{% if ansible_env.SUDO_USER is defined %}/home/{{ ansible_env.SUDO_USER }}{% else %}{{ ansible_user_dir }}{% endif %}"
+git_actual_user_name: "{% if ansible_env.SUDO_USER is defined %}{{ ansible_env.SUDO_USER }}{% else %}{{ ansible_user_id }}{% endif %}"
+
+# Git user account to configure (defaults to current user)
+git_config_user: "{{ ansible_facts['user_id'] }}"
+
+# Git identity configuration
+git_config_name: "parinya-ao"
+git_config_email: "flim.parinya.ao@gmail.com"
+
+# Commit configuration
+git_commit_gpgsign: "true"
+git_commit_verbose: "true"
+
+# Push and pull configuration
+git_push_autosetupremote: "true"
+git_pull_rebase: "true"
+
+# Rebase configuration
+git_rebase_autostash: "true"
+
+# Fetch configuration
+git_fetch_prune: "true"
+
+# Rerere (reuse recorded resolution) configuration
+git_rerere_enabled: "true"
+git_rerere_autoupdate: "true"
+
+# Core configuration
+git_core_autocrlf: "input"
+git_core_editor: "nvim"
+
+# Git aliases
+git_alias_lg: "log --oneline --graph --decorate --all"
+
+# Configuration scope (global or local)
+git_config_scope: global

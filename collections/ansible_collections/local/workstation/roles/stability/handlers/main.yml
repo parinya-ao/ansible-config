@@ -1,0 +1,21 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Handlers for Stability role
+
+- name: Restart dnf-automatic timer
+  ansible.builtin.systemd:
+    name: dnf-automatic.timer
+    state: restarted
+    daemon_reload: false
+  become: true
+  failed_when: false
+
+- name: Reload sysctl settings
+  ansible.builtin.command: sysctl -p /etc/sysctl.d/99-stability.conf
+  changed_when: false
+  become: true
+
+- name: Refresh GRUB for snapshots
+  ansible.builtin.command: grub2-mkconfig -o /boot/grub2/grub.cfg
+  changed_when: false
+  become: true

@@ -1,0 +1,21 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# power role handlers
+# =============================================================================
+
+- name: Restart TLP service
+  ansible.builtin.systemd:
+    name: tlp.service
+    state: restarted
+  become: true
+  listen: restart tlp
+  failed_when: false
+
+- name: Restart TLP-PD service
+  ansible.builtin.systemd:
+    name: tlp-pd.service
+    state: restarted
+  become: true
+  listen: restart tlp-pd
+  failed_when: false

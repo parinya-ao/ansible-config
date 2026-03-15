@@ -1,0 +1,20 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Handlers for Locale Role
+# =============================================================================
+# Fedora uses systemd-localed for locale management
+# =============================================================================
+
+- name: Regenerate locales
+  ansible.builtin.systemd:
+    name: systemd-localed.service
+    state: restarted
+  register: locale_localed_restart
+  failed_when: false
+
+- name: Reload locale configuration
+  ansible.builtin.command: localectl reload
+  register: locale_reload
+  changed_when: true
+  failed_when: false

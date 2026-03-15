@@ -1,0 +1,13 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Remove old/obsolete Docker packages
+
+- name: Remove old Docker packages
+  ansible.builtin.dnf:
+    name: "{{ docker_old_packages }}"
+    state: absent
+  become: true
+  when: docker_remove_old_packages
+  tags:
+    - docker
+    - cleanup

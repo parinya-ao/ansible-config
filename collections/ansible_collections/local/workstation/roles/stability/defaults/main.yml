@@ -1,0 +1,80 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Default variables for Stability role
+
+# =============================================================================
+# Level Selection
+# =============================================================================
+# Enable each level independently. Level 2 (Snapshot & Rollback) is highly recommended.
+stability_enable_level1_basic: true
+stability_enable_level2_snapshot: true
+stability_enable_level3_hardening: true
+
+# =============================================================================
+# Level 1: Basic Stability
+# =============================================================================
+# Enable automatic security updates via dnf-automatic
+stability_dnf_automatic_enable: true
+
+# DNF automatic upgrade type: security, default, or all
+# Recommended: security (only security patches for stability)
+stability_dnf_automatic_upgrade_type: "security"
+
+# Apply updates automatically (true) or download only (false)
+stability_dnf_automatic_apply_updates: true
+
+# Enable firewalld (basic firewall protection)
+stability_firewalld_enable: true
+
+# =============================================================================
+# Level 2: Snapshot & Rollback (Btrfs + Snapper)
+# =============================================================================
+# Install and configure Snapper for Btrfs snapshot/rollback support
+# This is HIGHLY RECOMMENDED as it allows system rollback if updates break things
+stability_snapper_enable: true
+
+# Snapper packages to install
+stability_snapper_packages:
+  - snapper
+
+# Snapper configurations to create
+stability_snapper_configs:
+  - name: root
+    path: "/"
+  - name: home
+    path: "/home"
+
+# Enable snapper dnf plugin for automatic snapshots during dnf operations
+stability_snapper_dnf_plugin_enable: true
+
+# Snapper configuration values
+# Timeline: create automatic snapshots hourly, daily, weekly, monthly
+stability_snapper_timeline_enable: true
+stability_snapper_timeline_hourly: false
+stability_snapper_timeline_daily: true
+stability_snapper_timeline_weekly: false
+stability_snapper_timeline_monthly: false
+
+# Number of snapshots to keep
+stability_snapper_timeline_limit_hourly: 10
+stability_snapper_timeline_limit_daily: 7
+stability_snapper_timeline_limit_weekly: 0
+stability_snapper_timeline_limit_monthly: 0
+
+# =============================================================================
+# Level 3: Kernel Hardening (sysctl)
+# =============================================================================
+# Configure kernel hardening parameters via sysctl
+stability_sysctl_hardening_enable: true
+
+# Network hardening parameters
+stability_sysctl_net_ipv4_accept_redirects: 0
+stability_sysctl_net_ipv4_send_redirects: 0
+stability_sysctl_net_ipv4_rp_filter: 1
+
+# Kernel information protection
+stability_sysctl_kernel_ptr_restrict: 2
+stability_sysctl_dmesg_restrict: 1
+
+# Core dump protection
+stability_sysctl_fs_suid_dumpable: 0

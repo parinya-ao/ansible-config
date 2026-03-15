@@ -1,0 +1,33 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Role metadata for developer
+
+galaxy_info:
+  role_name: developer
+  author: Ansible Developer Configuration
+  description: Install and configure a complete development environment including compilers, language runtimes, and CLI tools.
+  company: personal
+
+  license: MIT-0
+
+  min_ansible_version: "2.15"
+
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+
+  galaxy_tags:
+    - development
+    - compilers
+    - rust
+    - nodejs
+    - python
+    - golang
+    - java
+    - javascript
+
+dependencies: []
+  # List your role dependencies here, one per line.
+  # Example:
+  # - common

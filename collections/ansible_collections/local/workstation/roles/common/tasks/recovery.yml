@@ -1,0 +1,108 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Recovery tasks for auto-healing after failures
+# Used in rescue blocks for automatic recovery
+
+- name: Log error to centralized recovery log
+  ansible.builtin.lineinfile:
+    path: /var/log/ansible_recovery.log
+    line: "{{ ansible_date_time.iso8601 }} - RECOVERY on {{ inventory_hostname }} - Task: {{ recovery_task_name | default('unknown') }} - Error: {{ ansible_failed_result.msg | default('Unknown error') }}"
+    create: true
+    mode: "0644"
+  become: true
+  register: recovery_log_result
+  failed_when: false
+  tags:
+    - always
+    - recovery
+
+- name: Display recovery notification
+  ansible.builtin.debug:
+    msg:
+      - "⚠️  RECOVERY TRIGGERED on {{ inventory_hostname }}"
+      - "Task: {{ recovery_task_name | default('unknown') }}"
+      - "Error: {{ ansible_failed_result.msg | default('Unknown error') }}"
+      - "Attempting automatic recovery..."
+  tags:
+    - always
+    - recovery
+
+- name: Clear DNF locks and caches (recovery step)
+  ansible.builtin.command: "{{ item }}"
+  become: true
+  loop:
+    - rm -f /var/run/dnf.pid
+    - rm -f /var/lib/dnf/locks/*
+    - dnf clean all
+  when: recovery_clear_dnf_locks | default(false)
+  failed_when: false
+  changed_when: false
+  tags:
+    - always
+    - recovery
+
+- name: Restart systemd-resolved (recovery step)
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    state: restarted
+  become: true
+  when: recovery_restart_resolved | default(false)
+  failed_when: false
+  tags:
+    - always
+    - recovery
+
+- name: Rollback configuration from backup
+  ansible.builtin.copy:
+    src: "{{ recovery_backup_file }}"
+    dest: "{{ recovery_target_file }}"
+    remote_src: true
+    mode: preserve
+  become: true
+  when:
+    - recovery_backup_file is defined
+    - recovery_target_file is defined
+    - recovery_backup_file | exists
+  failed_when: false
+  tags:
+    - always
+    - recovery
+
+- name: Send recovery notification (webhook)
+  ansible.builtin.uri:
+    url: "{{ recovery_webhook_url }}"
+    method: POST
+    body_format: json
+    body:
+      text: |
+        🔧 **Recovery Alert**
+        Host: {{ inventory_hostname }}
+        Task: {{ recovery_task_name | default('unknown') }}
+        Error: {{ ansible_failed_result.msg | default('Unknown error') }}
+        Time: {{ ansible_date_time.iso8601 }}
+    timeout: 10
+  when:
+    - recovery_webhook_url is defined
+    - recovery_webhook_url | length > 0
+  failed_when: false
+  tags:
+    - always
+    - recovery
+
+- name: Create recovery marker file
+  ansible.builtin.copy:
+    content: |
+      Recovery Event
+      ==============
+      Host: {{ inventory_hostname }}
+      Task: {{ recovery_task_name | default('unknown') }}
+      Error: {{ ansible_failed_result.msg | default('Unknown error') }}
+      Time: {{ ansible_date_time.iso8601 }}
+      Resolved: {{ ansible_date_time.iso8601 }}
+    dest: /var/log/ansible_recovery_{{ recovery_task_name | default('unknown') }}.marker
+    mode: "0644"
+  become: true
+  failed_when: false
+  tags:
+    - always
+    - recovery
