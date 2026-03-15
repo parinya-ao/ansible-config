@@ -133,8 +133,9 @@ health_critical_services: []  # Empty in CI (no systemd)
 # These variables ensure consistent behavior across GitHub Actions and GitLab CI
 
 # CI platform detection (auto-detected, but can be overridden)
-ci_platform: "{{ lookup('env', 'GITLAB_CI') | ternary('gitlab',
-  lookup('env', 'GITHUB_ACTIONS') | ternary('github', 'unknown')) }}"
+ci_platform: >-
+  {{ lookup('env', 'GITLAB_CI') | ternary('gitlab',
+  lookup('env', 'GITHUB_ACTIONS') | ternary('github', 'unknown')) }}
 
 # Shared cache directory for both CI platforms
 cache_dir: "{{ lookup('env', 'CI_PROJECT_DIR') | default(lookup('env', 'GITHUB_WORKSPACE') | default('/tmp/ansible-cache')) }}"
