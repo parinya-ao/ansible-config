@@ -1,411 +1,589 @@
-# SPDX-License-Identifier: MIT-0
-# =============================================================================
-# Architecture Overview - Ansible Fedora Workstation Configuration
-# =============================================================================
-# This document provides a comprehensive understanding of the codebase's
-# architecture, enabling efficient navigation and effective contribution.
-# =============================================================================
+# Architecture Overview
+
+This document serves as a critical, living template designed to equip agents with a rapid and comprehensive understanding of the codebase's architecture, enabling efficient navigation and effective contribution from day one. Update this document as the codebase evolves.
+
+**Last Updated**: 2026-03-15
 
 ## 1. Project Structure
 
-This Ansible-based project transforms a fresh Fedora installation into a fully
-configured development environment. The architecture follows ansible-creator
-best practices with collection-based organization and role-based modularity.
+This section provides a high-level overview of the project's directory and file structure, categorised by architectural layer or major functional area. It is essential for quickly navigating the codebase, locating relevant files, and understanding the overall organization and separation of concerns.
 
 ```
 [Project Root]/
-├── site.yml                   # Main entry point (ansible-creator standard)
-├── playbook.yaml              # Main playbook configuration
+├── site.yml                    # Main entry point (ansible-creator standard)
+├── playbook.yaml               # Main playbook configuration
 ├── inventory/
-│   ├── hosts                 # Inventory file
+│   ├── hosts                   # Inventory file (localhost)
 │   └── group_vars/
-│       └── all.yml           # Group variables
-├── requirements.yml           # Ansible collection dependencies
-├── ansible.cfg                # Ansible configuration
-├── ansible-navigator.yml      # Ansible Navigator configuration
-├── init.sh                    # Bootstrap script
-├── ci_vars.yml                # CI-specific variables for testing
-│
+│       └── all.yml             # Group variables
+├── ci_vars.yml                 # CI/CD pipeline variables
+├── requirements.yml            # Ansible collection dependencies
+├── ansible.cfg                 # Ansible configuration
+├── ansible-navigator.yml       # Ansible Navigator configuration
+├── init.sh                     # Bootstrap script for Fedora
+├── main.py                     # (Unused - legacy)
 ├── collections/
 │   └── ansible_collections/
 │       └── local/
-│           └── workstation/   # Local collection
-│               ├── galaxy.yml # Collection metadata
+│           └── workstation/    # Local collection (namespace: local.workstation)
+│               ├── galaxy.yml  # Collection metadata
 │               ├── README.md
-│               ├── .gitignore
 │               ├── meta/
 │               │   └── runtime.yml
 │               └── roles/
-│                   ├── common/
-│                   │   ├── tasks/
-│                   │   ├── defaults/
-│                   │   ├── handlers/
-│                   │   ├── files/
-│                   │   ├── templates/
-│                   │   └── meta/
-│                   ├── locale/
-│                   ├── git/
-│                   ├── stability/
-│                   ├── developer/
-│                   ├── font/
-│                   ├── power/
-│                   └── multimedia/
-│
+│                   ├── common/         # Base system configuration
+│                   ├── locale/         # English-only environment
+│                   ├── git/            # Git configuration with SSH signing
+│                   ├── stability/      # Fedora stability & hardening
+│                   ├── developer/      # Development tools & runtimes
+│                   ├── font/           # Font installation (incl. Thai)
+│                   ├── power/          # TLP power management
+│                   ├── multimedia/     # Codecs & video acceleration
+│                   ├── embed/          # Embedded development (ARM, ESP)
+│                   └── docker/         # Docker installation
 ├── .github/
 │   └── workflows/
-│       └── tests.yml          # CI/CD pipeline
-│
-├── .devcontainer/
-│   └── devcontainer.json      # DevContainer configuration
-│
-├── .pre-commit-config.yaml    # Pre-commit hooks
-├── .yamllint                  # YAML lint configuration
-├── .gitignore
-├── CLAUDE.md
-├── README.md
-└── ARCHITECTURE.md
+│       ├── ci.yml              # Main CI/CD pipeline
+│       └── tests.yml           # Lint & syntax tests
+├── .devcontainer/              # DevContainer configuration
+├── .pre-commit-config.yaml     # Pre-commit hooks
+├── .ansible-lint               # Ansible-lint configuration
+├── .yamllint                   # YAML lint configuration
+└── docs/                       # Additional documentation
 ```
 
 ## 2. High-Level System Diagram
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         Fedora Workstation (Target)                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────┐     ┌─────────────────────────────────────────────┐   │
-│  │   init.sh       │────▶│  Ansible Core (ansible-playbook)            │   │
-│  │  (Bootstrap)    │     │  - Reads site.yml                           │   │
-│  └─────────────────┘     │  - Loads inventory/hosts                     │   │
-│                          │  - Executes collection roles                 │   │
-│                          └─────────────────────────────────────────────┘   │
-│                                                   │                         │
-│                                                   ▼                         │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │              local.workstation Collection (Roles)                   │   │
-│  ├─────────────┬─────────────┬─────────────┬─────────────┬─────────────┤   │
-│  │   common    │   locale    │   git       │  stability  │  developer  │   │
-│  │  (dnf5/rpm) │ (en_US/xdg) │ (ssh-sign)  │ (snapshot)  │ (sdk/tools) │   │
-│  ├─────────────┼─────────────┼─────────────┼─────────────┼─────────────┤   │
-│  │    font     │    power    │ multimedia  │   embed     │             │   │
-│  │ (ttf/otf)   │  (tlp)      │  (codecs)   │  (stm32)    │             │   │
-│  └─────────────┴─────────────┴─────────────┴─────────────┴─────────────┘   │
-│                          │                                                 │
-│                          ▼                                                 │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                     System Changes (Idempotent)                     │   │
-│  │  - Package installation (DNF5)                                      │   │
-│  │  - Configuration file management                                   │   │
-│  │  - Service enablement/startup (systemd)                            │   │
-│  │  - User environment customization                                  │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────────────┘
+This is an **Infrastructure-as-Code (IaC)** project, not a traditional application. The architecture follows Ansible's agentless, push-based configuration management model.
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         GitHub Actions (CI/CD)                              │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────────────┐  │
-│  │ Ansible Lint │  │ YAML Lint    │  │  Fedora Test                     │  │
-│  │ (Production) │  │ (Syntax)     │  │  - Syntax check                  │  │
-│  └──────────────┘  └──────────────┘  │  - Check mode                    │  │
-│                                       └──────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
 ```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Developer/User                          │
+│                    (Runs init.sh or playbook)                   │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Bootstrap Script (init.sh)                    │
+│  - Installs Ansible via DNF                                     │
+│  - Installs Galaxy collections                                  │
+│  - Configures feature flags                                     │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Ansible Control Node                         │
+│              (Runs on target Fedora workstation)                │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │                    playbook.yaml                         │  │
+│  │  - Defines execution order                               │  │
+│  │  - Applies 9 roles in sequence                           │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              local.workstation Collection (Roles)               │
+│                                                                 │
+│  ┌──────────┐ ┌─────────┐ ┌─────┐ ┌──────────┐ ┌──────────┐   │
+│  │  common  │→│ locale  │→│ git │→│stability │→│developer │   │
+│  └──────────┘ └─────────┘ └─────┘ └──────────┘ └──────────┘   │
+│       ↓              ↓           ↓            ↓                │
+│  ┌──────────┐ ┌─────────┐ ┌──────────┐ ┌──────────┐          │
+│  │  font    │←│ power   │←│multimedia│←│  embed   │          │
+│  └──────────┘ └─────────┘ └──────────┘ └──────────┘          │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Target System (Fedora)                       │
+│                                                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
+│  │  DNF/DNF5    │  │   Systemd    │  │  Flatpak     │         │
+│  │  Packages    │  │   Services   │  │    Apps      │         │
+│  └──────────────┘  └──────────────┘  └──────────────┘         │
+│                                                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
+│  │ COPR Repos   │  │  Filesystem  │  │   Users &    │         │
+│  │ (RPM Fusion) │  │    Config    │  │   Groups     │         │
+│  └──────────────┘  └──────────────┘  └──────────────┘         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Data Flow**:
+1. User runs `init.sh` or `ansible-playbook`
+2. Bootstrap installs Ansible and collections
+3. Playbook executes roles in sequence on localhost
+4. Each role configures specific aspects of the system
+5. Changes are applied directly to the target system
 
 ## 3. Core Components
 
-### 3.1. Entry Points
+### 3.1. Ansible Collection (local.workstation)
 
-#### 3.1.1. site.yml (Main Entry Point)
+**Name**: local.workstation
 
-**Description:** Primary entry point following ansible-creator standards.
-Imports the main playbook configuration.
+**Description**: The core automation collection containing all roles for Fedora Workstation configuration. Follows Ansible collection structure with namespace `local` and collection name `workstation`.
 
-**Technologies:** Ansible Playbook YAML
+**Technologies**: 
+- Ansible 2.15+
+- YAML (playbooks, tasks, variables)
+- Jinja2 (templating)
 
-**Key Features:**
-- Standard entry point for ansible-navigator
-- Compatible with ansible-playbook command
+**Structure**:
+- **Roles**: Modular configuration units (common, developer, font, etc.)
+- **Galaxy Metadata**: `galaxy.yml` defines collection info and dependencies
+- **Runtime Metadata**: `meta/runtime.yml` defines Ansible version requirements
 
-#### 3.1.2. playbook.yaml (Main Configuration)
+### 3.2. Roles
 
-**Description:** Main orchestrator that executes all roles from the local.workstation collection.
-Each role is tagged with its name for selective execution.
+Each role is a self-contained unit of configuration with its own tasks, variables, handlers, and tests.
 
-**Technologies:** Ansible Playbook YAML
+#### 3.2.1. common
 
-**Key Features:**
-- Uses fully qualified collection names (FQCN) for roles
-- Supports variable overrides via `-e` flag
-- Includes pre and post tasks for status display
+**Name**: Base System Configuration
 
-#### 3.1.3. init.sh (Bootstrap Script)
+**Description**: Core system setup including DNF optimization, RPM Fusion repositories, system updates, firmware management, Fish shell, and system optimizations.
 
-**Description:** Entry point for provisioning. Handles Ansible installation if missing,
-then executes the main playbook.
+**Key Tasks**:
+- DNF configuration and caching
+- RPM Fusion repository setup
+- System package updates
+- Fish shell installation
+- System optimizations (hostname, DNS, etc.)
 
-**Technologies:** Bash, DNF5, Python venv
+**Technologies**: DNF5, systemd, COPR repositories
 
-**Key Features:**
-- Detects and installs Ansible via pip
-- Creates Python virtual environment
-- Passes through all arguments to `ansible-playbook`
+#### 3.2.2. developer
 
-### 3.2. Ansible Collection
+**Name**: Development Tools & Runtimes
 
-#### 3.2.1. local.workstation Collection
+**Description**: Installs and configures development tooling including compilers, package managers, and SDKs.
 
-**Description:** Local collection containing all workstation automation roles.
-Organized following ansible-creator collection standards.
+**Key Tasks**:
+- Node.js, Rust, Go, Python installation
+- Bun, uv package managers
+- Flutter SDK with Android SDK
+- Java (Temurin 17)
+- Neovim configuration (LazyVim)
 
-**Structure:**
-- `galaxy.yml` - Collection metadata and dependencies
-- `meta/runtime.yml` - Minimum Ansible version requirements
-- `roles/` - All role directories with standard structure
+**Technologies**: DNF, SDKMAN, rustup, Flutter, Android SDK
 
-**Collection Roles:**
+#### 3.2.3. font
 
-##### 3.2.1.1. common (Base System Configuration)
+**Name**: Font Installation
 
-**Description:** Foundation tasks required for all subsequent roles. Handles package
-manager configuration, third-party repositories, and system updates.
+**Description**: Installs programming fonts and Thai language support.
 
-**Key Tasks:**
-- RPM Fusion repository enablement (free + non-free)
-- DNF5 configuration and optimization
-- System firmware and driver updates
-- NVIDIA driver installation (optional)
+**Key Tasks**:
+- JetBrains Mono (COPR)
+- Fira Code, Inter fonts
+- Sarabun Thai fonts (from GitHub)
+- Font cache refresh
 
-**Variables:** `common_enable_rpm_fusion`, `common_install_nvidia_drivers`, `common_configure_custom_dns`, `common_install_d2`
+**Technologies**: COPR, fontconfig
 
-##### 3.2.1.2. locale (English-Only Environment)
+#### 3.2.4. stability
 
-**Description:** Enforces strict English-only environment across system locale, XDG
-directories, and input methods. Critical for consistent log output and debugging.
+**Name**: Fedora Stability & Hardening
 
-**Task Files:**
-- `system_locale.yml` - Configures `/etc/locale.conf`, `/etc/environment`
-- `xdg_dirs.yml` - Migrates localized XDG directories to English
-- `input_method.yml` - Configures ibus/fcitx5 for English input
-- `cli_language.yml` - Enforces locale in shell profiles
+**Description**: System stability features including dnf-automatic updates, firewalld, and optional Snapper Btrfs snapshots.
 
-**Variables:** `locale_lang`, `locale_input_method`, `locale_remove_secondary_layouts`
+**Levels**:
+- Level 1: Basic (dnf-automatic, firewalld)
+- Level 2: Snapshot & Rollback (Snapper)
+- Level 3: Hardening (sysctl)
 
-**Feature Toggles:**
-- `locale_configure_system_locale`
-- `locale_configure_xdg_dirs`
-- `locale_configure_input_method`
-- `locale_enforce_cli_language`
+#### 3.2.5. embed
 
-##### 3.2.1.3. git (Version Control Configuration)
+**Name**: Embedded Development
 
-**Description:** Configures Git with user settings, commit signing (SSH keys),
-and sensible defaults for development workflows.
+**Description**: Tools for embedded systems development.
 
-**Key Tasks:**
-- User identity configuration
-- SSH key signing for commits
-- Default branch and init settings
+**Key Tasks**:
+- ARM GCC toolchain
+- ESP-IDF tools (esptool)
+- Serial debugging (minicom)
+- Dialout group configuration
 
-##### 3.2.1.4. stability (Fedora Stability & Hardening)
+#### 3.2.6. locale
 
-**Description:** Implements Fedora stability features and system hardening.
+**Name**: Locale Configuration
 
-**Key Tasks:**
-- Btrfs snapshot configuration (snapper)
-- Firewall configuration (firewalld)
-- Automatic updates (dnf-automatic)
+**Description**: Enforces English-only environment for consistent CLI behavior.
 
-##### 3.2.1.5. developer (Development Tools & Runtimes)
+**Key Tasks**:
+- glibc locale installation
+- System locale configuration
+- XDG directory setup
 
-**Description:** Provisions complete development environment including compilers,
-package managers, language runtimes, and mobile development SDKs.
+#### 3.2.7. git
 
-**Key Installations:**
-- Compilers: GCC, Clang, Rust (via rustup)
-- JavaScript: Bun package manager
-- Python: uv (modern Python installer)
-- Mobile: Flutter SDK, Android SDK (command-line tools only)
+**Name**: Git Configuration
 
-**Variables:** Role variables for SDK versions and installation paths
+**Description**: Git setup with optional SSH key signing.
 
-##### 3.2.1.6. font (Programming Fonts)
+**Key Tasks**:
+- Git installation
+- SSH key generation
+- Commit signing configuration
 
-**Description:** Installs programming fonts from COPR repositories and local
-font files for development and multilingual support.
+#### 3.2.8. power
 
-**COPR Fonts:** JetBrains Mono, Fira Code, Inter, Arimo, IBM Plex Sans Thai
+**Name**: Power Management
 
-**Local Fonts:** Arial, Courier, THSarabunNew, Verdana
+**Description**: TLP power management for laptops (disabled by default).
 
-**Variables:** `font_install_enabled`, `font_sarabun_install_enabled`
+**Key Tasks**:
+- TLP installation
+- power-profiles-daemon removal
+- TLP configuration
 
-##### 3.2.1.7. power (TLP Power Management)
+#### 3.2.9. multimedia
 
-**Description:** Installs and configures TLP for advanced power management and battery optimization.
-Disabled by default (`power_install_tlp: false`).
+**Name**: Multimedia Codecs
 
-**Key Tasks:**
-- Disables and masks `power-profiles-daemon`
-- Installs TLP packages: `tlp`, `tlp-pd`, `tlp-rdw`
-- Configures SELinux boolean `tlp_can_write_to_d` for Fedora 38+ compatibility
-- Deploys optimized `/etc/tlp.conf` with battery charge thresholds
+**Description**: Multimedia codec installation and hardware video acceleration.
 
-**Variables:** `power_install_tlp`, `power_cpu_scaling_governor_on_ac`, `power_start_charge_thresh_bat0`, `power_stop_charge_thresh_bat0`
+**Key Tasks**:
+- RPM Fusion multimedia packages
+- FFmpeg installation
+- Hardware acceleration (Intel/AMD)
+- OpenH264 (disabled by default)
 
-**Feature Toggles:**
-- `power_install_tlp` - Main enable/disable toggle
+### 3.3. Bootstrap Script
 
-##### 3.2.1.8. multimedia (Codecs & Hardware Acceleration)
+**Name**: init.sh
 
-**Description:** Installs multimedia codecs, FFmpeg, and enables hardware-accelerated
-video decoding for smooth media playback.
+**Description**: Bash script that bootstraps the Ansible environment on fresh Fedora installations.
 
-**Key Tasks:** Codec installation, GPU acceleration setup
+**Features**:
+- Installs Ansible via DNF
+- Installs Galaxy collections
+- Configures feature flags via environment variables
+- Hands off to ansible-playbook
 
-### 3.3. CI/CD Pipeline
-
-**Description:** GitHub Actions workflow that validates playbook changes on every
-push and pull request.
-
-**Stages:**
-1. **Lint:** Ansible Lint (production profile), YAML validation
-2. **Syntax:** Playbook syntax check
-3. **Test:** Check mode execution
-
-**Technologies:** GitHub Actions, Fedora containers, Ansible Lint
-
-**Key Validations:**
-- Syntax: Valid YAML, compliant with Ansible production profile
-- Check mode: Playbook must execute without errors in dry-run mode
+**Technologies**: Bash, DNF
 
 ## 4. Data Stores
 
-This project does not use traditional databases. Configuration state is stored in:
+### 4.1. Ansible Fact Cache
 
-| **Location** | **Type** | **Purpose** |
-|--------------|----------|-------------|
-| `/etc/locale.conf` | Text file | System locale configuration |
-| `/etc/environment` | Text file | Environment variables |
-| `~/.config/` | Directory tree | User configuration files |
-| `~/.local/share/` | Directory tree | XDG data directories |
-| `/etc/dnf/dnf5.conf` | DNF5 config | Package manager settings |
-| `/etc/systemd/` | Directory tree | Service unit files |
+**Type**: JSON File Cache
+
+**Location**: `./.ansible/facts/`
+
+**Purpose**: Caches system facts between playbook runs for performance. Configured in `ansible.cfg` with 24-hour timeout.
+
+### 4.2. Inventory Cache
+
+**Type**: JSON File Cache
+
+**Location**: `./.ansible/inventory_cache/`
+
+**Purpose**: Caches inventory parsing results.
+
+### 4.3. Configuration State
+
+**Type**: System Configuration Files
+
+**Locations**:
+- `/etc/dnf/` - DNF configuration
+- `/etc/systemd/` - Systemd service configuration
+- `/etc/profile.d/` - Environment variables
+- `~/.bashrc`, `~/.config/` - User configuration
+- `/usr/share/fonts/` - System fonts
+- `/etc/sysctl.d/` - Kernel parameters
+
+**Purpose**: Persistent system configuration applied by Ansible roles.
 
 ## 5. External Integrations / APIs
 
-| **Service** | **Purpose** | **Integration Method** |
-|-------------|-------------|------------------------|
-| Fedora Packages (DNF) | Package installation | DNF5 API / dnf5 command |
-| RPM Fusion | Third-party RPM packages | Repository subscription |
-| COPR (neurowelfare) | Custom programming fonts | DNF repository |
-| GitHub Actions | CI/CD pipeline | Workflow YAML |
+### 5.1. Fedora COPR Repositories
+
+**Service**: COPR (Cool Other Package Repo)
+
+**Purpose**: Third-party RPM repositories for packages not in official Fedora repos.
+
+**Repositories Used**:
+- `jetpack-io/fonts` - JetBrains Mono fonts
+- `b00f1nt/inter-fonts` - Inter fonts
+- `rpmfusion-free/nonfree` - Multimedia codecs
+
+**Integration Method**: DNF repository configuration
+
+### 5.2. Ansible Galaxy
+
+**Service**: Ansible Galaxy
+
+**Purpose**: External collection dependencies.
+
+**Collections**:
+- `community.general` (≥8.0.0) - General purpose modules
+- `ansible.posix` (≥1.5.0) - POSIX-specific modules
+
+**Integration Method**: `ansible-galaxy collection install`
+
+### 5.3. GitHub Releases
+
+**Service**: GitHub
+
+**Purpose**: Downloading fonts and tools.
+
+**Used For**:
+- Sarabun fonts (from Thai font repository)
+- Android SDK command-line tools
+- Rust installer (rustup.rs)
+- Bun installer (bun.sh)
+- UV installer (astral.sh)
+
+**Integration Method**: `ansible.builtin.get_url`
+
+### 5.4. Google (Android)
+
+**Service**: Android SDK Repository
+
+**Purpose**: Android SDK command-line tools.
+
+**URL**: `https://dl.google.com/android/repository/commandlinetools-linux-*.zip`
+
+**Integration Method**: Direct download via `get_url`
 
 ## 6. Deployment & Infrastructure
 
-**Target Platform:** Fedora Workstation (Fedora 41+)
+### 6.1. Execution Model
 
-**Package Manager:** DNF5 (next-gen DNF)
+**Type**: Agentless Configuration Management
 
-**CI/CD Platform:** GitHub Actions (ubuntu-24.04 runners, Fedora containers)
+**Target**: Localhost (Fedora Workstation)
 
-**Monitoring & Logging:**
-- CI logs uploaded as artifacts (retention: 14 days)
-- Local execution logs: `ansible-run.log`, `idempotence.log`
+**Connection**: `ansible_connection=local`
 
-**Key Infrastructure Tools:**
-- Ansible Core 2.15+
-- Python 3.12+ (via `python3` package)
-- Ansible Lint (production profile)
+**Privilege Escalation**: `become: true` (sudo to root)
+
+### 6.2. CI/CD Pipeline
+
+**Platform**: GitHub Actions
+
+**Workflows**:
+1. **Ansible CI Pipeline** (`.github/workflows/ci.yml`)
+   - Security Scan (TruffleHog + Checkov)
+   - Lint & Syntax Validation (ansible-lint, yamllint, actionlint)
+   - Test on Fedora Rawhide (containerized execution)
+   - Idempotence check (verify playbook can run twice)
+   - Final Report
+
+2. **Tests** (`.github/workflows/tests.yml`)
+   - ansible-lint (production profile)
+   - YAML lint
+   - Playbook syntax check
+   - Check mode dry run
+
+**Trigger Events**:
+- Push to `main`/`develop` branches
+- Pull requests
+- Manual workflow dispatch
+
+**Caching**:
+- Ansible collections (by `requirements.yml` hash)
+- Python virtual environment (by requirements hash)
+
+### 6.3. Monitoring & Logging
+
+**Log File**: `./ansible.log`
+
+**Artifacts**: `./.ansible/artifacts/`
+
+**GitHub Actions Logs**: Uploaded as artifacts for failed runs
+
+**Recovery System**: Roles include recovery tasks with error logging to `/var/log/ansible_recovery_*.marker`
 
 ## 7. Security Considerations
 
-**Authentication:** N/A (local provisioning, uses sudo for privilege escalation)
+### 7.1. Authentication
 
-**Authorization:** sudo privileges required for system-level changes
+**Type**: SSH Keys (for Git signing)
 
-**Secrets Management:**
-- No secrets in repository
-- Sensitive data (SSH keys, GPG keys) managed by user locally
+**Storage**: `~/.ssh/` (user's existing keys)
 
-**Security Tools:**
-- **Ansible Lint:** Security-focused rule checking
-- **Pre-commit hooks:** Automated code quality checks
+**Usage**: Git commit signing (optional)
+
+### 7.2. Privilege Escalation
+
+**Method**: sudo
+
+**Configuration**: All roles run with `become: true`
+
+**Scope**: Root access for system configuration
+
+### 7.3. Data Protection
+
+**In Transit**: HTTPS for all external downloads (GitHub, Google, etc.)
+
+**At Rest**: System file permissions (0644 for configs, 0755 for directories)
+
+**Filtered Data**: Ansible log filtering for passwords/secrets (`log_filter = *password*,*secret*,*key*`)
+
+### 7.4. Security Scanning
+
+**Tools**:
+- **TruffleHog**: Secret detection in code
+- **Checkov**: Infrastructure-as-Code security scanning
+
+**Integration**: GitHub Actions with SARIF upload to Security tab
+
+**Known Alerts**: Checkov warnings for HTTP URLs (user-configurable webhook URLs)
 
 ## 8. Development & Testing Environment
 
-**Local Setup Instructions:**
+### 8.1. Local Setup
+
+**Requirements**:
+- Fedora Linux 40+
+- sudo privileges
+- Git
+
+**Quick Start**:
 ```bash
-# Clone repository
-git clone <repo-url>
+git clone https://github.com/parinya-ao/ansible-config.git
 cd ansible-config
-
-# Install collection dependencies
-ansible-galaxy collection install -r requirements.yml
-
-# Run complete provisioning
 ./init.sh
-
-# Run specific roles only
-ansible-playbook site.yml -i inventory/hosts --tags developer,font
-
-# Lint the project
-ansible-lint --profile production
 ```
 
-**Testing Frameworks:**
-- Ansible Lint (syntax and best practices)
-- YAML validation via yamllint
-- Pre-commit hooks for automated checks
+**Manual Setup**:
+```bash
+# Install Ansible
+sudo dnf install -y ansible
 
-**Code Quality Tools:**
-- Ansible Lint with production profile
-- YAML validation
-- Shell script linting (shellcheck)
+# Install collections
+ansible-galaxy collection install -r requirements.yml
 
-**CI Testing Strategy:**
-1. Lint all roles for syntax and best practices
-2. Run playbook syntax check
-3. Execute playbook in check mode to verify idempotence
+# Run playbook
+ansible-playbook site.yml -i inventory/hosts
+```
+
+### 8.2. Testing Frameworks
+
+**Syntax Validation**:
+```bash
+ansible-playbook --syntax-check site.yml
+```
+
+**Check Mode (Dry Run)**:
+```bash
+ansible-playbook site.yml -i inventory/hosts --check
+```
+
+**Idempotence Test**:
+```bash
+# First run
+ansible-playbook site.yml -i inventory/hosts
+
+# Second run (should show 0 changed)
+ansible-playbook site.yml -i inventory/hosts
+```
+
+**Linting**:
+```bash
+ansible-lint --profile production
+yamllint -c .yamllint .
+```
+
+### 8.3. Code Quality Tools
+
+**ansible-lint**: Production profile enforced in CI
+
+**yamllint**: Custom configuration (`.yamllint`)
+
+**actionlint**: GitHub Actions workflow validation
+
+**shellcheck**: Bash script validation (init.sh)
+
+**pre-commit**: Git pre-commit hooks for automated linting
+
+### 8.4. Development Conventions
+
+**Variable Naming**: Role prefix required (e.g., `common_*`, `developer_*`, `font_*`)
+
+**License Header**: `SPDX-License-Identifier: MIT-0`
+
+**Task Structure**:
+```yaml
+- name: Descriptive task name
+  ansible.builtin.module:
+    parameter: value
+  register: role_prefix_result
+  when: condition
+  tags:
+    - category
+    - subcategory
+```
 
 ## 9. Future Considerations / Roadmap
 
-**Current Known Limitations:**
-- Local font files may bloat Git repository (consider Git LFS)
-- Limited to Fedora Workstation (not portable to other distributions)
+### 9.1. Known Architectural Debts
 
-**Planned Improvements:**
-- [ ] Migrate font files to Git LFS
-- [ ] Add support for Fedora Server edition
-- [ ] Implement hardware detection for conditional driver installation
-- [ ] Create rollback mechanism for failed configurations
+1. **Molecule Testing**: Currently disabled due to Podman-in-Docker compatibility issues in GitHub Actions. Need self-hosted runners or VM-based testing.
+
+2. **Idempotence**: Some roles (locale) have minor idempotence issues (10 changed tasks allowed in CI). Should be addressed for 100% idempotence.
+
+3. **Checkov Alerts**: 5 security alerts for webhook URLs using variables (not hardcoded HTTP). Should add skip comments or validation.
+
+### 9.2. Planned Improvements
+
+1. **Event-Driven Recovery**: Enhanced recovery system with webhook notifications (currently file-based).
+
+2. **Btrfs Snapshot Integration**: Optional Snapper integration for rollback capability (Level 2 stability).
+
+3. **NVIDIA Driver Support**: Currently disabled by default. Consider automated detection and installation.
+
+4. **Container Testing**: Implement proper Molecule tests with Podman native support.
+
+5. **Modular Feature Flags**: More granular control over individual packages within roles.
+
+### 9.3. Scalability Considerations
+
+**Current Scope**: Single workstation (localhost)
+
+**Potential Extensions**:
+- Multi-host fleet management
+- Group-specific configurations (developers vs. designers)
+- Cloud workstation provisioning (AWS WorkSpaces, etc.)
 
 ## 10. Project Identification
 
-**Project Name:** Ansible Fedora Workstation Configuration
+**Project Name**: Ansible Fedora Workstation Configuration
 
-**Repository URL:** https://github.com/parinya-ao/ansible-config
+**Repository URL**: https://github.com/parinya-ao/ansible-config
 
-**Target OS:** Fedora Workstation 41+
+**Primary Contact/Team**: @parinya-ao
 
-**Collection:** local.workstation
+**License**: MIT-0 (No Rights Reserved)
 
-**Date of Last Update:** 2026-03-14
+**Date of Last Update**: 2026-03-15
 
 ## 11. Glossary / Acronyms
 
-| **Term** | **Definition** |
-|----------|----------------|
-| **Ansible** | Open-source automation tool for configuration management |
-| **DNF5** | Next-generation Dandified YUM (package manager for Fedora) |
-| **RPM Fusion** | Third-party software repository for Fedora |
-| **COPR** | Community extras for RPM packages (build system for Fedora) |
-| **XDG** | freedesktop.org specifications for directory structure |
-| **Idempotence** | Property where applying an operation multiple times has the same effect as once |
-| **Role** | Ansible unit of organization containing tasks, variables, handlers |
-| **Playbook** | Ansible orchestration file that defines roles and execution order |
-| **Collection** | Ansible distribution format for roles, plugins, and modules |
-| **FQCN** | Fully Qualified Collection Name (e.g., local.workstation.common) |
-| **Rustup** | Rust toolchain installer and version manager |
-| **uv** | Modern Python package installer and project manager |
-| **Bun** | JavaScript runtime and package manager |
+| Term | Definition |
+|------|------------|
+| **COPR** | Cool Other Package Repo - Fedora's community package repository system |
+| **DNF** | Dandified YUM - Fedora's package manager (DNF5 in Fedora 41+) |
+| **IaC** | Infrastructure as Code - Managing infrastructure through configuration files |
+| **Idempotence** | Property where applying configuration multiple times has same effect as once |
+| **COPR** | Community-owned package repository for Fedora |
+| **TLP** | Power management tool for Linux laptops |
+| **ESP-IDF** | Espressif IoT Development Framework |
+| **ARM GCC** | GNU Compiler Collection for ARM architecture |
+| **Flatpak** | Universal Linux application packaging system |
+| **RPM Fusion** | Third-party repository for Fedora (free and non-free packages) |
+| **Checkov** | Infrastructure-as-Code security scanning tool |
+| **TruffleHog** | Secret detection tool for Git repositories |
+| **Molecule** | Ansible testing framework for role testing |
+| **Podman** | Daemonless container engine (alternative to Docker) |
+| **Btrfs** | Copy-on-write filesystem with snapshot support |
+| **Snapper** | Btrfs snapshot management tool |
+| **sysctl** | Linux kernel parameter configuration |
+| **Firewalld** | Dynamic firewall management daemon |
+| **Temurin** | OpenJDK distribution by Adoptium |
+| **LazyVim** | Neovim configuration framework |
