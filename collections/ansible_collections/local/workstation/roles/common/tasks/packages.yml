@@ -3,7 +3,7 @@
 # Base packages installation tasks with auto-recovery
 
 - name: Managed Package Installation Operation
-  ansible.builtin.block:
+  block:
     - name: Install base system packages
       ansible.builtin.dnf:
         name: "{{ common_base_packages }}"
