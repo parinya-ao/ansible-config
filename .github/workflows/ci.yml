@@ -175,9 +175,15 @@ jobs:
           # Verify DNF5 is available (Fedora Rawhide default)
           dnf5 --version || dnf --version
 
-          bash init.sh --skip-install --skip-check || true
-
+          # Create Python virtual environment
+          python3 -m venv .ansible-venv
           source .ansible-venv/bin/activate
+          pip install --upgrade pip
+
+          # Install Ansible and dev tools
+          pip install ansible-dev-tools
+
+          # Install collection requirements
           ansible-galaxy collection install -r requirements.yml --force
         env:
           CI: "true"
