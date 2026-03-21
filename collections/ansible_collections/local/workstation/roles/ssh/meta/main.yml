@@ -1,0 +1,21 @@
+---
+# SPDX-License-Identifier: MIT-0
+galaxy_info:
+  role_name: ssh
+  author: Your Name
+  description: Configure SSH directory and file permissions
+  company: Your Company (optional)
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+  galaxy_tags:
+    - ssh
+    - security
+    - permissions
+    - fedora
+    - keys
+
+dependencies: []

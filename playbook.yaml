@@ -43,6 +43,9 @@
           - "  9. firmware    - Non-free firmware installation"
           - " 10. multimedia  - Multimedia codecs and video acceleration"
           - " 11. embed       - Embedded development"
+          - " 12. ghostty     - Ghostty terminal emulator"
+          - " 13. ssh         - SSH directory and file permissions"
+          - " 14. flatpak     - Flatpak applications"
           - "=========================================="
 
     - name: Display Ansible version
@@ -122,6 +125,24 @@
         - embedded
         - esp
 
+    - role: local.workstation.ghostty
+      tags:
+        - ghostty
+        - terminal
+        - application
+
+    - role: local.workstation.ssh
+      tags:
+        - ssh
+        - security
+        - permissions
+
+    - role: local.workstation.flatpak
+      tags:
+        - flatpak
+        - applications
+        - gui
+
   post_tasks:
     - name: Display completion summary
       ansible.builtin.debug:
@@ -148,9 +169,17 @@
           - "   - dnf list installed ffmpeg*"
           - "5. Verify Intel VA-API (for Intel GPUs):"
           - "   - vainfo | grep -E 'H264|HEVC'"
-          - "6. Verify installations:"
+          - "6. Verify Ghostty terminal:"
+          - "   - ghostty --version"
+          - "   - Check Applications menu for 'Ghostty'"
+          - "7. Verify SSH permissions:"
+          - "   - ls -la ~/.ssh/"
+          - "   - ssh -T git@github.com"
+          - "8. Verify Flatpak applications:"
+          - "   - flatpak list"
+          - "   - Check Applications menu for installed apps"
+          - "9. Verify installations:"
           - "   - node --version"
           - "   - cargo --version"
-          - "7. Run 'flatpak list' to see installed apps"
-          - "8. Run 'fc-list' to see installed fonts"
+          - "10. Run 'fc-list' to see installed fonts"
           - "=========================================="

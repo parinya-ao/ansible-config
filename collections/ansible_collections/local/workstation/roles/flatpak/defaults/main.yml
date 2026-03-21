@@ -1,0 +1,51 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Default variables for Flatpak role
+
+# Enable Flatpak installation and configuration
+flatpak_enabled: true
+
+# Install Flatpak if not present
+flatpak_install_package: true
+
+# Flatpak applications to install
+flatpak_apps:
+  # Communication
+  - name: org.signal.Signal
+    enabled: true
+  
+  # Media
+  - name: org.videolan.VLC
+    enabled: true
+  
+  # Development
+  - name: md.obs.Studio
+    enabled: true
+  
+  # Productivity
+  - name: org.libreoffice.LibreOffice
+    enabled: false
+  
+  # Graphics
+  - name: org.gimp.GIMP
+    enabled: false
+  
+  # Browsers
+  - name: org.chromium.Chromium
+    enabled: false
+    # Alternative: org.mozilla.firefox
+
+# Enable Flathub repository
+flatpak_enable_flathub: true
+
+# Flathub repository URL
+flatpak_flathub_url: "https://flathub.org/repo/flathub.flatpakrepo"
+
+# Update Flatpak apps after installation
+flatpak_update_apps: true
+
+# Remove unused Flatpak runtimes
+flatpak_remove_unused_runtimes: false
+
+# Auto-update configuration
+flatpak_auto_update: false

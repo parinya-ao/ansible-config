@@ -1,0 +1,151 @@
+---
+# SPDX-License-Identifier: MIT-0
+# tasks file for Flatpak role
+# Installs and configures Flatpak applications
+
+- name: Display Flatpak configuration
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "Flatpak Application Installation"
+      - "=========================================="
+      - "Flatpak Enabled: {{ flatpak_enabled }}"
+      - "Install Flatpak Package: {{ flatpak_install_package }}"
+      - "Enable Flathub: {{ flatpak_enable_flathub }}"
+      - "Apps to Install: {{ flatpak_apps | selectattr('enabled', 'defined') | selectattr('enabled', 'equalto', true) | list | length }}"
+      - "=========================================="
+  tags:
+    - flatpak
+    - always
+
+- name: Check if Flatpak is installed
+  ansible.builtin.command: flatpak --version
+  register: flatpak_installed_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - flatpak
+    - check
+
+- name: Install Flatpak
+  ansible.builtin.dnf:
+    name:
+      - flatpak
+      - flatpak-selinux
+    state: present
+  when:
+    - flatpak_install_package | bool
+    - flatpak_enabled | bool
+    - flatpak_installed_check.rc != 0
+  become: true
+  tags:
+    - flatpak
+    - install
+
+- name: Initialize Flatpak (if first run)
+  ansible.builtin.command: flatpak --system repair --apply
+  when:
+    - flatpak_enabled | bool
+    - flatpak_installed_check.rc == 0
+  become: true
+  changed_when: false
+  failed_when: false
+  tags:
+    - flatpak
+    - init
+
+- name: Check if Flathub repository is configured
+  ansible.builtin.command: flatpak remotes --system
+  register: flatpak_remotes
+  changed_when: false
+  failed_when: false
+  when: flatpak_enable_flathub | bool
+  tags:
+    - flatpak
+    - repository
+
+- name: Add Flathub repository
+  ansible.builtin.command: flatpak remote-add --if-not-exists --system flathub https://flathub.org/repo/flathub.flatpakrepo
+  when:
+    - flatpak_enable_flathub | bool
+    - flatpak_remotes.stdout is not search('flathub')
+  become: true
+  tags:
+    - flatpak
+    - repository
+
+- name: Update Flatpak application data
+  ansible.builtin.command: flatpak update --system --appstream
+  when: flatpak_enabled | bool
+  become: true
+  changed_when: false
+  failed_when: false
+  tags:
+    - flatpak
+    - update
+
+- name: Install Flatpak applications
+  ansible.builtin.command: >
+    flatpak install --assumeyes --system flathub {{ item.name }}
+  loop: "{{ flatpak_apps }}"
+  when:
+    - flatpak_enabled | bool
+    - item.enabled | default(false) | bool
+  become: true
+  register: flatpak_install_result
+  changed_when: "'Installing' in flatpak_install_result.stdout"
+  failed_when: false
+  tags:
+    - flatpak
+    - install
+
+- name: Update all Flatpak applications
+  ansible.builtin.command: flatpak update --system --assumeyes
+  when:
+    - flatpak_enabled | bool
+    - flatpak_update_apps | bool
+  become: true
+  changed_when: false
+  failed_when: false
+  tags:
+    - flatpak
+    - update
+
+- name: Remove unused Flatpak runtimes
+  ansible.builtin.command: flatpak uninstall --unused --assumeyes
+  when:
+    - flatpak_enabled | bool
+    - flatpak_remove_unused_runtimes | bool
+  become: true
+  changed_when: false
+  failed_when: false
+  tags:
+    - flatpak
+    - cleanup
+
+- name: List installed Flatpak applications
+  ansible.builtin.command: flatpak list --app --columns=application,version,installation
+  register: flatpak_installed_apps
+  changed_when: false
+  failed_when: false
+  when: flatpak_enabled | bool
+  tags:
+    - flatpak
+    - list
+
+- name: Display installed Flatpak applications
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "Flatpak Installation Complete"
+      - "=========================================="
+      - "Installed Applications:"
+      - "{{ flatpak_installed_apps.stdout_lines | default(['No applications installed'], true) }}"
+      - "=========================================="
+      - "Verification commands:"
+      - "  flatpak list"
+      - "  flatpak remote-ls --app flathub"
+      - "=========================================="
+  tags:
+    - flatpak
+    - always

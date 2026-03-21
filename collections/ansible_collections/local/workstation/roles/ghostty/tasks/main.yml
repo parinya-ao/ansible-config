@@ -1,0 +1,172 @@
+---
+# SPDX-License-Identifier: MIT-0
+# tasks file for Ghostty role
+
+- name: Display Ghostty configuration
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "Ghostty Terminal Installation"
+      - "=========================================="
+      - "Install Ghostty: {{ ghostty_install }}"
+      - "COPR Repository: {{ ghostty_copr_repo }}"
+      - "Create Desktop Entry: {{ ghostty_create_desktop_entry }}"
+      - "Install Config: {{ ghostty_install_config }}"
+      - "=========================================="
+  tags:
+    - ghostty
+    - always
+
+- name: Check if Ghostty is already installed
+  ansible.builtin.command: dnf list installed ghostty
+  register: ghostty_installed_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - ghostty
+    - check
+
+- name: Check if COPR repository is already enabled
+  ansible.builtin.shell: |
+    dnf copr list 2>/dev/null | grep -q "{{ ghostty_copr_repo }}" && echo "enabled" || echo "disabled"
+  register: ghostty_copr_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - ghostty
+    - copr
+
+- name: Enable COPR repository for Ghostty
+  ansible.builtin.command: dnf copr -y enable {{ ghostty_copr_repo }}
+  when:
+    - ghostty_install | bool
+    - ghostty_copr_check.stdout != "enabled"
+  become: true
+  tags:
+    - ghostty
+    - copr
+
+- name: Install Ghostty terminal emulator
+  ansible.builtin.dnf:
+    name: "{{ ghostty_package }}"
+    state: present
+  when:
+    - ghostty_install | bool
+    - ghostty_installed_check.rc != 0
+  become: true
+  tags:
+    - ghostty
+    - install
+
+- name: Ensure desktop entry directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.local/share/applications"
+    state: directory
+    mode: "0755"
+  when: ghostty_create_desktop_entry | bool
+  tags:
+    - ghostty
+    - desktop
+
+- name: Create Ghostty desktop entry file
+  ansible.builtin.copy:
+    dest: "{{ ghostty_desktop_entry_path }}"
+    content: |
+      [Desktop Entry]
+      Version={{ ghostty_desktop_entry.version }}
+      Name={{ ghostty_desktop_entry.name }}
+      Type={{ ghostty_desktop_entry.type }}
+      Comment={{ ghostty_desktop_entry.comment }}
+      TryExec={{ ghostty_desktop_entry.try_exec }}
+      Exec={{ ghostty_desktop_entry.exec }}
+      Icon={{ ghostty_desktop_entry.icon }}
+      Categories={{ ghostty_desktop_entry.categories }}
+      Keywords={{ ghostty_desktop_entry.keywords }}
+      StartupNotify={{ ghostty_desktop_entry.startup_notify | ternary('true', 'false') }}
+      StartupWMClass={{ ghostty_desktop_entry.startup_wm_class }}
+      Terminal={{ ghostty_desktop_entry.terminal | ternary('true', 'false') }}
+      Actions={{ ghostty_desktop_entry.actions }}
+      X-GNOME-UsesNotifications={{ ghostty_desktop_entry.gnome_uses_notifications | ternary('true', 'false') }}
+      X-TerminalArgExec=-e
+      X-TerminalArgTitle=--title=
+      X-TerminalArgAppId=--class=
+      X-TerminalArgDir=--working-directory=
+      X-TerminalArgHold=--wait-after-command
+      DBusActivatable=true
+      X-KDE-Shortcuts={{ ghostty_desktop_entry.kde_shortcuts }}
+
+      [Desktop Action new-window]
+      Name=New Window
+      Exec={{ ghostty_desktop_entry.exec }}
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+    mode: "0644"
+  when: ghostty_create_desktop_entry | bool
+  tags:
+    - ghostty
+    - desktop
+
+- name: Ensure Ghostty config directory exists
+  ansible.builtin.file:
+    path: "{{ ghostty_config_dir }}"
+    state: directory
+    mode: "0755"
+  when: ghostty_install_config | bool
+  tags:
+    - ghostty
+    - config
+
+- name: Create Ghostty configuration file
+  ansible.builtin.copy:
+    dest: "{{ ghostty_config_file }}"
+    content: |
+      # Ghostty Configuration
+      # See https://ghostty.org/docs/config for all options
+      
+      # Font configuration
+      # font-family = JetBrains Mono
+      
+      # Theme
+      # theme = system
+      
+      # Window settings
+      # window-maximize = true
+      
+      # Terminal behavior
+      # confirm-close-surface = false
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+    mode: "0644"
+  when: ghostty_install_config | bool
+  tags:
+    - ghostty
+    - config
+
+- name: Update desktop database
+  ansible.builtin.command: update-desktop-database {{ ansible_env.HOME }}/.local/share/applications
+  when: ghostty_create_desktop_entry | bool
+  changed_when: false
+  failed_when: false
+  tags:
+    - ghostty
+    - desktop
+
+- name: Display Ghostty installation summary
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "Ghostty Installation Complete"
+      - "=========================================="
+      - "Package: {{ ghostty_package }}"
+      - "COPR Repository: {{ ghostty_copr_repo }}"
+      - "Desktop Entry: {{ 'Created' if ghostty_create_desktop_entry | bool else 'Not Created' }}"
+      - "Config File: {{ ghostty_config_file }}"
+      - "=========================================="
+      - "Launch Ghostty:"
+      - "  - From terminal: ghostty"
+      - "  - From GUI: Search for 'Ghostty' in applications"
+      - "  - Keyboard shortcut: Ctrl+Alt+T (if supported)"
+      - "=========================================="
+  tags:
+    - ghostty
+    - always

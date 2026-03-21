@@ -1,0 +1,21 @@
+---
+# SPDX-License-Identifier: MIT-0
+galaxy_info:
+  role_name: flatpak
+  author: Your Name
+  description: Install and manage Flatpak applications on Fedora
+  company: Your Company (optional)
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+  galaxy_tags:
+    - flatpak
+    - applications
+    - gui
+    - fedora
+    - desktop
+
+dependencies: []
