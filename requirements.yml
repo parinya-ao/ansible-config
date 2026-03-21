@@ -7,3 +7,17 @@ collections:
     version: ">=8.0.0"
   - name: ansible.posix
     version: ">=1.5.0"
+
+# Local workstation collections
+# The following collections are maintained locally in the collections/ directory:
+# - local.workstation.common
+# - local.workstation.locale
+# - local.workstation.git
+# - local.workstation.stability
+# - local.workstation.developer
+# - local.workstation.font
+# - local.workstation.power
+# - local.workstation.rpmfusion
+# - local.workstation.firmware
+# - local.workstation.multimedia
+# - local.workstation.embed

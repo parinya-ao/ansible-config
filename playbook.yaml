@@ -28,6 +28,9 @@
     - name: Display roles to be applied
       ansible.builtin.debug:
         msg:
+          - "=========================================="
+          - "Ansible Configuration Playbook"
+          - "=========================================="
           - "Roles to be applied:"
           - "  1. common      - Base system configuration"
           - "  2. locale      - English-only environment enforcement"
@@ -36,8 +39,10 @@
           - "  5. developer   - Development tools and runtimes"
           - "  6. font        - Font installation"
           - "  7. power       - TLP power management (disabled by default)"
-          - "  8. multimedia  - Multimedia codecs and video acceleration"
-          - "  9. embed       - Embedded development"
+          - "  8. rpmfusion   - RPM Fusion repositories (Free & Non-Free)"
+          - "  9. firmware    - Non-free firmware installation"
+          - " 10. multimedia  - Multimedia codecs and video acceleration"
+          - " 11. embed       - Embedded development"
           - "=========================================="
 
     - name: Display Ansible version
@@ -96,6 +101,16 @@
         - tlp
         - battery
 
+    - role: local.workstation.rpmfusion
+      tags:
+        - rpmfusion
+        - repositories
+
+    - role: local.workstation.firmware
+      tags:
+        - firmware
+        - drivers
+
     - role: local.workstation.multimedia
       tags:
         - multimedia
@@ -125,9 +140,17 @@
           - "Next Steps:"
           - "=========================================="
           - "1. Log out and log back in for group changes"
-          - "2. Verify installations:"
+          - "2. Verify RPM Fusion repositories:"
+          - "   - dnf repolist | grep rpmfusion"
+          - "3. Verify firmware installation:"
+          - "   - dnf list installed '*firmware*'"
+          - "4. Verify multimedia codecs:"
+          - "   - dnf list installed ffmpeg*"
+          - "5. Verify Intel VA-API (for Intel GPUs):"
+          - "   - vainfo | grep -E 'H264|HEVC'"
+          - "6. Verify installations:"
           - "   - node --version"
           - "   - cargo --version"
-          - "3. Run 'flatpak list' to see installed apps"
-          - "4. Run 'fc-list' to see installed fonts"
+          - "7. Run 'flatpak list' to see installed apps"
+          - "8. Run 'fc-list' to see installed fonts"
           - "=========================================="

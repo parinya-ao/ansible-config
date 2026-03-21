@@ -1,0 +1,100 @@
+---
+# SPDX-License-Identifier: MIT-0
+# tasks file for firmware role
+
+- name: Display firmware configuration
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "Non-Free Firmware Installation"
+      - "=========================================="
+      - "Install Non-Free Firmware: {{ firmware_install_nonfree }}"
+      - "Enable Tainted Repository: {{ firmware_enable_tainted }}"
+      - "Install All Firmware Patterns: {{ firmware_install_all_patterns }}"
+      - "=========================================="
+  tags:
+    - firmware
+    - always
+
+- name: Check if RPM Fusion Non-Free repository is available
+  ansible.builtin.stat:
+    path: /etc/yum.repos.d/rpmfusion-nonfree.repo
+  register: firmware_rpmfusion_nonfree_check
+  changed_when: false
+  tags:
+    - firmware
+    - check
+
+- name: Check if tainted repository is available
+  ansible.builtin.stat:
+    path: /etc/yum.repos.d/rpmfusion-nonfree-tainted.repo
+  register: firmware_tainted_check
+  changed_when: false
+  tags:
+    - firmware
+    - check
+
+- name: Install tainted firmware release package
+  ansible.builtin.dnf:
+    name: "{{ firmware_nonfree_packages }}"
+    state: present
+  when:
+    - firmware_install_nonfree | bool
+    - firmware_rpmfusion_nonfree_check.stat.exists
+  become: true
+  tags:
+    - firmware
+    - tainted
+
+- name: Install standard firmware packages
+  ansible.builtin.dnf:
+    name: "{{ firmware_packages }}"
+    state: present
+  when: firmware_install_nonfree | bool
+  become: true
+  tags:
+    - firmware
+    - standard
+
+- name: Install all firmware packages from tainted repository
+  ansible.builtin.dnf:
+    name: "*-firmware"
+    state: present
+    enablerepo: "rpmfusion-nonfree-tainted"
+  when:
+    - firmware_install_nonfree | bool
+    - firmware_enable_tainted | bool
+    - firmware_tainted_check.stat.exists
+  become: true
+  tags:
+    - firmware
+    - tainted
+
+- name: Install additional non-free firmware packages
+  ansible.builtin.dnf:
+    name:
+      - broadcom-wl
+      - broadcom-wl-firmware
+    state: present
+  when:
+    - firmware_install_nonfree | bool
+    - firmware_rpmfusion_nonfree_check.stat.exists
+  become: true
+  failed_when: false
+  tags:
+    - firmware
+    - wifi
+
+- name: Display firmware installation summary
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "Firmware Installation Complete"
+      - "=========================================="
+      - "Standard Firmware: Installed"
+      - "Non-Free Firmware: {{ 'Enabled' if firmware_enable_tainted | bool else 'Disabled' }}"
+      - "Tainted Repository: {{ 'Available' if firmware_tainted_check.stat.exists else 'Not Available' }}"
+      - "=========================================="
+  tags:
+    - firmware
+    - always
