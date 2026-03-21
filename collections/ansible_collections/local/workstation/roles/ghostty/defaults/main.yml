@@ -1,0 +1,43 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Default variables for Ghostty role
+
+# Enable Ghostty installation
+ghostty_install: true
+
+# COPR repository configuration
+ghostty_copr_repo: "scottames/ghostty"
+
+# Ghostty package name
+ghostty_package: "ghostty"
+
+# Create desktop entry file (fixes missing .desktop issue)
+ghostty_create_desktop_entry: true
+
+# Desktop entry configuration
+ghostty_desktop_entry:
+  version: "1.0"
+  name: "Ghostty"
+  type: "Application"
+  comment: "A fast, feature-rich, and cross-platform terminal emulator"
+  exec: "/usr/bin/ghostty --gtk-single-instance=true"
+  try_exec: "/usr/bin/ghostty"
+  icon: "com.mitchellh.ghostty"
+  categories: "System;TerminalEmulator;"
+  keywords: "terminal;tty;pty;"
+  startup_notify: true
+  startup_wm_class: "com.mitchellh.ghostty"
+  terminal: false
+  actions: "new-window;"
+  gnome_uses_notifications: true
+  kde_shortcuts: "Ctrl+Alt+T"
+
+# Desktop entry file location
+ghostty_desktop_entry_path: "{{ ansible_env.HOME }}/.local/share/applications/ghostty.desktop"
+
+# Additional Ghostty configuration
+ghostty_config_dir: "{{ ansible_env.HOME }}/.config/ghostty"
+ghostty_config_file: "{{ ghostty_config_dir }}/config"
+
+# Install Ghostty configuration template
+ghostty_install_config: false

@@ -1,0 +1,115 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# powertop Configuration - Power Monitoring and Tuning
+# =============================================================================
+
+- name: Check if powertop is installed
+  ansible.builtin.command: rpm -q powertop
+  register: power_powertop_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - power
+    - powertop
+
+- name: Install powertop
+  ansible.builtin.dnf:
+    name: powertop
+    state: present
+  become: true
+  when: power_powertop_check.rc != 0
+  tags:
+    - power
+    - powertop
+
+- name: Create powertop auto-tune systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/powertop.service
+    content: |
+      [Unit]
+      Description=Powertop tunings
+      After=multi-user.target
+      
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      ExecStart=/usr/sbin/powertop --auto-tune
+      
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when: power_powertop_auto_tune | bool
+  tags:
+    - power
+    - powertop
+    - systemd
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+  when: power_powertop_auto_tune | bool
+  tags:
+    - power
+    - powertop
+    - systemd
+
+- name: Enable and start powertop service
+  ansible.builtin.systemd:
+    name: powertop.service
+    state: started
+    enabled: true
+  become: true
+  when: power_powertop_auto_tune | bool
+  tags:
+    - power
+    - powertop
+    - systemd
+
+- name: Run powertop auto-tune (one-time)
+  ansible.builtin.command: powertop --auto-tune
+  become: true
+  register: power_powertop_autotune_result
+  changed_when: false
+  failed_when: false
+  when: power_powertop_auto_tune | bool
+  tags:
+    - power
+    - powertop
+
+- name: Display powertop auto-tune warnings
+  ansible.builtin.debug:
+    msg:
+      - "Note: powertop --auto-tune may show warnings like:"
+      - "  - 'modprobe cpufreq_stats failed' (normal on newer kernels)"
+      - "  - 'glob returned GLOB_ABORTED' (normal on Fedora 38+)"
+      - "These are expected and do not affect functionality."
+  when: power_powertop_auto_tune | bool
+  tags:
+    - power
+    - powertop
+
+- name: Show powertop configuration summary
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "powertop Configuration Complete"
+      - "=========================================="
+      - "powertop auto-tune service: {{ 'Enabled' if power_powertop_auto_tune | bool else 'Disabled' }}"
+      - "Service: powertop.service"
+      - "=========================================="
+      - "Usage:"
+      - "  sudo powertop              # Interactive mode"
+      - "  sudo powertop --auto-tune  # Apply all optimizations"
+      - "=========================================="
+      - "Verification:"
+      - "  systemctl status powertop.service"
+      - "  sudo powertop (check Tunables tab)"
+      - "=========================================="
+  tags:
+    - power
+    - powertop

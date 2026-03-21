@@ -234,5 +234,10 @@
   # ===========================================================================
   always:
     - name: Pre-flight execution cleanup
+      ansible.builtin.set_fact:
+        locale_preflight_status: >-
+          {{ 'Success' if ansible_failed_result is not defined else 'Failed' }}
+
+    - name: Pre-flight execution status message
       ansible.builtin.debug:
-        msg: "Locale pre-flight checks completed ({{ 'Success' if ansible_failed_result is not defined else 'Failed' }})"
+        msg: "Locale pre-flight checks completed ({{ locale_preflight_status }})"

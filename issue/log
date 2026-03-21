@@ -1,0 +1,12 @@
+
+TASK [local.workstation.developer : Check if Android SDK is already installed] ***
+Friday 20 March 2026  22:37:26 +0700 (0:08:45.942)       0:14:35.226 ********** 
+fatal: [localhost]: FAILED! => {"changed": false, "module_stderr": "sudo: a password is required\n", "module_stdout": "", "msg": "MODULE FAILURE: No start of json char found\nSee stdout/stderr for the exact error", "rc": 1}
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=184  changed=79   unreachable=0    failed=1    skipped=32   rescued=1    ignored=0   
+
+
+:12 +0700 (0:00:00.165)       0:00:00.918 ********** 
+ok: [localhost] => {"ansible_facts": {"common_rpmfusion_free_installed": false}, "changed": false}
+

@@ -1,0 +1,25 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Default variables for firmware role
+
+# Enable non-free firmware installation
+firmware_install_nonfree: true
+
+# Firmware packages to install
+firmware_packages:
+  - linux-firmware
+  - amd-ucode-firmware
+  - intel-audio-firmware
+  - nvidia-gpu-firmware
+  - rtl8723bs-firmware
+  - rtl8821ce-firmware
+
+# Additional non-free firmware from RPM Fusion (tainted)
+firmware_nonfree_packages:
+  - rpmfusion-nonfree-release-tainted
+
+# Enable tainted repository for firmware
+firmware_enable_tainted: true
+
+# Pattern-based firmware installation (installs all *-firmware packages)
+firmware_install_all_patterns: true

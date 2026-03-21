@@ -1,0 +1,23 @@
+---
+# SPDX-License-Identifier: MIT-0
+galaxy_info:
+  role_name: firmware
+  author: Your Name
+  description: Install non-free firmware packages on Fedora
+  company: Your Company (optional)
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Fedora
+      versions:
+        - all
+  galaxy_tags:
+    - firmware
+    - nonfree
+    - fedora
+    - hardware
+    - drivers
+
+dependencies:
+  - role: local.workstation.rpmfusion
+    when: firmware_install_nonfree | bool

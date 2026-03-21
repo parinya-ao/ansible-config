@@ -2,6 +2,52 @@
 # SPDX-License-Identifier: MIT-0
 # tasks file for roles/multimedia
 
+- name: Display multimedia configuration
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "Multimedia Codec and Driver Setup"
+      - "=========================================="
+      - "Install Codecs: {{ multimedia_install_codecs }}"
+      - "Install Video Acceleration: {{ multimedia_install_video_acceleration }}"
+      - "Install OpenH264: {{ multimedia_install_openh264 }}"
+      - "GPU Vendor: {{ multimedia_gpu_vendor | default('Auto-detect', true) }}"
+      - "=========================================="
+  tags:
+    - multimedia
+    - always
+
+- name: Auto-detect Intel GPU
+  ansible.builtin.shell: |
+    lspci -nn 2>/dev/null | grep -i "vga.*intel\|3d.*intel\|display.*intel" | head -1
+  register: multimedia_intel_gpu_detect
+  changed_when: false
+  failed_when: false
+  when:
+    - multimedia_auto_detect_gpu | bool
+    - multimedia_gpu_vendor == "" or multimedia_gpu_vendor == "intel"
+  tags:
+    - multimedia
+    - detect
+
+- name: Set GPU vendor to Intel if detected
+  ansible.builtin.set_fact:
+    multimedia_gpu_vendor: "intel"
+  when:
+    - multimedia_auto_detect_gpu | bool
+    - multimedia_gpu_vendor == "" or multimedia_gpu_vendor == "intel"
+    - multimedia_intel_gpu_detect.stdout | length > 0
+  tags:
+    - multimedia
+    - detect
+
+- name: Display detected GPU vendor
+  ansible.builtin.debug:
+    msg: "Detected GPU Vendor: {{ multimedia_gpu_vendor | default('Unknown', true) }}"
+  tags:
+    - multimedia
+    - detect
+
 - name: Check if RPM Fusion is available
   ansible.builtin.stat:
     path: /etc/yum.repos.d/rpmfusion-free.repo
@@ -149,3 +195,37 @@
   tags:
     - multimedia
     - openh264
+
+- name: Verify VA-API video acceleration (Intel)
+  ansible.builtin.shell: |
+    vainfo --display drm 2>&1 | grep -E "VAProfileH264|VAProfileHEVC" | head -5
+  register: multimedia_vaapi_verify
+  changed_when: false
+  failed_when: false
+  when:
+    - multimedia_install_video_acceleration | bool
+    - multimedia_gpu_vendor == "intel"
+  tags:
+    - multimedia
+    - video-acceleration
+    - verify
+
+- name: Display VA-API verification result
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "VA-API Video Acceleration Verification"
+      - "=========================================="
+      - "GPU Vendor: {{ multimedia_gpu_vendor }}"
+      - "VA-API Profiles Detected:"
+      - "{{ multimedia_vaapi_verify.stdout_lines | default(['No VA-API profiles detected'], true) }}"
+      - "=========================================="
+      - "Note: If no profiles detected, try running 'vainfo' manually"
+      - "=========================================="
+  when:
+    - multimedia_install_video_acceleration | bool
+    - multimedia_gpu_vendor == "intel"
+  tags:
+    - multimedia
+    - video-acceleration
+    - verify

@@ -1,0 +1,25 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Default variables for RPM Fusion role
+
+# Enable RPM Fusion repositories
+rpmfusion_enable_free: true
+rpmfusion_enable_nonfree: true
+
+# Install tainted firmware repository (for non-free firmware)
+rpmfusion_install_tainted: true
+
+# Install AppStream metadata for GNOME Software/KDE Discover integration
+rpmfusion_install_appstream: true
+
+# RPM Fusion release package URLs (will be auto-generated based on Fedora version)
+rpmfusion_free_url: "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_facts.distribution_version }}.noarch.rpm"
+rpmfusion_nonfree_url: "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_facts.distribution_version }}.noarch.rpm"
+
+# Tainted firmware package
+rpmfusion_tainted_package: "rpmfusion-nonfree-release-tainted"
+
+# AppStream metadata packages
+rpmfusion_appstream_packages:
+  - rpmfusion-free-appstream-data
+  - rpmfusion-nonfree-appstream-data

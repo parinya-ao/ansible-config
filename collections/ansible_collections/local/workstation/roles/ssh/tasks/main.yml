@@ -1,0 +1,147 @@
+---
+# SPDX-License-Identifier: MIT-0
+# tasks file for SSH role
+# Sets correct permissions on SSH directory and files
+
+- name: Display SSH configuration
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "SSH Permissions Configuration"
+      - "=========================================="
+      - "SSH Directory: {{ ssh_dir }}"
+      - "Private Key: {{ ssh_private_key }}"
+      - "Public Key: {{ ssh_public_key }}"
+      - "Authorized Keys: {{ ssh_authorized_keys }}"
+      - "=========================================="
+  tags:
+    - ssh
+    - always
+
+- name: Check if SSH directory exists
+  ansible.builtin.stat:
+    path: "{{ ssh_dir }}"
+  register: ssh_dir_stat
+  changed_when: false
+  tags:
+    - ssh
+    - check
+
+- name: Create SSH directory
+  ansible.builtin.file:
+    path: "{{ ssh_dir }}"
+    state: directory
+    mode: "{{ ssh_dir_mode }}"
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+  when:
+    - ssh_create_dir | bool
+    - not ssh_dir_stat.stat.exists
+  tags:
+    - ssh
+    - directory
+
+- name: Set SSH directory permissions
+  ansible.builtin.file:
+    path: "{{ ssh_dir }}"
+    state: directory
+    mode: "{{ ssh_dir_mode }}"
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+  when: ssh_dir_stat.stat.exists
+  tags:
+    - ssh
+    - directory
+
+- name: Check if SSH private key exists
+  ansible.builtin.stat:
+    path: "{{ ssh_private_key }}"
+  register: ssh_private_key_stat
+  changed_when: false
+  tags:
+    - ssh
+    - check
+
+- name: Set SSH private key permissions
+  ansible.builtin.file:
+    path: "{{ ssh_private_key }}"
+    mode: "{{ ssh_private_key_mode }}"
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+  when: ssh_private_key_stat.stat.exists
+  tags:
+    - ssh
+    - permissions
+
+- name: Check if SSH public key exists
+  ansible.builtin.stat:
+    path: "{{ ssh_public_key }}"
+  register: ssh_public_key_stat
+  changed_when: false
+  tags:
+    - ssh
+    - check
+
+- name: Set SSH public key permissions
+  ansible.builtin.file:
+    path: "{{ ssh_public_key }}"
+    mode: "{{ ssh_public_key_mode }}"
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+  when: ssh_public_key_stat.stat.exists
+  tags:
+    - ssh
+    - permissions
+
+- name: Check if authorized_keys file exists
+  ansible.builtin.stat:
+    path: "{{ ssh_authorized_keys }}"
+  register: ssh_authorized_keys_stat
+  changed_when: false
+  tags:
+    - ssh
+    - check
+
+- name: Set authorized_keys permissions
+  ansible.builtin.file:
+    path: "{{ ssh_authorized_keys }}"
+    mode: "{{ ssh_authorized_keys_mode }}"
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+  when: ssh_authorized_keys_stat.stat.exists
+  tags:
+    - ssh
+    - permissions
+
+- name: Generate SSH key pair
+  community.crypto.openssh_keypair:
+    path: "{{ ssh_private_key }}"
+    type: "{{ ssh_key_type }}"
+    size: "{{ ssh_key_size }}"
+    comment: "{{ ssh_key_comment }}"
+    force: false
+  when:
+    - ssh_generate_key | bool
+    - not ssh_private_key_stat.stat.exists
+  tags:
+    - ssh
+    - generate
+
+- name: Display SSH permissions summary
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "SSH Permissions Configuration Complete"
+      - "=========================================="
+      - "Directory: {{ ssh_dir }} ({{ ssh_dir_mode }})"
+      - "Private Key: {{ ssh_private_key }} ({{ ssh_private_key_mode }})"
+      - "Public Key: {{ ssh_public_key }} ({{ ssh_public_key_mode }})"
+      - "Authorized Keys: {{ ssh_authorized_keys }} ({{ ssh_authorized_keys_mode }})"
+      - "=========================================="
+      - "Verification commands:"
+      - "  ls -la ~/.ssh/"
+      - "  ssh -T git@github.com"
+      - "=========================================="
+  tags:
+    - ssh
+    - always

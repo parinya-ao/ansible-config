@@ -2,15 +2,52 @@
 # SPDX-License-Identifier: MIT-0
 # =============================================================================
 # TLP Installation Tasks
+# Note: TLP and power-profiles-daemon are mutually exclusive
 # =============================================================================
 
-- name: Disable and mask power-profiles-daemon
+- name: Display TLP installation warning
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "WARNING: Installing TLP"
+      - "=========================================="
+      - "TLP will replace power-profiles-daemon"
+      - "GNOME Power Settings will be disabled"
+      - "This is for advanced users only"
+      - "=========================================="
+  tags:
+    - power
+    - tlp
+
+- name: Check if power-profiles-daemon is installed
+  ansible.builtin.command: rpm -q power-profiles-daemon
+  register: power_ppd_installed
+  changed_when: false
+  failed_when: false
+  tags:
+    - power
+    - tlp
+
+- name: Stop and disable power-profiles-daemon
   ansible.builtin.systemd:
     name: power-profiles-daemon
     state: stopped
     enabled: false
+  become: true
+  when: power_ppd_installed.rc == 0
+  tags:
+    - power
+    - tlp
+
+- name: Mask power-profiles-daemon (prevent auto-start)
+  ansible.builtin.systemd:
+    name: power-profiles-daemon
     masked: true
-  failed_when: false
+  become: true
+  when: power_ppd_installed.rc == 0
+  tags:
+    - power
+    - tlp
 
 - name: Install TLP packages
   ansible.builtin.dnf:
@@ -19,6 +56,9 @@
       - tlp-rdw
     state: present
   become: true
+  tags:
+    - power
+    - tlp
 
 - name: Enable and start tlp.service
   ansible.builtin.systemd:
@@ -27,8 +67,11 @@
     state: started
   become: true
   failed_when: false
+  tags:
+    - power
+    - tlp
 
-- name: Mask systemd-rfkill services
+- name: Mask systemd-rfkill services (prevent conflicts)
   ansible.builtin.systemd:
     name: "{{ item }}"
     masked: true
@@ -37,15 +80,21 @@
     - systemd-rfkill.service
     - systemd-rfkill.socket
   failed_when: false
+  tags:
+    - power
+    - tlp
 
 - name: Configure SELinux for TLP
   ansible.posix.seboolean:
-    name: tlp_can_write_to_d
+    name: tlp_can_write_to_sys
     state: true
     persistent: true
   become: true
-  when: ansible_selinux.status == "enabled" and ansible_selinux.mode != "disabled"
+  when: ansible_selinux.status is defined and ansible_selinux.status == "enabled"
   failed_when: false
+  tags:
+    - power
+    - tlp
 
 - name: Deploy TLP configuration
   ansible.builtin.template:
@@ -57,11 +106,34 @@
     backup: true
   become: true
   notify: restart tlp
+  tags:
+    - power
+    - tlp
 
 - name: Run TLP recommendations check
-  ansible.builtin.command:
-    cmd: tlp-stat -b
+  ansible.builtin.command: tlp-stat -b
   register: power_tlp_recommendations
   changed_when: false
   failed_when: false
   become: true
+  tags:
+    - power
+    - tlp
+
+- name: Display TLP installation summary
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "TLP Installation Complete"
+      - "=========================================="
+      - "TLP is now active and managing power"
+      - "GNOME Power Settings are disabled"
+      - "=========================================="
+      - "Verification:"
+      - "  tlp-stat -s    # Show TLP status"
+      - "  tlp-stat -b    # Show battery info"
+      - "  tlp-stat -e    # Show PCI Express status"
+      - "=========================================="
+  tags:
+    - power
+    - tlp

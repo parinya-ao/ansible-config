@@ -7,6 +7,32 @@
 # This ensures all system-level output is in English for debugging consistency.
 # =============================================================================
 
+- name: "GATHER: Read current /etc/locale.conf"
+  ansible.builtin.slurp:
+    src: /etc/locale.conf
+  register: locale_conf_current_raw
+  failed_when: false
+  changed_when: false
+
+- name: "GATHER: Parse current locale.conf content"
+  ansible.builtin.set_fact:
+    locale_conf_current: >-
+      {{ (locale_conf_current_raw.content | b64decode) if locale_conf_current_raw.content is defined else '' }}
+  changed_when: false
+
+- name: "GATHER: Read current /etc/environment"
+  ansible.builtin.slurp:
+    src: /etc/environment
+  register: locale_environment_current_raw
+  failed_when: false
+  changed_when: false
+
+- name: "GATHER: Parse current /etc/environment content"
+  ansible.builtin.set_fact:
+    locale_environment_current: >-
+      {{ (locale_environment_current_raw.content | b64decode) if locale_environment_current_raw.content is defined else '' }}
+  changed_when: false
+
 - name: "STATE: System locale configuration file must exist"
   ansible.builtin.copy:
     dest: /etc/locale.conf
@@ -37,12 +63,27 @@
     backup: true
   register: locale_environment_config
 
+- name: "GATHER: Get current localectl locale setting"
+  ansible.builtin.command: localectl status
+  register: locale_localed_status
+  changed_when: false
+  failed_when: false
+  when: not locale_is_container
+
+- name: "CHECK: Determine if localectl needs update"
+  ansible.builtin.set_fact:
+    locale_localed_needs_update: >-
+      {{ not locale_is_container
+         and locale_localed_status.stdout is defined
+         and ('LANG=' + locale_lang) not in locale_localed_status.stdout }}
+  when: not locale_is_container
+  changed_when: false
+
 - name: "STATE: Localed configuration must match target locale"
   ansible.builtin.command: localectl set-locale LANG={{ locale_lang }}
   register: locale_localed_set
   when:
-    - locale_system_locale_config.changed or locale_environment_config.changed
-    - not locale_is_container
+    - locale_localed_needs_update | default(false)
   changed_when: locale_localed_set.rc == 0
   failed_when: false
   notify: Regenerate locales

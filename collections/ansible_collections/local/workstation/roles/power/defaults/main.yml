@@ -1,15 +1,34 @@
 ---
 # SPDX-License-Identifier: MIT-0
 # =============================================================================
-# power role defaults - TLP configuration
+# power role defaults - Power management for Fedora Workstations
 # =============================================================================
 
-# Main toggle for TLP installation
-power_install_tlp: true
+# Power management mode selection
+# Options: "power-profiles-daemon" (recommended for Fedora Workstation) or "tlp"
+power_management_mode: "power-profiles-daemon"
+
+# Install thermald for Intel CPU thermal management (recommended for Intel)
+power_install_thermald: true
+
+# Install and configure powertop for power monitoring
+power_install_powertop: true
+
+# Enable powertop auto-tune service
+power_powertop_auto_tune: true
+
+# Power profiles daemon settings (for power-management-mode: power-profiles-daemon)
+power_profile_on_ac: "balanced"
+power_profile_on_battery: "power-saver"
 
 # -----------------------------------------------------------------------------
-# CPU Scaling Governors
+# TLP Configuration (only used if power_management_mode: "tlp")
 # -----------------------------------------------------------------------------
+
+# Main toggle for TLP installation
+power_install_tlp: false
+
+# CPU Scaling Governors
 power_cpu_scaling_governor_on_ac: performance
 power_cpu_scaling_governor_on_bat: powersave
 
@@ -17,55 +36,40 @@ power_cpu_scaling_governor_on_bat: powersave
 power_cpu_energy_perf_policy_on_ac: performance
 power_cpu_energy_perf_policy_on_bat: power
 
-# CPU boost (Intel/AMD)
+# CPU boost (Intel/AMD) - disable on battery for power saving
 power_cpu_boost_on_ac: 1
 power_cpu_boost_on_bat: 0
 
-# -----------------------------------------------------------------------------
 # Battery Charge Thresholds (ThinkPad and supported laptops)
 # Set to 0 to disable threshold
 power_start_charge_thresh_bat0: 20
 power_stop_charge_thresh_bat0: 80
 
-# -----------------------------------------------------------------------------
 # Disk Power Saving
-# -----------------------------------------------------------------------------
 power_disk_apm_level_on_ac: "254 254"
 power_disk_apm_level_on_bat: "128 128"
 
-# -----------------------------------------------------------------------------
 # WiFi Power Saving
-# -----------------------------------------------------------------------------
 power_wifi_pwr_on_ac: "off"
 power_wifi_pwr_on_bat: "on"
 
-# -----------------------------------------------------------------------------
 # PCIe Active State Power Management (ASPM)
-# -----------------------------------------------------------------------------
 power_pcie_aspm_on_ac: default
 power_pcie_aspm_on_bat: powersupersave
 
-# -----------------------------------------------------------------------------
 # USB Auto Suspension
-# -----------------------------------------------------------------------------
 power_usb_autosuspend: 1
 power_usb_blacklist: ""
 
-# -----------------------------------------------------------------------------
 # Audio Power Saving
-# -----------------------------------------------------------------------------
 power_sound_power_save_on_ac: 0
 power_sound_power_save_on_bat: 1
 
-# -----------------------------------------------------------------------------
 # RAID Power Saving
-# -----------------------------------------------------------------------------
 power_raid_power_on_ac: false
 power_raid_power_on_bat: true
 
-# -----------------------------------------------------------------------------
 # Wireless Power Switch
-# -----------------------------------------------------------------------------
 power_wifi_power_on_ac: "on"
 power_wifi_power_on_bat: "on"
 power_bluetooth_power_on_ac: "on"

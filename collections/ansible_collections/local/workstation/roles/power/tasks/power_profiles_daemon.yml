@@ -1,0 +1,80 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# Power Profiles Daemon Configuration
+# Recommended for Fedora Workstation and Laptops
+# =============================================================================
+
+- name: Check if power-profiles-daemon is installed
+  ansible.builtin.command: rpm -q power-profiles-daemon
+  register: power_ppd_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - power
+    - power-profiles-daemon
+
+- name: Install power-profiles-daemon
+  ansible.builtin.dnf:
+    name: power-profiles-daemon
+    state: present
+  become: true
+  when: power_ppd_check.rc != 0
+  tags:
+    - power
+    - power-profiles-daemon
+
+- name: Ensure power-profiles-daemon is enabled and running
+  ansible.builtin.systemd:
+    name: power-profiles-daemon
+    state: started
+    enabled: true
+  become: true
+  tags:
+    - power
+    - power-profiles-daemon
+
+- name: Set power profile to balanced on AC
+  ansible.builtin.command: powerprofilesctl set {{ power_profile_on_ac }}
+  when: power_profile_on_ac is defined
+  changed_when: false
+  failed_when: false
+  tags:
+    - power
+    - power-profiles-daemon
+
+- name: Set power profile to power-saver on battery
+  ansible.builtin.command: powerprofilesctl set {{ power_profile_on_battery }}
+  when:
+    - power_profile_on_battery is defined
+    - ansible_facts.battery_present is defined
+    - ansible_facts.battery_present
+  changed_when: false
+  failed_when: false
+  tags:
+    - power
+    - power-profiles-daemon
+
+- name: Display power profiles daemon status
+  ansible.builtin.command: powerprofilesctl
+  register: power_ppd_status
+  changed_when: false
+  failed_when: false
+  tags:
+    - power
+    - power-profiles-daemon
+
+- name: Show power profiles daemon configuration
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "Power Profiles Daemon Status"
+      - "=========================================="
+      - "{{ power_ppd_status.stdout_lines | default(['Not available'], true) }}"
+      - "=========================================="
+      - "Available profiles: balanced, power-saver, performance"
+      - "Change profile: powerprofilesctl set <profile>"
+      - "=========================================="
+  tags:
+    - power
+    - power-profiles-daemon

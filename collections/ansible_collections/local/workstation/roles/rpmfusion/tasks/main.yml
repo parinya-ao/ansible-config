@@ -1,0 +1,130 @@
+---
+# SPDX-License-Identifier: MIT-0
+# tasks file for RPM Fusion role
+
+- name: Display RPM Fusion configuration
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "RPM Fusion Repository Setup"
+      - "=========================================="
+      - "Fedora Version: {{ ansible_facts.distribution_version }}"
+      - "Enable Free Repo: {{ rpmfusion_enable_free }}"
+      - "Enable Non-Free Repo: {{ rpmfusion_enable_nonfree }}"
+      - "Install Tainted Firmware: {{ rpmfusion_install_tainted }}"
+      - "Install AppStream Metadata: {{ rpmfusion_install_appstream }}"
+      - "=========================================="
+  tags:
+    - rpmfusion
+    - always
+
+- name: Check if RPM Fusion Free repository is already installed
+  ansible.builtin.stat:
+    path: /etc/yum.repos.d/rpmfusion-free.repo
+  register: rpmfusion_free_check
+  changed_when: false
+  tags:
+    - rpmfusion
+    - repositories
+
+- name: Install RPM Fusion Free repository
+  ansible.builtin.dnf:
+    name: "{{ rpmfusion_free_url }}"
+    state: present
+    disable_gpg_check: false
+  when:
+    - rpmfusion_enable_free | bool
+    - not rpmfusion_free_check.stat.exists
+  become: true
+  tags:
+    - rpmfusion
+    - repositories
+
+- name: Check if RPM Fusion Non-Free repository is already installed
+  ansible.builtin.stat:
+    path: /etc/yum.repos.d/rpmfusion-nonfree.repo
+  register: rpmfusion_nonfree_check
+  changed_when: false
+  tags:
+    - rpmfusion
+    - repositories
+
+- name: Install RPM Fusion Non-Free repository
+  ansible.builtin.dnf:
+    name: "{{ rpmfusion_nonfree_url }}"
+    state: present
+    disable_gpg_check: false
+  when:
+    - rpmfusion_enable_nonfree | bool
+    - not rpmfusion_nonfree_check.stat.exists
+  become: true
+  tags:
+    - rpmfusion
+    - repositories
+
+- name: Install tainted firmware repository
+  ansible.builtin.dnf:
+    name: "{{ rpmfusion_tainted_package }}"
+    state: present
+  when:
+    - rpmfusion_install_tainted | bool
+    - rpmfusion_enable_nonfree | bool
+    - rpmfusion_nonfree_check.stat.exists
+  become: true
+  tags:
+    - rpmfusion
+    - firmware
+
+- name: Install non-free firmware packages from tainted repository
+  ansible.builtin.dnf:
+    name: "*-firmware"
+    state: present
+    enablerepo: "rpmfusion-nonfree-tainted"
+  when:
+    - rpmfusion_install_tainted | bool
+    - rpmfusion_enable_nonfree | bool
+    - rpmfusion_nonfree_check.stat.exists
+  become: true
+  tags:
+    - rpmfusion
+    - firmware
+
+- name: Install AppStream metadata packages
+  ansible.builtin.dnf:
+    name: "{{ rpmfusion_appstream_packages }}"
+    state: present
+  when:
+    - rpmfusion_install_appstream | bool
+    - rpmfusion_enable_free | bool
+    - rpmfusion_enable_nonfree | bool
+    - rpmfusion_free_check.stat.exists
+    - rpmfusion_nonfree_check.stat.exists
+  become: true
+  tags:
+    - rpmfusion
+    - appstream
+
+- name: Refresh DNF metadata
+  ansible.builtin.command: dnf makecache
+  when:
+    - rpmfusion_free_check.stat.exists or rpmfusion_nonfree_check.stat.exists
+  become: true
+  changed_when: false
+  tags:
+    - rpmfusion
+    - cache
+
+- name: Display RPM Fusion setup completion
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "RPM Fusion Setup Complete"
+      - "=========================================="
+      - "Free Repository: {{ 'Installed' if rpmfusion_free_check.stat.exists else 'Not Installed' }}"
+      - "Non-Free Repository: {{ 'Installed' if rpmfusion_nonfree_check.stat.exists else 'Not Installed' }}"
+      - "Tainted Firmware: {{ 'Enabled' if rpmfusion_install_tainted | bool else 'Disabled' }}"
+      - "AppStream Metadata: {{ 'Installed' if rpmfusion_install_appstream | bool else 'Disabled' }}"
+      - "=========================================="
+  tags:
+    - rpmfusion
+    - always

@@ -1,0 +1,33 @@
+---
+# SPDX-License-Identifier: MIT-0
+# Default variables for SSH role
+
+# SSH directory path
+ssh_dir: "{{ ansible_env.HOME }}/.ssh"
+
+# SSH key type
+ssh_key_type: "ed25519"
+
+# SSH key file paths
+ssh_private_key: "{{ ssh_dir }}/id_{{ ssh_key_type }}"
+ssh_public_key: "{{ ssh_dir }}/id_{{ ssh_key_type }}.pub"
+ssh_authorized_keys: "{{ ssh_dir }}/authorized_keys"
+
+# SSH directory permissions
+ssh_dir_mode: "0700"
+
+# SSH file permissions
+ssh_private_key_mode: "0600"
+ssh_public_key_mode: "0644"
+ssh_authorized_keys_mode: "0600"
+
+# Create SSH directory if it doesn't exist
+ssh_create_dir: true
+
+# Generate SSH key if it doesn't exist
+ssh_generate_key: false
+ssh_key_comment: "{{ ansible_facts.user_id }}@{{ ansible_facts.fqdn }}"
+ssh_key_size: 4096
+
+# Backup existing keys before generating new ones
+ssh_backup_existing_keys: true

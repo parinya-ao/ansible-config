@@ -6,6 +6,7 @@
   ansible.builtin.stat:
     path: "{{ developer_target_home }}/Android/Sdk/cmdline-tools/latest/bin/sdkmanager"
   register: developer_android_sdk_check
+  become: false
   tags:
     - android
     - mobile
@@ -39,26 +40,6 @@
     - android
     - mobile
 
-- name: Remove all OpenJDK packages
-  ansible.builtin.dnf:
-    name:
-      - java-21-openjdk
-      - java-21-openjdk-devel
-      - java-21-openjdk-headless
-      - java-25-openjdk
-      - java-25-openjdk-devel
-      - java-25-openjdk-headless
-      - java-25-openjdk-crypto-adapter
-      - java-latest-openjdk
-      - java-latest-openjdk-devel
-      - java-latest-openjdk-headless
-    state: absent
-  become: true
-  failed_when: false
-  tags:
-    - android
-    - mobile
-
 - name: Install Android SDK dependencies
   ansible.builtin.dnf:
     name:
@@ -70,6 +51,9 @@
   tags:
     - android
     - mobile
+
+# Note: We don't remove OpenJDK packages as they can coexist with Temurin
+# The alternatives system below ensures Temurin is used by default
 
 - name: Check current Java alternative
   ansible.builtin.shell:
