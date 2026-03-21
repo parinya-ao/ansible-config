@@ -20,7 +20,7 @@ system_min_disk_mb: 1000
 # DNF configuration
 dnf_max_retries: 3
 dnf_retry_delay: 5
-dnf_timeout_seconds: 300
+# No timeout on DNF operations - allows long-running updates to complete
 
 # -----------------------------------------------------------------------------
 # Ansible Bootstrap Configuration

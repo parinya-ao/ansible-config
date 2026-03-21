@@ -35,6 +35,7 @@ common_dnf_metadata_expire: "6h"
 common_dnf_deltarpm: "False"
 
 # DNF retry settings (for network resilience)
+# No timeout is set - allows long-running updates to complete
 common_dnf_retries: 3
 common_dnf_delay: 10
 
@@ -64,6 +65,7 @@ common_base_packages:
   - p7zip-plugins
   - unrar
   - lm_sensors
+  - distrobox
 
 # Additional packages (extend this list in your playbook)
 common_extra_packages: []
