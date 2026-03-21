@@ -17,21 +17,23 @@
     state: present
 
 - name: "GATHER: Check current XDG directories configuration"
-  ansible.builtin.shell: |
-    set -o pipefail
-    if [ -f "{{ locale_real_home }}/.config/user-dirs.dirs" ]; then
-      cat "{{ locale_real_home }}/.config/user-dirs.dirs"
-    else
-      echo "No XDG configuration file found"
-    fi
-  register: locale_xdg_current_dirs
-  changed_when: false
+  ansible.builtin.slurp:
+    src: "{{ locale_real_home }}/.config/user-dirs.dirs"
+  register: locale_xdg_current_raw
   failed_when: false
+  changed_when: false
+  become: false
+
+- name: "GATHER: Parse current XDG configuration"
+  ansible.builtin.set_fact:
+    locale_xdg_current_content: >-
+      {{ (locale_xdg_current_raw.content | b64decode) if locale_xdg_current_raw.content is defined else '' }}
+  changed_when: false
   become: false
 
 - name: "GATHER: Display current XDG directories"
   ansible.builtin.debug:
-    msg: "{{ locale_xdg_current_dirs.stdout_lines | default(['Failed: Unable to retrieve XDG directories']) }}"
+    msg: "{{ locale_xdg_current_content.split('\n') | select('match', '^[^#]') | list | default(['No XDG configuration found']) }}"
 
 - name: "STATE: Check for localized directories in home"
   ansible.builtin.stat:
@@ -57,6 +59,13 @@
 
     # Check if source directory exists and is accessible
     if [ ! -d "$src_dir" ] || [ ! -r "$src_dir" ] || [ ! -x "$src_dir" ]; then
+      echo "Source directory not accessible, skipping"
+      exit 0
+    fi
+
+    # Check if directories are the same (already migrated)
+    if [ "$src_dir" = "$dst_dir" ]; then
+      echo "Source and destination are the same, skipping"
       exit 0
     fi
 
@@ -65,14 +74,18 @@
       # Use rsync for more robust copying, then remove source
       rsync -a --remove-source-files "$src_dir/" "$dst_dir/" 2>/dev/null || \
       mv -f "$src_dir"/* "$dst_dir/" 2>/dev/null || true
+      echo "Content moved"
+    else
+      echo "Source directory empty, nothing to move"
     fi
   loop: "{{ locale_localized_dir_checks.results }}"
   when:
     - item.stat is defined
     - item.stat.exists | default(false)
     - locale_real_home != '/root'
+    - item.item.name != item.item.target
   register: locale_move_result
-  changed_when: locale_move_result.rc == 0
+  changed_when: "'Content moved' in locale_move_result.stdout"
   failed_when: false
   become: false
 
@@ -85,6 +98,7 @@
     - item.stat is defined
     - item.stat.exists | default(false)
     - locale_real_home != '/root'
+    - item.item.name != item.item.target
   become: false
   failed_when: false
 
@@ -122,17 +136,13 @@
   become: false
 
 - name: "VERIFY: Display updated XDG directories"
-  ansible.builtin.shell: |
-    if [ -f "{{ locale_real_home }}/.config/user-dirs.dirs" ]; then
-      cat "{{ locale_real_home }}/.config/user-dirs.dirs"
-    else
-      echo "No XDG configuration file found"
-    fi
-  register: locale_xdg_updated_dirs
+  ansible.builtin.slurp:
+    src: "{{ locale_real_home }}/.config/user-dirs.dirs"
+  register: locale_xdg_updated_raw
   changed_when: false
   failed_when: false
   become: false
 
 - name: "VERIFY: Show updated XDG configuration"
   ansible.builtin.debug:
-    msg: "{{ locale_xdg_updated_dirs.stdout_lines | default(['Failed: Unable to retrieve updated XDG configuration']) }}"
+    msg: "{{ ((locale_xdg_updated_raw.content | b64decode) if locale_xdg_updated_raw.content is defined else 'No configuration available').split('\n') | select('match', '^[^#]') | list }}"

@@ -7,6 +7,27 @@
 # Ensures consistent debugging and log output in English
 # =============================================================================
 
+- name: "GATHER: Check if /etc/profile.d/locale.sh exists"
+  ansible.builtin.stat:
+    path: /etc/profile.d/locale.sh
+  register: locale_profile_stat
+  changed_when: false
+  failed_when: false
+
+- name: "GATHER: Read current /etc/profile.d/locale.sh"
+  ansible.builtin.slurp:
+    src: /etc/profile.d/locale.sh
+  register: locale_profile_current_raw
+  failed_when: false
+  changed_when: false
+  when: locale_profile_stat.stat.exists | default(false)
+
+- name: "GATHER: Parse current profile locale content"
+  ansible.builtin.set_fact:
+    locale_profile_current_content: >-
+      {{ (locale_profile_current_raw.content | b64decode) if locale_profile_current_raw.content is defined else '' }}
+  changed_when: false
+
 - name: "STATE: System-wide locale profile must exist"
   ansible.builtin.copy:
     dest: /etc/profile.d/locale.sh
@@ -34,6 +55,19 @@
     insertafter: EOF
     mode: "0644"
 
+- name: "GATHER: Check current /etc/bashrc for locale block"
+  ansible.builtin.slurp:
+    src: /etc/bashrc
+  register: locale_bashrc_current_raw
+  failed_when: false
+  changed_when: false
+
+- name: "GATHER: Parse current bashrc content"
+  ansible.builtin.set_fact:
+    locale_bashrc_current_content: >-
+      {{ (locale_bashrc_current_raw.content | b64decode) if locale_bashrc_current_raw.content is defined else '' }}
+  changed_when: false
+
 - name: "STATE: Configure bashrc locale for interactive shells"
   ansible.builtin.blockinfile:
     path: /etc/bashrc
@@ -50,7 +84,14 @@
     backup: true
   register: locale_bashrc_config
 
-- name: "STATE: Ensure fish config directory exists"
+- name: "GATHER: Check if fish config exists"
+  ansible.builtin.stat:
+    path: /etc/fish/config.fish
+  register: locale_fish_stat
+  failed_when: false
+  changed_when: false
+
+- name: "STATE: Ensure /etc/fish config directory exists"
   ansible.builtin.file:
     path: /etc/fish
     state: directory
@@ -75,6 +116,7 @@
     backup: true
   register: locale_fish_config
   failed_when: false
+  when: locale_fish_stat.stat.exists | default(false)
 
 - name: "STATE: Ensure systemd user environment directory exists"
   ansible.builtin.file:
@@ -84,6 +126,14 @@
     recurse: true
   become: false
   failed_when: false
+
+- name: "GATHER: Check current systemd user environment"
+  ansible.builtin.stat:
+    path: "{{ locale_real_home }}/.config/environment.d/locale.conf"
+  register: locale_systemd_env_stat
+  failed_when: false
+  changed_when: false
+  become: false
 
 - name: "STATE: Configure systemd user environment"
   ansible.builtin.copy:
