@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT-0
 # =============================================================================
 # TLP Configuration - Managed by Ansible
+# Optimized for Intel-based Laptops and Desktops
 # Do not edit manually; changes will be overwritten
 # =============================================================================
 
@@ -16,12 +17,19 @@ CPU_SCALING_GOVERNOR_ON_BAT={{ power_cpu_scaling_governor_on_bat }}
 CPU_ENERGY_PERF_POLICY_ON_AC={{ power_cpu_energy_perf_policy_on_ac }}
 CPU_ENERGY_PERF_POLICY_ON_BAT={{ power_cpu_energy_perf_policy_on_bat }}
 
-# CPU Boost (Intel/AMD)
+# CPU Boost (Intel/AMD) - Disable on battery for power saving
 CPU_BOOST_ON_AC={{ power_cpu_boost_on_ac }}
 CPU_BOOST_ON_BAT={{ power_cpu_boost_on_bat }}
 
+# CPU frequency scaling (Intel P-State)
+# For Intel 12th/13th gen and newer
+CPU_MIN_PERF_ON_AC=0
+CPU_MAX_PERF_ON_AC=100
+CPU_MIN_PERF_ON_BAT=0
+CPU_MAX_PERF_ON_BAT=80
+
 # -----------------------------------------------------------------------------
-# Battery Charge Thresholds (ThinkPad and supported laptops)
+# Battery Charge Thresholds (Supported laptops)
 # Set to 0 to disable
 {% if power_start_charge_thresh_bat0 > 0 %}
 START_CHARGE_THRESH_BAT0={{ power_start_charge_thresh_bat0 }}
@@ -34,6 +42,11 @@ STOP_CHARGE_THRESH_BAT0={{ power_stop_charge_thresh_bat0 }}
 DISK_APM_LEVEL_ON_AC="{{ power_disk_apm_level_on_ac }}"
 DISK_APM_LEVEL_ON_BAT="{{ power_disk_apm_level_on_bat }}"
 
+# NVMe power saving (NVMe SSD)
+# Aggressive power saving on battery
+NVME_POWER_POLICY_ON_AC=performance
+NVME_POWER_POLICY_ON_BAT=powersave
+
 # -----------------------------------------------------------------------------
 # WiFi Power Saving
 # -----------------------------------------------------------------------------
@@ -42,23 +55,36 @@ WIFI_PWR_ON_BAT={{ power_wifi_pwr_on_bat }}
 
 # -----------------------------------------------------------------------------
 # PCIe Active State Power Management (ASPM)
+# Critical for power savings on laptops
 # -----------------------------------------------------------------------------
 PCIE_ASPM_ON_AC={{ power_pcie_aspm_on_ac }}
 PCIE_ASPM_ON_BAT={{ power_pcie_aspm_on_bat }}
 
 # -----------------------------------------------------------------------------
 # USB Auto Suspension
+# Laptops with multiple USB-C ports - be careful with suspension
 # -----------------------------------------------------------------------------
 USB_AUTOSUSPEND={{ power_usb_autosuspend }}
 {% if power_usb_blacklist != "" %}
 USB_BLACKLIST="{{ power_usb_blacklist }}"
 {% endif %}
 
+# Don't suspend USB devices that are in use
+USB_AUTOSUSPEND_IGNORE_DEVICES=audio
+
 # -----------------------------------------------------------------------------
 # Audio Power Saving
 # -----------------------------------------------------------------------------
 SOUND_POWER_SAVE_ON_AC={{ power_sound_power_save_on_ac }}
 SOUND_POWER_SAVE_ON_BAT={{ power_sound_power_save_on_bat }}
+
+# -----------------------------------------------------------------------------
+# Graphics Power Saving (Intel Iris Xe)
+# -----------------------------------------------------------------------------
+# Enable RC6 power saving for Intel graphics
+INTEL_GPU_RC6_ON_BAT=1
+INTEL_GPU_FREQ_MIN_ON_BAT=0
+INTEL_GPU_FREQ_MAX_ON_BAT=800
 
 # -----------------------------------------------------------------------------
 # RAID Power Saving
@@ -73,3 +99,20 @@ WIFI_PWR_ON_AC={{ power_wifi_power_on_ac }}
 WIFI_PWR_ON_BAT={{ power_wifi_power_on_bat }}
 BLUETOOTH_POWER_ON_AC={{ power_bluetooth_power_on_ac }}
 BLUETOOTH_POWER_ON_BAT={{ power_bluetooth_power_on_bat }}
+
+# -----------------------------------------------------------------------------
+# Laptop Specific Optimizations
+# -----------------------------------------------------------------------------
+
+# Processor power limits (PL1/PL2)
+# Reduce power limits on battery for better battery life
+PROC_THROTTLE_ON_BAT=1
+
+# Runtime PM for devices
+RUNTIME_PM_ON_AC=auto
+RUNTIME_PM_ON_BAT=auto
+
+# SATA link power management (if applicable)
+SATA_LINKPWR_ON_AC=max_performance
+SATA_LINKPWR_ON_BAT=min_power
+

@@ -1,0 +1,74 @@
+---
+# SPDX-License-Identifier: MIT-0
+# =============================================================================
+# thermald Configuration for Intel CPUs
+# Prevents CPU overheating and improves power efficiency
+# =============================================================================
+
+- name: Check if thermald is installed
+  ansible.builtin.command: rpm -q thermald
+  register: power_thermald_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - power
+    - thermald
+
+- name: Install thermald
+  ansible.builtin.dnf:
+    name: thermald
+    state: present
+  become: true
+  when: power_thermald_check.rc != 0
+  tags:
+    - power
+    - thermald
+
+- name: Check if thermald service is available
+  ansible.builtin.systemd:
+    name: thermald
+  register: power_thermald_service
+  failed_when: false
+  changed_when: false
+  tags:
+    - power
+    - thermald
+
+- name: Enable and start thermald
+  ansible.builtin.systemd:
+    name: thermald
+    state: started
+    enabled: true
+  become: true
+  when: power_thermald_service.exists | default(false)
+  tags:
+    - power
+    - thermald
+
+- name: Display thermald status
+  ansible.builtin.command: systemctl status thermald --no-pager
+  register: power_thermald_status
+  changed_when: false
+  failed_when: false
+  when: power_thermald_service.exists | default(false)
+  tags:
+    - power
+    - thermald
+
+- name: Show thermald configuration summary
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "thermald Status"
+      - "=========================================="
+      - "thermald is {{ 'running' if power_thermald_service.exists | default(false) else 'not available' }}"
+      - "Purpose: Prevents Intel CPU overheating"
+      - "Improves power efficiency by managing thermal throttling"
+      - "=========================================="
+      - "Verification:"
+      - "  systemctl status thermald"
+      - "  journalctl -u thermald -f"
+      - "=========================================="
+  tags:
+    - power
+    - thermald

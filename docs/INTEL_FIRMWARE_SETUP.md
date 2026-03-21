@@ -17,7 +17,7 @@ This configuration is tested and optimized for:
 - **Intel Iris Xe Graphics** (11th Gen and newer)
 - **Intel UHD Graphics** (8th-10th Gen)
 - **Intel HD Graphics** (older generations)
-- Framework Laptop 13 with Intel processors
+- Intel-based laptops and desktops
 
 ## Quick Start
 
@@ -313,7 +313,7 @@ multimedia_auto_detect_gpu: true             # Auto-detect GPU vendor
 - [Intel Media Driver GitHub](https://github.com/intel/media-driver)
 - [VA-API Documentation](https://www.freedesktop.org/wiki/Software/vaapi/)
 - [Fedora Multimedia Wiki](https://fedoraproject.org/wiki/Multimedia)
-- [Framework Laptop 13 Linux Guide](https://frame.work/docs/linux)
+- [Fedora Workstation Linux Guide](https://docs.fedoraproject.org/en-US/workstation/)
 
 ## License
 

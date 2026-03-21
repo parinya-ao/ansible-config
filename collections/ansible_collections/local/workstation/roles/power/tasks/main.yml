@@ -1,14 +1,50 @@
 ---
 # SPDX-License-Identifier: MIT-0
 # =============================================================================
-# power role - TLP power management for Fedora Workstations
+# power role - Power management for Fedora Workstations
+# Supports: power-profiles-daemon (default) or TLP
 # =============================================================================
 
-- name: Fail if power_install_tlp is not set
-  ansible.builtin.fail:
-    msg: "power_install_tlp must be set to true or false"
-  when: power_install_tlp is not defined
+- name: Display power management configuration
+  ansible.builtin.debug:
+    msg:
+      - "=========================================="
+      - "Power Management Configuration"
+      - "=========================================="
+      - "Mode: {{ power_management_mode }}"
+      - "Install thermald: {{ power_install_thermald }}"
+      - "Install powertop: {{ power_install_powertop }}"
+      - "Powertop Auto-tune: {{ power_powertop_auto_tune }}"
+      - "TLP Enabled: {{ power_install_tlp }}"
+      - "=========================================="
+  tags:
+    - power
+    - always
 
-- name: Import tlp_install.yml
+- name: Import power-profiles-daemon configuration
+  ansible.builtin.import_tasks: power_profiles_daemon.yml
+  when: power_management_mode == "power-profiles-daemon"
+  tags:
+    - power
+    - power-profiles-daemon
+
+- name: Import TLP configuration
   ansible.builtin.import_tasks: tlp_install.yml
-  when: power_install_tlp | bool
+  when: power_management_mode == "tlp"
+  tags:
+    - power
+    - tlp
+
+- name: Import thermald configuration
+  ansible.builtin.import_tasks: thermald.yml
+  when: power_install_thermald | bool
+  tags:
+    - power
+    - thermald
+
+- name: Import powertop configuration
+  ansible.builtin.import_tasks: powertop.yml
+  when: power_install_powertop | bool
+  tags:
+    - power
+    - powertop

@@ -81,8 +81,9 @@ lspci -k | grep -A 3 -i network
 
 ## Use Cases
 
-### Framework Laptop 13 (Intel)
-This role is particularly useful for Framework Laptop 13 with Intel Iris Xe graphics, as it ensures all Wi-Fi and Bluetooth firmware is properly installed.
+### Intel-based Laptops
+
+This role is particularly useful for laptops with Intel Iris Xe graphics, as it ensures all Wi-Fi and Bluetooth firmware is properly installed.
 
 ### Laptops with Hybrid Graphics
 For laptops with NVIDIA Optimus or AMD switchable graphics, this role installs the necessary firmware for both GPUs.
