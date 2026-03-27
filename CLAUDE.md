@@ -25,11 +25,10 @@ collections/             # Ansible collections
           ├── git/            # Git + SSH signing
           ├── stability/      # dnf-automatic, firewalld, sysctl
           ├── developer/      # Compilers, runtimes, SDKs
-          ├── font/           # Programming + Thai fonts
-          ├── power/          # TLP power management
           ├── multimedia/     # Codecs, hardware acceleration
-          ├── embed/          # ARM GCC, ESP-IDF, serial tools
-          └── docker/         # Docker/Podman setup
+          └── embed/          # ARM GCC, ESP-IDF, serial tools
+
+**Note**: Ultramarine Linux includes Podman pre-installed.
 .github/workflows/       # CI: security scan, lint, idempotence test
 ```
 
@@ -56,7 +55,7 @@ collections/             # Ansible collections
 ./init.sh
 
 # Run specific roles
-ansible-playbook site.yml -i inventory/hosts --tags developer,font
+ansible-playbook site.yml -i inventory/hosts --tags developer
 
 # Syntax check
 ansible-playbook --syntax-check site.yml
@@ -125,7 +124,7 @@ For detailed context, read these files when working on specific areas:
 
 1. **Checkov alerts**: 5 warnings for webhook URLs (user-configurable via variables)
 2. **Idempotence**: Locale role has minor issues (10 changed tasks allowed)
-3. **Molecule tests**: Disabled in CI (Podman-in-Docker limitation)
+3. **Molecule tests**: Podman-based testing configured
 4. **Systemd tasks**: Skip in CI containers (no PID 1 systemd)
 
 ## Quick Reference

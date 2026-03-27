@@ -1,8 +1,0 @@
----
-# SPDX-License-Identifier: MIT-0
-# Host-specific variables for Docker test container
-
-container_env:
-  TEST_HOST: "molecule-fedora-docker"
-  TEST_RUNTIME: "docker"
-  DOCKER_TEST_VAR: "from_docker_host_vars"

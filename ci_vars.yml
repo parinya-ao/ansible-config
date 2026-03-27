@@ -32,9 +32,6 @@ common_skip_disk_check: true
 # =============================================================================
 # Desktop Role Variables
 # =============================================================================
-# Disable Flatpak font access (no GUI in CI)
-desktop_enable_flatpak_font_access: false
-
 # Reduce installed Flatpak apps in CI
 desktop_flatpak_apps:
   - com.github.MarkText
@@ -47,13 +44,6 @@ developer_install_android_sdk: false
 
 # Skip Flutter in CI (large download)
 developer_install_flutter: false
-
-# =============================================================================
-# Docker Role Variables
-# =============================================================================
-# Use DNF5 native for Fedora Rawhide (default package manager)
-docker_use_fedora_native: true
-docker_use_dnf5: true
 
 # =============================================================================
 # Multimedia Role Variables
@@ -85,12 +75,6 @@ wifi_disable_usb_autosuspend: false  # Skip USB config in CI
 stability_dnf_automatic_enable: false  # Skip timer enable (daemon-reload fails in containers)
 stability_firewalld_enable: false  # Skip firewalld (requires systemd)
 stability_snapper_enable: false  # Skip snapper (requires systemd timers, Btrfs not in CI)
-
-# =============================================================================
-# Power Role Variables
-# =============================================================================
-# Disable TLP in CI (no battery in containers)
-power_install_tlp: false
 
 # =============================================================================
 # Embed Role Variables (STM32CubeMX removed)

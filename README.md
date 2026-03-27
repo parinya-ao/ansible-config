@@ -21,17 +21,17 @@
 
 ## Overview
 
-This playbook automates the setup of a Fedora workstation for development work. It installs and configures:
+This playbook automates the setup of a Fedora/Ultramarine workstation for development work. It installs and configures:
 
 - System optimizations and core utilities
 - Development tools and runtimes
 - Desktop applications and settings
-- Fonts including Thai language support
-- Docker and container tools
 - Multimedia codecs and hardware acceleration
 
-**Target OS**: Fedora Linux (tested on Fedora 41+)
+**Target OS**: Fedora Linux / Ultramarine Linux (tested on Fedora 41+)
 **Execution**: Local provisioning via `ansible_connection=local`
+
+**Note**: Ultramarine Linux includes Podman (container management) pre-installed by default.
 
 ## What It Covers
 
@@ -42,8 +42,6 @@ This playbook automates the setup of a Fedora workstation for development work. 
 | **git** | Git configuration with SSH key signing |
 | **stability** | Fedora stability and hardening |
 | **developer** | Compilers, Rust, Go, Node.js, Bun, Python (uv), Flutter, Android SDK |
-| **font** | JetBrains Mono, Fira Code, Inter, Sarabun (Thai) |
-| **power** | TLP power management (disabled by default) |
 | **multimedia** | Codecs, FFmpeg, hardware video acceleration |
 
 ## Prerequisites
@@ -66,7 +64,7 @@ ansible-galaxy collection install -r requirements.yml
 ansible-playbook site.yml -i inventory/hosts
 
 # Run specific roles only (by tag)
-ansible-playbook site.yml -i inventory/hosts --tags font,developer
+ansible-playbook site.yml -i inventory/hosts --tags developer
 
 # Use init script (installs Ansible if missing)
 ./init.sh
@@ -107,7 +105,6 @@ ansible-config/
 │                   ├── git/
 │                   ├── stability/
 │                   ├── developer/
-│                   ├── font/
 │                   ├── power/
 │                   └── multimedia/
 ├── .github/workflows/      # CI/CD pipelines
@@ -122,12 +119,9 @@ ansible-config/
 Each role has configurable defaults in `collections/ansible_collections/local/workstation/roles/<name>/defaults/main.yml`:
 
 ```yaml
-# Example: font role defaults
-font_sarabun_install_enabled: true    # Install Sarabun Thai font
-font_install_enabled: true            # Main font toggle
-
 # Example: developer role defaults
 developer_install_flutter: false      # Install Flutter SDK
+developer_install_nodejs: true        # Install Node.js
 ```
 
 ### Feature Toggles
@@ -143,7 +137,7 @@ ansible-playbook site.yml -i inventory/hosts -e "developer_install_flutter=false
 
 ### Code Standards
 
-- **Naming**: Registered variables MUST use role prefix (e.g., `font_*`, `developer_*`)
+- **Naming**: Registered variables MUST use role prefix (e.g., `common_*`, `developer_*`, `locale_*`)
 - **License**: Use `SPDX-License-Identifier: MIT-0` in all new files
 - **Structure**: Follow standard Ansible role layout (`tasks/`, `defaults/`, `handlers/`, etc.)
 
@@ -160,11 +154,11 @@ ansible-lint --profile production
 ### Running Specific Roles
 
 ```bash
-# Run only font configuration
-ansible-playbook site.yml -i inventory/hosts --tags font
-
 # Run developer setup only
 ansible-playbook site.yml -i inventory/hosts --tags developer
+
+# Run multimedia codec installation
+ansible-playbook site.yml -i inventory/hosts --tags multimedia
 ```
 
 ## Testing & CI

@@ -1,8 +1,9 @@
 ---
 # =============================================================================
 # Ansible Configuration Playbook
-# This playbook configures a Fedora workstation with development tools,
-# desktop environment, Docker, and fonts.
+# This playbook configures a Fedora/Ultramarine workstation with development
+# tools, desktop environment, and multimedia codecs.
+# Uses Podman for container management (Docker-native alternative).
 # =============================================================================
 
 - name: Setup localhost workstation
@@ -34,10 +35,8 @@
           - "  3. git        - Git configuration with SSH signing"
           - "  4. stability   - Fedora stability and hardening"
           - "  5. developer   - Development tools and runtimes"
-          - "  6. font        - Font installation"
-          - "  7. power       - TLP power management (disabled by default)"
-          - "  8. multimedia  - Multimedia codecs and video acceleration"
-          - "  9. embed       - Embedded development"
+          - "  6. multimedia  - Multimedia codecs and video acceleration"
+          - "  7. embed       - Embedded development"
           - "=========================================="
 
     - name: Display Ansible version
@@ -85,17 +84,6 @@
         - developer
         - development
 
-    - role: local.workstation.font
-      tags:
-        - font
-        - fonts
-
-    - role: local.workstation.power
-      tags:
-        - power
-        - tlp
-        - battery
-
     - role: local.workstation.multimedia
       tags:
         - multimedia
@@ -129,5 +117,4 @@
           - "   - node --version"
           - "   - cargo --version"
           - "3. Run 'flatpak list' to see installed apps"
-          - "4. Run 'fc-list' to see installed fonts"
           - "=========================================="
