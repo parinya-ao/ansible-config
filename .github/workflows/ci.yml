@@ -112,22 +112,27 @@ jobs:
           ANSIBLE_LINT_STRICT: "1"
 
   # =============================================================================
-  # STAGE 2: INTEGRATION TEST (Fedora Rawhide - Development Branch)
+  # STAGE 2: INTEGRATION TEST (Ultramarine Linux - Based on Fedora Rawhide)
   # =============================================================================
 
-  test-fedora:
-    name: Test on Fedora Rawhide
+  test-ultramarine:
+    name: Test on Ultramarine Linux
     runs-on: ubuntu-24.04
     needs: [security-scan, validate]
     timeout-minutes: 45
     permissions:
       contents: read
+    defaults:
+      run:
+        # Use bash instead of sh (minimal containers may not have /bin/sh symlinked)
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
-        # Test against Fedora Rawhide (rolling development branch)
-        fedora-version: ["rawhide"]
+        # Test against Ultramarine latest (based on Fedora Rawhide)
+        ultramarine-version: ["latest"]
     container:
+      # Use Ultramarine latest tag
       image: ghcr.io/ultramarine-linux/ultramarine:latest
       # Use standard Docker options for systemd support (not Podman's --systemd flag)
       options: --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --security-opt seccomp=unconfined
@@ -330,7 +335,7 @@ jobs:
         uses: actions/upload-artifact@main
         if: always()
         with:
-          name: ansible-logs-fedora-rawhide
+          name: ansible-logs-ultramarine
           path: |
             ansible_run.log
             idempotence.log
@@ -346,7 +351,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     if: always()
-    needs: [security-scan, validate, test-fedora]
+    needs: [security-scan, validate, test-ultramarine]
     permissions:
       contents: read
     steps:
@@ -355,15 +360,15 @@ jobs:
           echo "=== CI Pipeline Results ==="
           echo "Security Scan: ${{ needs.security-scan.result }}"
           echo "Lint & Syntax: ${{ needs.validate.result }}"
-          echo "Fedora Test:   ${{ needs.test-fedora.result }}"
+          echo "Ultramarine Test: ${{ needs.test-ultramarine.result }}"
           echo ""
 
           # All stages must pass
           if [[ "${{ needs.security-scan.result }}" == "success" ]] && \
              [[ "${{ needs.validate.result }}" == "success" ]] && \
-             [[ "${{ needs.test-fedora.result }}" == "success" ]]; then
+             [[ "${{ needs.test-ultramarine.result }}" == "success" ]]; then
               echo "✓ PASSED: All pipeline stages completed successfully"
-              echo "Fedora Rawhide is ready for production!"
+              echo "Ultramarine Linux is ready for production!"
               exit 0
           else
               echo "✗ FAILED: One or more pipeline stages failed"
@@ -378,7 +383,7 @@ jobs:
           echo "PIPELINE SUCCESS"
           echo "=========================================="
           echo "Your Ansible configuration has been"
-          echo "validated against Fedora Rawhide"
+          echo "validated against Ultramarine Linux"
           echo "=========================================="
 
       - name: Pipeline Failure Notification
