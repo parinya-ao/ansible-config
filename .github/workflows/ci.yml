@@ -206,7 +206,7 @@ jobs:
       # First run: Apply configuration
       - name: First Run (Apply Configuration)
         run: |
-          source .ansible-venv/bin/activate
+          . .ansible-venv/bin/activate
           echo "=== FIRST RUN STARTED ==="
 
           ansible-playbook playbook.yaml -i inventory \
@@ -224,7 +224,7 @@ jobs:
       # Idempotence check using JSON output for deterministic parsing
       - name: Idempotence Check
         run: |
-          source .ansible-venv/bin/activate
+          . .ansible-venv/bin/activate
           echo "=== IDEMPOTENCE CHECK STARTED ==="
 
           # Run playbook with JSON callback plugin output
@@ -272,7 +272,7 @@ jobs:
       # Verify critical services and configurations
       - name: Post-Run Verification
         run: |
-          source .ansible-venv/bin/activate
+          . .ansible-venv/bin/activate
 
           # Create verification playbook
           cat > verify.yml << 'EOF'
@@ -363,10 +363,10 @@ jobs:
           echo "Ultramarine Test: ${{ needs.test-ultramarine.result }}"
           echo ""
 
-          # All stages must pass
-          if [[ "${{ needs.security-scan.result }}" == "success" ]] && \
-             [[ "${{ needs.validate.result }}" == "success" ]] && \
-             [[ "${{ needs.test-ultramarine.result }}" == "success" ]]; then
+          # All stages must pass (POSIX sh compliant)
+          if [ "${{ needs.security-scan.result }}" = "success" ] && \
+             [ "${{ needs.validate.result }}" = "success" ] && \
+             [ "${{ needs.test-ultramarine.result }}" = "success" ]; then
               echo "✓ PASSED: All pipeline stages completed successfully"
               echo "Ultramarine Linux is ready for production!"
               exit 0
