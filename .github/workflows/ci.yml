@@ -128,7 +128,7 @@ jobs:
         # Test against Fedora Rawhide (rolling development branch)
         fedora-version: ["rawhide"]
     container:
-      image: fedora:${{ matrix.fedora-version }}
+      image: ghcr.io/ultramarine-linux/ultramarine:latest
       # Use standard Docker options for systemd support (not Podman's --systemd flag)
       options: --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --security-opt seccomp=unconfined
     steps:
