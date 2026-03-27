@@ -125,11 +125,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Test against Fedora latest (Ultramarine is based on Fedora)
-        fedora-version: ["41"]
+        # Test against Fedora Rawhide (Ultramarine is based on Fedora Rawhide)
+        fedora-version: ["rawhide"]
     container:
-      # Use Fedora 41 (Ultramarine is based on Fedora, has bash pre-installed)
-      image: fedora:41
+      # Use Fedora Rawhide (Ultramarine is based on Fedora Rawhide, has bash pre-installed)
+      image: fedora:rawhide
       # Use standard Docker options for systemd support (not Podman's --systemd flag)
       options: --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --security-opt seccomp=unconfined
     steps:
