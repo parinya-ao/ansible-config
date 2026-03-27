@@ -122,28 +122,24 @@ jobs:
     timeout-minutes: 45
     permissions:
       contents: read
-    defaults:
-      run:
-        # Use bash (installed via dnf in bootstrap step)
-        shell: bash
     strategy:
       fail-fast: false
       matrix:
-        # Test against Ultramarine latest (based on Fedora Rawhide)
-        ultramarine-version: ["latest"]
+        # Test against Fedora latest (Ultramarine is based on Fedora)
+        fedora-version: ["41"]
     container:
-      # Use Ultramarine latest tag
-      image: ghcr.io/ultramarine-linux/ultramarine:latest
+      # Use Fedora 41 (Ultramarine is based on Fedora, has bash pre-installed)
+      image: fedora:41
       # Use standard Docker options for systemd support (not Podman's --systemd flag)
       options: --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro --security-opt seccomp=unconfined
     steps:
       - name: Checkout Code
         uses: actions/checkout@main
 
-      # Install shell and basic utilities (minimal container doesn't include these)
-      - name: Install Shell and Basic Utilities
+      # Install required packages (Fedora minimal container doesn't include all needed tools)
+      - name: Install Required Packages
         run: |
-          dnf install -y bash coreutils findutils grep gawk sed
+          dnf install -y bash coreutils findutils grep gawk sed git python3 python3-pip
 
       # Cache Ansible Collections (deterministic by requirements.yml hash)
       - name: Cache Ansible Collections
