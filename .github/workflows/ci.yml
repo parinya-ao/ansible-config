@@ -182,7 +182,7 @@ jobs:
 
           # Create Python virtual environment
           python3 -m venv .ansible-venv
-          source .ansible-venv/bin/activate
+          . .ansible-venv/bin/activate
           pip install --upgrade pip
 
           # Install Ansible and dev tools
