@@ -124,8 +124,8 @@ jobs:
       contents: read
     defaults:
       run:
-        # Use bash instead of sh (minimal containers may not have /bin/sh symlinked)
-        shell: bash
+        # Use POSIX sh for maximum compatibility (minimal containers may not have bash/zsh)
+        shell: sh -e {0}
     strategy:
       fail-fast: false
       matrix:
