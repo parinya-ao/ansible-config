@@ -66,58 +66,6 @@
       loop_control:
         label: "{{ item.container.Name }}"
 
-- name: Create container instances - Secondary Docker
-  hosts: localhost
-  gather_facts: false
-  tasks:
-    - name: Validate docker group exists
-      ansible.builtin.assert:
-        that:
-          - groups['docker_containers'] is defined
-        fail_msg: "docker_containers group not found in inventory"
-
-    - name: Create Docker containers from inventory
-      community.docker.docker_container:
-        name: "{{ item }}"
-        image: "{{ hostvars[item]['container_image'] }}"
-        command: "{{ hostvars[item]['container_command'] | default('/sbin/init') }}"
-        privileged: "{{ hostvars[item]['container_privileged'] | default(false) }}"
-        capabilities: "{{ hostvars[item]['container_capabilities'] | default(omit) }}"
-        volumes: "{{ hostvars[item]['container_volumes'] | default(omit) }}"
-        tmpfs: "{{ hostvars[item]['container_tmpfs'] | default(omit) }}"
-        log_driver: "{{ hostvars[item]['container_log_driver'] | default('json-file') }}"
-        state: started
-        auto_remove: "{{ container_auto_remove | default(false) }}"
-        entrypoint: ""
-      register: docker_result
-      loop: "{{ groups['docker_containers'] | default([]) }}"
-      loop_control:
-        label: "{{ item }}"
-      when: groups['docker_containers'] is defined
-
-    - name: Verify Docker containers are running
-      ansible.builtin.include_tasks:
-        file: tasks/create-fail.yml
-      vars:
-        container_runtime: docker
-      when: >
-        item.container.State.ExitCode != 0 or
-        not item.container.State.Running
-      loop: "{{ docker_result.results | default([]) }}"
-      loop_control:
-        label: "{{ item.container.Name }}"
-
-    - name: Display Docker container info
-      ansible.builtin.debug:
-        msg: >-
-          Created Docker container: {{ item.container.Name }}
-          Image: {{ item.container.Config.Image }}
-          State: {{ item.container.State.Status }}
-          Running: {{ item.container.State.Running }}
-      loop: "{{ docker_result.results | default([]) }}"
-      loop_control:
-        label: "{{ item.container.Name }}"
-
 - name: Wait for all containers to be ready
   hosts: all_containers
   gather_facts: false

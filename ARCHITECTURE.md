@@ -550,7 +550,7 @@ yamllint -c .yamllint .
 | **TruffleHog** | Secret detection tool for Git repositories |
 | **Molecule** | Ansible testing framework for role testing |
 | **Podman** | Daemonless container engine (pre-installed in Ultramarine Linux) |
-| **Podman-compose** | Docker-compose alternative for Podman |
+| **Podman-compose** | Compose tool for Podman (docker-compose alternative) |
 | **Btrfs** | Copy-on-write filesystem with snapshot support |
 | **Snapper** | Btrfs snapshot management tool |
 | **sysctl** | Linux kernel parameter configuration |

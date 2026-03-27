@@ -3,7 +3,7 @@
 # Ansible Configuration Playbook
 # This playbook configures a Fedora/Ultramarine workstation with development
 # tools, desktop environment, and multimedia codecs.
-# Uses Podman for container management (Docker-native alternative).
+# Ultramarine Linux includes Podman pre-installed by default.
 # =============================================================================
 
 - name: Setup localhost workstation
