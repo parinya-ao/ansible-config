@@ -4,27 +4,23 @@ Fedora Workstation automation collection for Ansible.
 
 ## Description
 
-This collection provides roles for automating Fedora Workstation setup, including:
+This collection provides roles for automating Fedora/Ultramarine Workstation setup, including:
 
 - System configuration and optimization
 - Development tools and runtimes
 - Desktop environment setup
-- Font installation
-- Docker and container tools
-- Multimedia codecs
+
+**Note**: Ultramarine Linux includes pre-installed: Podman, Multimedia codecs, RPM Fusion
 
 ## Included Content
 
 ### Roles
 
-- `common` - Base system configuration (DNF, RPM Fusion, updates)
-- `locale` - English-only environment enforcement
+- `common` - Base system configuration (DNF, updates)
+- `locale` - English environment (input method)
 - `git` - Git configuration with SSH signing
 - `stability` - Fedora stability and hardening
 - `developer` - Development tools and runtimes
-- `font` - Font installation
-- `power` - TLP power management
-- `multimedia` - Multimedia codecs
 - `embed` - Embedded development tools
 
 ## Installation

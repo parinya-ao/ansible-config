@@ -36,11 +36,7 @@ This section provides a high-level overview of the project's directory and file 
 │                   ├── git/            # Git configuration with SSH signing
 │                   ├── stability/      # Fedora stability & hardening
 │                   ├── developer/      # Development tools & runtimes
-│                   ├── font/           # Font installation (incl. Thai)
-│                   ├── power/          # TLP power management
-│                   ├── multimedia/     # Codecs & video acceleration
-│                   ├── embed/          # Embedded development (ARM, ESP)
-│                   └── docker/         # Docker installation
+│                   └── embed/          # Embedded development (ARM, ESP)
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml              # Main CI/CD pipeline
@@ -78,7 +74,7 @@ This is an **Infrastructure-as-Code (IaC)** project, not a traditional applicati
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │                    playbook.yaml                         │  │
 │  │  - Defines execution order                               │  │
-│  │  - Applies 9 roles in sequence                           │  │
+│  │  - Applies 8 roles in sequence                           │  │
 │  └──────────────────────────────────────────────────────────┘  │
 └────────────────────────────┬────────────────────────────────────┘
                              │
@@ -89,10 +85,10 @@ This is an **Infrastructure-as-Code (IaC)** project, not a traditional applicati
 │  ┌──────────┐ ┌─────────┐ ┌─────┐ ┌──────────┐ ┌──────────┐   │
 │  │  common  │→│ locale  │→│ git │→│stability │→│developer │   │
 │  └──────────┘ └─────────┘ └─────┘ └──────────┘ └──────────┘   │
-│       ↓              ↓           ↓            ↓                │
-│  ┌──────────┐ ┌─────────┐ ┌──────────┐ ┌──────────┐          │
-│  │  font    │←│ power   │←│multimedia│←│  embed   │          │
-│  └──────────┘ └─────────┘ └──────────┘ └──────────┘          │
+│       ↓                                                         │
+│  ┌──────────┐                                                   │
+│  │  embed   │                                                   │
+│  └──────────┘                                                   │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
@@ -132,7 +128,7 @@ This is an **Infrastructure-as-Code (IaC)** project, not a traditional applicati
 - Jinja2 (templating)
 
 **Structure**:
-- **Roles**: Modular configuration units (common, developer, font, etc.)
+- **Roles**: Modular configuration units (common, developer, power, etc.)
 - **Galaxy Metadata**: `galaxy.yml` defines collection info and dependencies
 - **Runtime Metadata**: `meta/runtime.yml` defines Ansible version requirements
 
@@ -170,21 +166,7 @@ Each role is a self-contained unit of configuration with its own tasks, variable
 
 **Technologies**: DNF, SDKMAN, rustup, Flutter, Android SDK
 
-#### 3.2.3. font
-
-**Name**: Font Installation
-
-**Description**: Installs programming fonts and Thai language support.
-
-**Key Tasks**:
-- JetBrains Mono (COPR)
-- Fira Code, Inter fonts
-- Sarabun Thai fonts (from GitHub)
-- Font cache refresh
-
-**Technologies**: COPR, fontconfig
-
-#### 3.2.4. stability
+#### 3.2.3. stability
 
 **Name**: Fedora Stability & Hardening
 
@@ -195,7 +177,7 @@ Each role is a self-contained unit of configuration with its own tasks, variable
 - Level 2: Snapshot & Rollback (Snapper)
 - Level 3: Hardening (sysctl)
 
-#### 3.2.5. embed
+#### 3.2.4. embed
 
 **Name**: Embedded Development
 
@@ -207,7 +189,7 @@ Each role is a self-contained unit of configuration with its own tasks, variable
 - Serial debugging (minicom)
 - Dialout group configuration
 
-#### 3.2.6. locale
+#### 3.2.5. locale
 
 **Name**: Locale Configuration
 
@@ -218,7 +200,7 @@ Each role is a self-contained unit of configuration with its own tasks, variable
 - System locale configuration
 - XDG directory setup
 
-#### 3.2.7. git
+#### 3.2.6. git
 
 **Name**: Git Configuration
 
@@ -229,28 +211,17 @@ Each role is a self-contained unit of configuration with its own tasks, variable
 - SSH key generation
 - Commit signing configuration
 
-#### 3.2.8. power
+#### 3.2.7. embed
 
-**Name**: Power Management
+**Name**: Embedded Development Tools
 
-**Description**: TLP power management for laptops (disabled by default).
-
-**Key Tasks**:
-- TLP installation
-- power-profiles-daemon removal
-- TLP configuration
-
-#### 3.2.9. multimedia
-
-**Name**: Multimedia Codecs
-
-**Description**: Multimedia codec installation and hardware video acceleration.
+**Description**: Development tools for embedded systems programming.
 
 **Key Tasks**:
-- RPM Fusion multimedia packages
-- FFmpeg installation
-- Hardware acceleration (Intel/AMD)
-- OpenH264 (disabled by default)
+- ARM GCC toolchain installation
+- ESP-IDF framework
+- Serial communication tools
+- Python packages for embedded development
 
 ### 3.3. Bootstrap Script
 
@@ -307,9 +278,7 @@ Each role is a self-contained unit of configuration with its own tasks, variable
 **Purpose**: Third-party RPM repositories for packages not in official Fedora repos.
 
 **Repositories Used**:
-- `jetpack-io/fonts` - JetBrains Mono fonts
-- `b00f1nt/inter-fonts` - Inter fonts
-- `rpmfusion-free/nonfree` - Multimedia codecs
+- `rpmfusion-free/nonfree` - Pre-enabled in Ultramarine Linux
 
 **Integration Method**: DNF repository configuration
 
@@ -329,11 +298,10 @@ Each role is a self-contained unit of configuration with its own tasks, variable
 
 **Service**: GitHub
 
-**Purpose**: Downloading fonts and tools.
+**Purpose**: Downloading development tools and SDKs.
 
 **Used For**:
-- Sarabun fonts (from Thai font repository)
-- Android SDK command-line tools
+- Android SDK command-line tools (from Google)
 - Rust installer (rustup.rs)
 - Bun installer (bun.sh)
 - UV installer (astral.sh)
@@ -524,7 +492,7 @@ yamllint -c .yamllint .
 
 ### 9.1. Known Architectural Debts
 
-1. **Molecule Testing**: Currently disabled due to Podman-in-Docker compatibility issues in GitHub Actions. Need self-hosted runners or VM-based testing.
+1. **Molecule Testing**: Podman-based testing configured for GitHub Actions.
 
 2. **Idempotence**: Some roles (locale) have minor idempotence issues (10 changed tasks allowed in CI). Should be addressed for 100% idempotence.
 
@@ -580,7 +548,8 @@ yamllint -c .yamllint .
 | **Checkov** | Infrastructure-as-Code security scanning tool |
 | **TruffleHog** | Secret detection tool for Git repositories |
 | **Molecule** | Ansible testing framework for role testing |
-| **Podman** | Daemonless container engine (alternative to Docker) |
+| **Podman** | Daemonless container engine (pre-installed in Ultramarine Linux) |
+| **Podman-compose** | Compose tool for Podman (docker-compose alternative) |
 | **Btrfs** | Copy-on-write filesystem with snapshot support |
 | **Snapper** | Btrfs snapshot management tool |
 | **sysctl** | Linux kernel parameter configuration |

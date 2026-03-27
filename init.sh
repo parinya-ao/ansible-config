@@ -14,11 +14,13 @@
 #   ✓ Git configuration with SSH signing                                       #
 #   ✓ Stability and hardening                                                   #
 #   ✓ Developer tools                                                           #
-#   ✓ Font installation                                                         #
-#   ✓ Power management (TLP)                                                    #
-#   ✓ Multimedia codecs                                                         #
 #   ✓ Embedded development (ARM, ESP)                                           #
 #   ✗ NVIDIA drivers (DISABLED - enable manually if needed)                     #
+#   ✗ Fonts (using separate script)                                             #
+#   ✗ Power management (using system default)                                   #
+#   ✓ Podman (pre-installed in Ultramarine)                                     #
+#   ✓ Multimedia codecs (pre-installed in Ultramarine)                          #
+#   ✓ RPM Fusion (pre-enabled in Ultramarine)                                   #
 #################################################################################
 
 set -euo pipefail
@@ -81,9 +83,6 @@ configure_feature_flags() {
     export DEVELOPER_INSTALL_RUST="${DEVELOPER_INSTALL_RUST:-true}"
     export DEVELOPER_INSTALL_GO="${DEVELOPER_INSTALL_GO:-true}"
     export DEVELOPER_INSTALL_PYTHON="${DEVELOPER_INSTALL_PYTHON:-true}"
-
-    # Power role flags
-    export POWER_INSTALL_TLP="${POWER_INSTALL_TLP:-true}"
 
     # Multimedia role flags
     export MULTIMEDIA_INSTALL_CODECS="${MULTIMEDIA_INSTALL_CODECS:-true}"

@@ -15,7 +15,7 @@ class ExecutorPort(ABC):
     """Port for executing tests.
 
     Abstract interface that defines HOW tests should be executed.
-    Concrete implementations (MoleculeExecutor, DockerExecutor, etc.)
+    Concrete implementations (MoleculeExecutor, PodmanExecutor, etc.)
     are in the infrastructure layer.
     """
 

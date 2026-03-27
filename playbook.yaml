@@ -1,8 +1,9 @@
 ---
 # =============================================================================
 # Ansible Configuration Playbook
-# This playbook configures a Fedora workstation with development tools,
-# desktop environment, Docker, and fonts.
+# This playbook configures a Fedora/Ultramarine workstation with development
+# tools, desktop environment, and multimedia codecs.
+# Ultramarine Linux includes Podman pre-installed by default.
 # =============================================================================
 
 - name: Setup localhost workstation
@@ -30,14 +31,17 @@
         msg:
           - "Roles to be applied:"
           - "  1. common      - Base system configuration"
-          - "  2. locale      - English-only environment enforcement"
+          - "  2. locale      - English environment (input method)"
           - "  3. git        - Git configuration with SSH signing"
           - "  4. stability   - Fedora stability and hardening"
           - "  5. developer   - Development tools and runtimes"
-          - "  6. font        - Font installation"
-          - "  7. power       - TLP power management (disabled by default)"
-          - "  8. multimedia  - Multimedia codecs and video acceleration"
-          - "  9. embed       - Embedded development"
+          - "  6. embed       - Embedded development"
+          - "=========================================="
+          - "Note: Ultramarine Linux includes pre-installed:"
+          - "  - RPM Fusion repositories"
+          - "  - Multimedia codecs"
+          - "  - Podman container engine"
+          - "  - System optimizations"
           - "=========================================="
 
     - name: Display Ansible version
@@ -85,22 +89,6 @@
         - developer
         - development
 
-    - role: local.workstation.font
-      tags:
-        - font
-        - fonts
-
-    - role: local.workstation.power
-      tags:
-        - power
-        - tlp
-        - battery
-
-    - role: local.workstation.multimedia
-      tags:
-        - multimedia
-        - codecs
-
     - role: local.workstation.embed
       tags:
         - embed
@@ -129,5 +117,4 @@
           - "   - node --version"
           - "   - cargo --version"
           - "3. Run 'flatpak list' to see installed apps"
-          - "4. Run 'fc-list' to see installed fonts"
           - "=========================================="

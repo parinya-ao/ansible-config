@@ -4,8 +4,7 @@
 # Molecule Test Inventory
 # =============================================================================
 # Shared inventory for all molecule scenarios
-# Primary: Podman containers with systemd support (Fedora Rawhide)
-# Secondary/Redundant: Docker containers (fallback)
+# Primary: Podman containers with systemd support (Fedora/Ultramarine)
 # =============================================================================
 
 all:
@@ -14,11 +13,10 @@ all:
     tmp_dir: "{{ lookup('env', 'TMPDIR') | default('/tmp') }}"
     # Test environment flag
     molecule_test_mode: true
-    # Fedora Rawhide specific settings
+    # Fedora/Ultramarine specific settings
     ansible_python_interpreter: /usr/bin/python3
-    # Container runtime selection (primary: podman, secondary: docker)
+    # Container runtime selection
     container_runtime_primary: podman
-    container_runtime_secondary: docker
 
   children:
     # =========================================================================
@@ -94,80 +92,11 @@ all:
         container_runtime: podman
 
     # =========================================================================
-    # SECONDARY: Docker Containers (Fallback/Redundancy)
-    # =========================================================================
-    docker_containers:
-      hosts:
-        # Fallback test container - Ubuntu with systemd
-        molecule-ubuntu-systemd:
-          ansible_connection: community.docker.docker
-          container_image: ubuntu:22.04
-          container_command: /sbin/init
-          container_privileged: true
-          container_volumes:
-            - /sys/fs/cgroup:/sys/fs/cgroup:ro
-          container_tmpfs:
-            - /run
-            - /tmp
-          container_log_driver: json-file
-          # Test variables
-          my_variable: molecule-ubuntu-systemd
-          attributes:
-            color: green
-            size: small
-            shape: square
-          prerequisites:
-            - python3
-            - systemd
-          # Ubuntu specific
-          ansible_distribution: Ubuntu
-          ansible_distribution_version: "22.04"
-          ansible_os_family: Debian
-
-        # Additional docker container - Debian (redundancy)
-        molecule-debian-systemd:
-          ansible_connection: community.docker.docker
-          container_image: debian:bookworm
-          container_command: /sbin/init
-          container_privileged: true
-          container_volumes:
-            - /sys/fs/cgroup:/sys/fs/cgroup:ro
-          container_tmpfs:
-            - /run
-            - /tmp
-          container_log_driver: json-file
-          # Test variables
-          my_variable: molecule-debian-systemd
-          attributes:
-            color: yellow
-            size: medium
-            shape: triangle
-          prerequisites:
-            - python3
-            - systemd
-          # Debian specific
-          ansible_distribution: Debian
-          ansible_distribution_version: "12"
-          ansible_os_family: Debian
-
-      vars:
-        # Common variables for all docker containers
-        ansible_connection: community.docker.docker
-        # APT package manager
-        ansible_pkg_mgr: apt
-        # Test mode flags
-        is_test_environment: true
-        skip_production_checks: true
-        # Container runtime
-        container_runtime: docker
-
-    # =========================================================================
     # ALL CONTAINERS GROUP (for testing all runtimes)
     # =========================================================================
     all_containers:
       children:
         - podman_containers
-        - docker_containers
       vars:
         # Shared variables for all containers
         container_state: started
