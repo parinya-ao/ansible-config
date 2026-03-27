@@ -217,7 +217,7 @@ Before submitting a PR:
 <details>
 <summary>Can I run this on other Linux distributions?</summary>
 
-This playbook is designed for **Fedora only**. It uses DNF, Fedora-specific COPR repositories, and assumes systemd. Adapting to other distros would require significant changes.
+This playbook is designed for **Fedora and Ultramarine**. It uses DNF, Fedora/Ultramarine-specific COPR repositories, and assumes systemd. Adapting to other distros would require significant changes.
 </details>
 
 <details>

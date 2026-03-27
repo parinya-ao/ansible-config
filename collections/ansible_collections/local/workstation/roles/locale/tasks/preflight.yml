@@ -21,12 +21,12 @@
     # =========================================================================
     # VALIDATION: OS and Format
     # =========================================================================
-    - name: Ensure target OS is Fedora
+    - name: Ensure target OS is Fedora or Ultramarine
       ansible.builtin.assert:
         that:
-          - ansible_distribution == "Fedora"
+          - ansible_distribution in ["Fedora", "Ultramarine"]
         fail_msg: |
-          This role only supports Fedora!
+          This role only supports Fedora and Ultramarine!
           Detected: {{ ansible_distribution }}
         success_msg: "OS validated: {{ ansible_distribution }} {{ ansible_distribution_version }}"
 
