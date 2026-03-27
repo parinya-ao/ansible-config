@@ -15,20 +15,19 @@
 **Project Structure**:
 ```
 site.yml                 # Entry point (ansible-creator standard)
-playbook.yaml            # Main playbook (9 roles)
+playbook.yaml            # Main playbook (6 roles)
 init.sh                  # Bootstrap script (installs Ansible via DNF)
 collections/             # Ansible collections
-  └── local/workstation/ # Our collection (10 roles)
+  └── local/workstation/ # Our collection (6 roles)
       └── roles/
-          ├── common/         # Base system (DNF, RPM Fusion, updates)
-          ├── locale/         # English environment
+          ├── common/         # Base system (DNF, updates)
+          ├── locale/         # English environment (input method)
           ├── git/            # Git + SSH signing
           ├── stability/      # dnf-automatic, firewalld, sysctl
           ├── developer/      # Compilers, runtimes, SDKs
-          ├── multimedia/     # Codecs, hardware acceleration
           └── embed/          # ARM GCC, ESP-IDF, serial tools
 
-**Note**: Ultramarine Linux includes Podman pre-installed.
+**Note**: Ultramarine Linux includes pre-installed: Podman, Multimedia codecs, RPM Fusion
 .github/workflows/       # CI: security scan, lint, idempotence test
 ```
 

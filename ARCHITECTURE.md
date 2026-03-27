@@ -36,7 +36,6 @@ This section provides a high-level overview of the project's directory and file 
 │                   ├── git/            # Git configuration with SSH signing
 │                   ├── stability/      # Fedora stability & hardening
 │                   ├── developer/      # Development tools & runtimes
-│                   ├── multimedia/     # Codecs & video acceleration
 │                   └── embed/          # Embedded development (ARM, ESP)
 ├── .github/
 │   └── workflows/
@@ -86,10 +85,10 @@ This is an **Infrastructure-as-Code (IaC)** project, not a traditional applicati
 │  ┌──────────┐ ┌─────────┐ ┌─────┐ ┌──────────┐ ┌──────────┐   │
 │  │  common  │→│ locale  │→│ git │→│stability │→│developer │   │
 │  └──────────┘ └─────────┘ └─────┘ └──────────┘ └──────────┘   │
-│       ↓              ↓           ↓                             │
-│  ┌──────────┐ ┌──────────┐                                     │
-│  │multimedia│←│  embed   │                                     │
-│  └──────────┘ └──────────┘                                     │
+│       ↓                                                         │
+│  ┌──────────┐                                                   │
+│  │  embed   │                                                   │
+│  └──────────┘                                                   │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
@@ -212,17 +211,17 @@ Each role is a self-contained unit of configuration with its own tasks, variable
 - SSH key generation
 - Commit signing configuration
 
-#### 3.2.7. multimedia
+#### 3.2.7. embed
 
-**Name**: Multimedia Codecs
+**Name**: Embedded Development Tools
 
-**Description**: Multimedia codec installation and hardware video acceleration.
+**Description**: Development tools for embedded systems programming.
 
 **Key Tasks**:
-- RPM Fusion multimedia packages
-- FFmpeg installation
-- Hardware acceleration (Intel/AMD)
-- OpenH264 (disabled by default)
+- ARM GCC toolchain installation
+- ESP-IDF framework
+- Serial communication tools
+- Python packages for embedded development
 
 ### 3.3. Bootstrap Script
 
@@ -279,7 +278,7 @@ Each role is a self-contained unit of configuration with its own tasks, variable
 **Purpose**: Third-party RPM repositories for packages not in official Fedora repos.
 
 **Repositories Used**:
-- `rpmfusion-free/nonfree` - Multimedia codecs
+- `rpmfusion-free/nonfree` - Pre-enabled in Ultramarine Linux
 
 **Integration Method**: DNF repository configuration
 

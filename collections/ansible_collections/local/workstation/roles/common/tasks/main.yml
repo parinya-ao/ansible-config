@@ -5,8 +5,7 @@
 # - DNF package manager optimization
 # - System package updates
 # - Essential base packages
-# - Repository configuration (RPM Fusion)
-# - System optimizations
+# Note: Ultramarine Linux includes RPM Fusion pre-enabled and system optimizations
 
 # Pre-flight Validation (replaces shell-based checks)
 - name: Run pre-flight validation
@@ -14,13 +13,6 @@
   tags:
     - common
     - preflight
-
-# Repository Configuration
-- name: Configure repositories
-  ansible.builtin.import_tasks: repositories.yml
-  tags:
-    - common
-    - repositories
 
 # DNF Configuration
 - name: Configure DNF package manager
@@ -51,20 +43,6 @@
   tags:
     - common
     - packages
-
-# Firmware Updates
-- name: Update firmware
-  ansible.builtin.import_tasks: firmware.yml
-  tags:
-    - common
-    - firmware
-
-# System Optimizations
-- name: Apply system optimizations
-  ansible.builtin.import_tasks: optimizations.yml
-  tags:
-    - common
-    - optimizations
 
 # System Maintenance
 - name: Configure system maintenance tasks

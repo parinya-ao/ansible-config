@@ -14,12 +14,13 @@
 #   ✓ Git configuration with SSH signing                                       #
 #   ✓ Stability and hardening                                                   #
 #   ✓ Developer tools                                                           #
-#   ✓ Multimedia codecs                                                         #
 #   ✓ Embedded development (ARM, ESP)                                           #
 #   ✗ NVIDIA drivers (DISABLED - enable manually if needed)                     #
 #   ✗ Fonts (using separate script)                                             #
 #   ✗ Power management (using system default)                                   #
 #   ✓ Podman (pre-installed in Ultramarine)                                     #
+#   ✓ Multimedia codecs (pre-installed in Ultramarine)                          #
+#   ✓ RPM Fusion (pre-enabled in Ultramarine)                                   #
 #################################################################################
 
 set -euo pipefail

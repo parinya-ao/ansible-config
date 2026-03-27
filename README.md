@@ -26,23 +26,26 @@ This playbook automates the setup of a Fedora/Ultramarine workstation for develo
 - System optimizations and core utilities
 - Development tools and runtimes
 - Desktop applications and settings
-- Multimedia codecs and hardware acceleration
 
 **Target OS**: Fedora Linux / Ultramarine Linux (tested on Fedora 41+)
 **Execution**: Local provisioning via `ansible_connection=local`
 
-**Note**: Ultramarine Linux includes Podman (container management) pre-installed by default.
+**Note**: Ultramarine Linux includes pre-installed:
+- Podman (container management)
+- Multimedia codecs (RPM Fusion)
+- System optimizations and kernel tuning
+- RPM Fusion repositories (Free & Non-free)
 
 ## What It Covers
 
 | Role | Description |
 |-------|-------------|
-| **common** | DNF optimization, RPM Fusion, system updates, firmware, core packages |
-| **locale** | English-only environment enforcement |
+| **common** | DNF optimization, system updates, core packages |
+| **locale** | English environment (input method for Thai) |
 | **git** | Git configuration with SSH key signing |
 | **stability** | Fedora stability and hardening |
 | **developer** | Compilers, Rust, Go, Node.js, Bun, Python (uv), Flutter, Android SDK |
-| **multimedia** | Codecs, FFmpeg, hardware video acceleration |
+| **embed** | ARM GCC, ESP-IDF, serial tools |
 
 ## Prerequisites
 
