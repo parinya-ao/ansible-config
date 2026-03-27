@@ -124,8 +124,8 @@ jobs:
       contents: read
     defaults:
       run:
-        # Use POSIX sh for maximum compatibility (minimal containers may not have bash/zsh)
-        shell: sh -e {0}
+        # Use bash (installed via dnf in bootstrap step)
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -139,6 +139,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@main
+
+      # Install shell and basic utilities (minimal container doesn't include these)
+      - name: Install Shell and Basic Utilities
+        run: |
+          dnf install -y bash coreutils findutils grep gawk sed
 
       # Cache Ansible Collections (deterministic by requirements.yml hash)
       - name: Cache Ansible Collections
